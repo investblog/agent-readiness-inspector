@@ -42,12 +42,16 @@ M1) и mcpServerCard/a2aAgentCard (мы принимаем de-facto формы, 
 день) — ручная сверка с web-UI и решение, чью сторону показывать юзеру, — часть
 подготовки M1.5.
 
-## M1 — popup: скан текущей вкладки (M)
+## M1 — главная поверхность: скан текущей вкладки (M)
+
+Поверхность — модель RI (спека §6): один HTML в двух режимах — **side panel в
+Chrome/Edge** (клик по иконке открывает панель; `default_popup` вырезан
+манифест-хуком, `sidePanel` permission) и **попап + sidebar_action в Firefox**.
 
 - Probe-layer в SW: `fetch` с таймаутом <30с на пробу, `credentials: 'omit'`
   для well-known проб, `include` — только для рефетча самой страницы; детект
   «3P-cookies заблокированы» → индикатор «скан без сессии» (§11).
-- Popup: композит + уровень + категории + чеклист pass/fail/na с evidence по
+- UI: композит + уровень + категории + чеклист pass/fail/na с evidence по
   каждой пробе; копия фикс-промпта (`navigator.clipboard`, по жесту); ссылки на
   стандарты. Стиль Lighthouse, css из RI (`theme.css`/`popup.css`).
 - Библиотека фикс-промптов v1 в бандле, ключ = `check.id`.
