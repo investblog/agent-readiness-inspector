@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Readiness Inspector</title>
+  </head>
+  <body>
+    <main id="app" class="popup">
+      <header class="popup-header">
+        <h1 data-i18n="popupTitle">Agent Readiness Inspector</h1>
+      </header>
+      <section id="scan" class="popup-body">
+        <button id="scan-button" type="button" data-i18n="scanButton">Scan this tab</button>
+        <div id="results" hidden></div>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

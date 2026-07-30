@@ -1,0 +1,14 @@
+{
+	"extName": {
+		"message": "Agent Readiness Inspector"
+	},
+	"extDescription": {
+		"message": "Проверка сайта на готовность к ИИ-агентам: robots.txt, llms.txt, markdown-негошиэйшн, MCP, Content Signals. Всё локально, без трекинга."
+	},
+	"popupTitle": {
+		"message": "Agent Readiness Inspector"
+	},
+	"scanButton": {
+		"message": "Сканировать вкладку"
+	}
+}

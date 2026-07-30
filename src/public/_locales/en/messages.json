@@ -1,0 +1,14 @@
+{
+	"extName": {
+		"message": "Agent Readiness Inspector"
+	},
+	"extDescription": {
+		"message": "Check any site for AI-agent readiness: robots.txt, llms.txt, markdown negotiation, MCP, Content Signals. Local checks, zero tracking."
+	},
+	"popupTitle": {
+		"message": "Agent Readiness Inspector"
+	},
+	"scanButton": {
+		"message": "Scan this tab"
+	}
+}

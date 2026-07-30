@@ -1,0 +1,14 @@
+# ./.agents/generated/.agents.lock.yaml — bootstrap snapshot (committed, provenance)
+source: C:\Users\Admin\.agents
+commit: 89676347f68bd67c97ef7e88ffb67df75e3d16c0
+generated_at: 2026-07-30T11:58:44Z
+domains:  [coding, web, qa, cloudflare]   # + always-on base
+rules:    [rule-format, env-setup, project-docs, proof-loop, secrets, git-discipline,
+           quality-py, quality-js, quality-bash, quality-perl, quality-cpp,
+           code-search, code-review, user-docs, css-practices, seo, i18n,
+           browser-use, cf-wrangler, cf-auth, cf-free-tier, edge-compat]
+skills:   [cf-secrets]
+agents:   [searcher, docs, reviewer, e2e]
+mcp:      []            # no project-bound MCP; playwright is GLOBAL infra (used, not rendered)
+templates: []
+hooks:    [secrets-guard, light-lint, git-quality-gate]

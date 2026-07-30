@@ -1,0 +1,1 @@
+W:/projects/agent-readiness/AGENTS.md
