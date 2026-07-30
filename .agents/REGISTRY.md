@@ -21,3 +21,13 @@ in `map.yaml` / `.agents.lock.yaml`).
   shell `W:\Program Files\Git\bin\bash.exe` (native Windows: bare `bash` may be the
   WSL launcher).
 - Spec draft moved from Downloads to `docs/spec.md` as the product source of truth.
+
+## 2026-07-30 — UI icon sprite (Claude Code, user decision)
+- RI icons are NOT copied for the UI — only the sprite PRINCIPLE is (inline
+  `<symbol id="i-mono-*">` + `<use>`, fill="currentColor" so both color themes
+  drive icon color; same mechanism as 301-ui `build:icons`).
+- Own icons come from `@mdi/svg` (Pictogrammers MDI, Apache-2.0 — no attribution
+  required, noted for store listing anyway). Generator: `scripts/build-icons.mjs`
+  (manifest of names → svgo → sprite + generated `icon-names.ts` union +
+  `dev/icons-preview.html` with light/dark panes). devDeps added: @mdi/svg, svgo.
+- Toolbar/store PNGs (16–128) remain RI placeholders until own art (M1.5).

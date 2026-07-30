@@ -14,13 +14,14 @@ export default defineConfig({
 
     ...(browser === 'chrome' && { minimum_chrome_version: '116' }),
 
-    // Spec §10: storage, alarms, contextMenus core; notifications is opt-in
-    // (watch-mode regression alerts), requested at runtime from a user gesture.
-    permissions: ['storage', 'alarms', 'contextMenus', 'clipboardWrite'],
+    // Spec §10, RI model: minimal install-time set; notifications is opt-in
+    // (301.sh news + watch alerts), requested at runtime from a user gesture,
+    // never at install. contextMenus/webRequest/scripting ship with their features.
+    permissions: ['storage', 'alarms'],
     optional_permissions: ['notifications'],
 
-    // Spec §13 open question: wide hosts vs activeTab + optional host grants.
-    // Wide for development; revisit before store submission.
+    // Cross-origin probes of any target + credentialed refetch are the product
+    // core (spec §10) — justified in store review notes.
     host_permissions: ['<all_urls>'],
 
     icons: {

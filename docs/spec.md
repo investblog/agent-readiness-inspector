@@ -7,9 +7,12 @@ Readiness score (isitagentready.com). Реализует те же провер�
 Cloudflare достать не может. Стек — WXT + TypeScript + Vanilla DOM, Manifest V3,
 как весь портфель 301.st.
 
-Рабочее имя — Agent Readiness Inspector (или короче, см. §13). Позиционирование:
-«единственный, кто аудит агент-реадинес делает и мониторит прямо в браузере,
-включая закрытые страницы, и подсказывает как чинить».
+Имя — **Agent Readiness Inspector** (решено, веттинг в `docs/branding.md`).
+Позиционирование — «рентген сайта для AI-агентов»: узнай, что агенты реально
+видят и могут сделать на твоём сайте — включая страницы за логином — с evidence
+по каждой пробе, рецептами починки и алертами на изменения. Инструмент
+нейтрален: «пускать или банить — решай сам, но осознанно» (диагностика нужна и
+тем, кто банит ботов). Детали и стор-копия — `docs/branding.md`.
 
 ---
 
@@ -51,26 +54,48 @@ Signals, MCP, Agent Skills, llms.txt), не проприетарщина Cloudfl
 Скоримые измерения зеркалят Cloudflare (Discoverability, Content, Bot Access
 Control, Capabilities). Commerce проверяется, но в скор не идёт.
 
-| Категория | Проверка / стандарт | Как пробим | Pass-критерий |
-|---|---|---|---|
-| Discoverability | robots.txt (RFC 9309) | `GET /robots.txt` | 200 + непустой |
-| Discoverability | sitemap.xml | `GET /sitemap.xml` или ссылка в robots | 200 / указан |
-| Discoverability | Link headers (RFC 8288) | заголовки ответа `/` | есть `Link:` с rel (describedby/alternate/api-catalog/service-doc) |
-| Content | Markdown negotiation | `GET /` с `Accept: text/markdown`; плюс суффикс `.md` | `content-type: text/markdown` + `vary: Accept` |
-| Content | llms.txt (опц., off by default) | `GET /llms.txt`, `/llms-full.txt` | 200 |
-| Bot Access | Content Signals | `Content-Signal:` в robots.txt | директива присутствует (ai-train/ai-input/search) |
-| Bot Access | AI-bot rules | правила для GPTBot/ClaudeBot/и т.п. в robots | явные user-agent блоки |
-| Bot Access | Web Bot Auth (draft) | `GET /.well-known/http-message-signatures-directory` | 200 |
-| Capabilities | Agent Skills | `GET /.well-known/agent-skills/index.json` | валидный JSON со skills[] |
-| Capabilities | API Catalog (RFC 9727) | `GET /.well-known/api-catalog` | 200 |
-| Capabilities | MCP Server Card | `/.well-known/mcp/server-card.json` И `/.well-known/mcp.json` | валидный JSON-card |
-| Capabilities | OAuth discovery (RFC 8414/9728) | `/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource` | 200 (N/A если нет авторизации) |
-| Capabilities | WebMCP | детект in-page tool exposure | присутствует |
-| Commerce (unscored) | x402 / UCP / ACP | проба 402-флоу и well-known | присутствует |
+| Категория | Проверка / стандарт | Как пробим | Pass-критерий | Анти-false-positive |
+|---|---|---|---|---|
+| Discoverability | robots.txt (RFC 9309) | `GET /robots.txt` | 200 + тело не HTML (пустой файл = валидный allow-all → pass с пометкой в evidence) | HTML-заглушка под 200 → fail (soft-404). Семантика ошибок разведена: 404/4xx → fail Discoverability (зеркалим CF), но evidence обязан сказать «по RFC это валидный allow-all»; 5xx → fail с пометкой «RFC: full disallow». Поведение CF на пустом robots — снять калибровкой |
+| Discoverability | sitemap.xml | `GET /sitemap.xml` или ссылка в robots | 200 / указан | XML content-type или тело начинается `<?xml`/`<urlset`/`<sitemapindex` |
+| Discoverability | Link headers (RFC 8288) | заголовки ответа `/` | есть `Link:` с rel (describedby/alternate/api-catalog/service-doc) | сам заголовок и есть факт — но href обязан парситься как URL, rel из известного списка |
+| Discoverability | DNS-AID (draft) | DNS-записи — у расширения нет DNS API: только внешний скан CF или opt-in DoH-запрос | запись присутствует | локально непроверяемо: статус «нужен внешний скан», не fail |
+| Content | Markdown negotiation | `GET /` с `Accept: text/markdown`; плюс суффикс `.md` | `content-type: text/markdown` + `vary: Accept` | тело не HTML (SPA-fallback отдаёт исходную страницу с 200 на любой Accept) |
+| Content | llms.txt (info, **вне скора** — CF выкинул из тула к 2026-07) | `GET /llms.txt`, `/llms-full.txt` | 200 | `content-type` text/plain или text/markdown; тело не HTML; по конвенции начинается с `# `-заголовка |
+| Bot Access | Content Signals | `Content-Signal:` в robots.txt | директива присутствует (ai-train/ai-input/search) | критерий — сам парсинг директивы, отдельной пробы нет |
+| Bot Access | AI-bot rules | правила для GPTBot/ClaudeBot/и т.п. в robots | явные user-agent блоки | то же — парсинг, не статус-код |
+| Bot Access | Web Bot Auth (draft) | `GET /.well-known/http-message-signatures-directory` | **detected-if-present, до калибровки в fail не переводим**: валидный JWKS → pass, отсутствие → `na` с evidence | JSON-parse обязателен; `keys: []` — валидно; HTML под 200 → fail (soft-404: operator.chatgpt.com отдаёт app-shell). Открыт вопрос семантики: возможно это чек agent-origin сайтов, а не универсальный — окончательный статус (scored/advanced/info) снять с web-UI при калибровке M0 |
+| Capabilities | Agent Skills | `GET /.well-known/agent-skills/index.json` | валидный JSON со skills[] | JSON-parse + непустой skills[] с name у каждого |
+| Capabilities | API Catalog (RFC 9727) | `GET /.well-known/api-catalog` | валидный linkset | JSON с ключом `linkset` (RFC 9264); в идеале `content-type: application/linkset+json`; голый 200 не считается |
+| Capabilities | MCP Server Card | **ярусная стратегия, не «один правильный путь»**: (a) draft-canonical — `/.well-known/mcp/server-card` (SEP-2127 v2) и `/.well-known/mcp-server` (IETF draft-serra-mcp-discovery-uri); (b) CF-scored — `/.well-known/mcp/server-card.json` (блог) + плюральный `server-cards.json`; (c) de-facto legacy — `/.well-known/mcp.json` | валидный JSON-card на любом ярусе; evidence называет ярус и путь | JSON-parse + идентифицирующие поля (name + url/servers/remotes); HTML/пустой объект → fail |
+| Capabilities | OAuth discovery — **две проверки, как у CF**: AS (RFC 8414) и PR (RFC 9728) | `/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource` | валидный JSON (N/A если нет авторизации) | обязательные поля спеки: `issuer` (8414) / `resource` (9728) |
+| Capabilities | Auth.md (конвенция CF) | путь снять с живого тула при калибровке (в блоге проверки нет) | 200 + markdown | тело не HTML |
+| Capabilities | A2A Agent Card (off by default, как у CF) | `/.well-known/agent-card.json`, legacy `/.well-known/agent.json` (пути сверить при калибровке) | валидный JSON agent card | JSON-parse + идентифицирующие поля |
+| Capabilities | WebMCP | MAIN-world скрипт: `document.modelContext ?? navigator.modelContext` + детект полифилла `@mcp-b`; поздние регистрации тулов — наблюдателем | detected | origin-trial: отсутствие API в браузере юзера ≠ fail — статусы `detected` / `not detectable`; требует `scripting` (шипится со своей версией, §10) |
+| Commerce (unscored) | x402 / UCP / ACP / MPP / AP2 | `GET /.well-known/ucp`, `/.well-known/x402`; 402-флоу; ACP/MPP/AP2 — детект снять с калибровки | присутствует | JSON-parse well-known документов; 402 — по семантике ответа (`accepts[]`), не по коду в одиночку |
 
-Замечание по MCP: путь в блоге Cloudflare — `/.well-known/mcp/server-card.json`,
-но в поле встречается и `/.well-known/mcp.json` (так у spintax.net). Проверяем оба,
-считаем pass при любом валидном.
+Замечание по MCP: источники расходятся и продолжат расходиться (блог CF —
+`mcp/server-card.json`; SEP-2127 v2 — `mcp/server-card`; IETF
+draft-serra-mcp-discovery-uri — `mcp-server`; в поле живёт legacy `mcp.json` — его
+отдают spintax.net и cloudflare.com, а путь из блога 2026-07-30 не отдавал никто).
+Поэтому в матрице не «правильный путь», а ярусы (draft-canonical / CF-scored /
+de-facto legacy): порядок проб внутри ярусов — деталь конфига, pass при любом
+валидном, evidence всегда называет, на каком ярусе и пути найдено. Состав ярусов
+обновляется конфигом (см. замечание по дрейфу ниже).
+
+Замечание по soft-404: голый «200 = pass» ловит ложные пассы на SPA/edge-фоллбеках,
+которые отдают HTML-заглушку с 200 на любой путь (Vercel и GitHub отдают честные 404,
+но полагаться на это нельзя). Поэтому у каждой пробы столбец анти-false-positive:
+контроль content-type + валидация тела. Правило движка: статус-код открывает проверку,
+pass выносит только валидатор тела.
+
+Замечание по дрейфу: матрица живого тула движется (llms.txt выкинули; DNS-AID,
+Auth.md, A2A, MPP/AP2 добавили за три месяца после блога). Поэтому чек-лист,
+состав категорий и пороги уровней — версионируемый конфиг движка, не код. Точный
+состав категорий снимаем калибровкой с web-UI (§4); дрейф ловит drift-watch CI
+(scheduled-диффы источников + калибровка, web-UI и `/api/scan`), который сам
+заводит Issues на каждое изменение — он же генератор фактов «CF разошёлся сам с
+собой» для §11. Детали — в ROADMAP, «Сквозные треки».
 
 Каждая проверка возвращает: `{ id, category, standard, status: pass|fail|na,
 evidence, fixPrompt, docUrl }`. `evidence` — сырой факт (код ответа, кусок
@@ -81,10 +106,19 @@ evidence, fixPrompt, docUrl }`. `evidence` — сырой факт (код от�
 
 ## 4. Скоринг
 
-- Четыре скоримых измерения → композитный 0–100 + уровень (напр. Basic /
-  Emerging / Advanced), зеркалим шкалу Cloudflare, чтобы цифра совпадала с их
-  тулом и была узнаваемой. Веса измерений держим в конфиге и калибруем под вывод
-  isitagentready / URL Scanner API, чтобы не расходиться.
+- Четыре скоримых измерения → композитный 0–100 + уровень **0–5 с именами
+  Cloudflare**: `0 Not Ready → 1 Basic Web Presence → 2 Bot-Aware →
+  3 Agent-Readable → 4 Agent-Integrated → 5 Agent-Native` — зеркалим web-UI,
+  чтобы цифра совпадала и была узнаваемой. Формула композита, пороги уровней и
+  состав категорий — в версионируемом конфиге, калибруем под web-UI. Осторожно: их собственные
+  поверхности уже расходятся — 2026-07-30 web-UI даёт spintax.net 79/100 Level 5
+  «Agent-Native», а `/api/scan` на тот же момент — Level 4 «Agent-Integrated».
+  Калибруемся по web-UI (это то, что видит юзер), расхождение с API — не наш баг.
+- Гипотеза формулы композита (из того же скрина, проверить на калибровочных
+  фикстурах): композит = пройденные проверки / применимые проверки, чек-взвешенно,
+  а не среднее категорий — spintax.net: категории 100/100/100/57, композит 79 =
+  11/14 (среднее дало бы ~89). Пороги уровней не требуют 100 по категориям:
+  Level 5 «Agent-Native» выдан при категории 57%.
 - Commerce показываем отдельным блоком «preview», в композит не включаем.
 - `N/A`-проверки (напр. OAuth на сайте без авторизации) не штрафуют — исключаются
   из знаменателя, как и у Cloudflare.
@@ -103,10 +137,16 @@ evidence, fixPrompt, docUrl }`. `evidence` — сырой факт (код от�
    - основной путь: `fetch` из service worker с `credentials: 'include'` и
      host-доступом → берём реальные заголовки/тело, **включая страницы за
      логином** (главный дифференциатор). Для текущей вкладки читаем и то, что
-     реально отдалось пользователю.
-   - опционально: **Cloudflare URL Scanner API** (`agentReadiness: true`) —
-     «официальный второй скор» по кнопке, за CF-токеном юзера. Не по умолчанию,
-     чтобы держать zero-dependency и приватность.
+     реально отдалось пользователю — это возможно только проспективно:
+     `webRequest`-кэш заголовков (слушатель на старте SW; permission шипится со
+     своей версией, §10) с фолбэком на рефетч; UI различает «наблюдено» и
+     «перефетчено», ретроспективно заголовки вкладки не достаются.
+   - опционально: **внешний скан** через Cloudflare URL Scanner API
+     (`agentReadiness: true`) по кнопке, за CF-токеном юзера (§8.1). Даёт то,
+     чего локально нет: официальную цифру CF, взгляд «снаружи» (как видит
+     публичный агент — дифф «изнутри vs снаружи» показываем явно), DNS-AID и
+     shareable-отчёт. Не по умолчанию, чтобы держать zero-dependency и
+     приватность.
 3. **state/storage** — `chrome.storage.local`: сохранённые сайты, история
    сканов, watch-лист, настройки (CF-токен, опц. проверки, веса).
 4. **surfaces** — popup, dashboard, context menu, минимальный content script.
@@ -158,6 +198,63 @@ Manifest V3, WXT. Сеть — только к сканируемому тарг
   Мощно и рискованно — только за явным подтверждением, с предпросмотром
   изменений, откатом, и токеном минимального scope. Позиционируем как advanced.
 
+### 8.0 Repair skills (переносимый repair kit, без AI в расширении)
+
+На каждый fail — не только короткий fix-prompt, а **repair kit**, привязанный к
+`check.id`:
+- **SKILL.md** для кодового агента — формат совместим с тем, что раздаёт сам
+  Cloudflare (`skillUrl` в их API), агентам он уже знаком;
+- **stack-specific рецепты**: Cloudflare, Vercel, Netlify, nginx, Next.js —
+  расширение детектит стек по заголовкам, которые уже читает
+  (`server: cloudflare`, `x-vercel-id`, `x-nf-request-id`, `server: nginx`,
+  `x-powered-by: Next.js`), и предлагает нужный рецепт первым;
+- **проверочные команды + ожидаемый evidence после фикса** — expected evidence
+  формулируется в терминах наших же валидаторов §3, так что цикл замыкается
+  ресканом в расширении: нашёл → починил → доказал.
+
+Позиционирование: помогаем реализовать открытый стандарт у себя, даже если
+managed-фича платформы доступна только на платном плане (managed markdown / AI
+Index у CF). Kit — статичный контент, никакого AI внутри расширения.
+
+Масштаб держим под контролем: матрица «проверки × стеки» пишется по спросу —
+сначала top-fail проверки (markdown-негошиэйшн, Content Signals, robots/AI-боты)
+× основные стеки, остальное добавляется итеративно. Объём китов — аргумент за
+хостинг на 301.st (см. §13), в бандле — минимум (короткие промпты всегда офлайн).
+
+### 8.1 CF Connect визард (паттерн 301-ui)
+
+Токен нужен только двум фичам: внешний скан (URL Scanner: скоуп
+`Account → URL Scanner: Edit`) и fix-apply (зонные скоупы). Без токена всё
+остальное работает — визард строго опционален и живёт в настройках.
+
+Флоу трёхступенчатый, как cf-connect в 301-ui, но без бэкенда — все вызовы CF
+API идут прямо из расширения:
+
+1. **Вход:** юзер вставляет bootstrap-токен ИЛИ целиком «тестовый curl» со
+   страницы создания токена — автопарсим account ID + токен из curl (regex как в
+   301-ui `cf-connect.ts`). Рядом — deep-link на
+   `dash.cloudflare.com/profile/api-tokens` с преднастроенным шаблоном скоупов
+   (template links CF; точные параметры уточнить при реализации).
+2. **Минт:** визард через `POST /user/tokens` (bootstrap должен иметь
+   `API Tokens: Edit`) сам создаёт узкие токены под выбранный пресет:
+   - «Scan» — только URL Scanner: Edit;
+   - «Scan + Fix» — плюс зонные скоупы, **ограниченные конкретной зоной**,
+     которую юзер чинит (главный выигрыш минтинга: template-ссылка так не умеет);
+   - TTL по умолчанию (напр. 90 дней), имя токена с префиксом расширения.
+   После минта предлагаем удалить bootstrap-токен (кнопка + объяснение).
+3. **Верификация:** `GET /user/tokens/verify` на каждый созданный токен, статус
+   в UI; ре-верификация при каждом использовании фичи (протухший TTL → визард
+   предлагает перевыпуск).
+
+Фолбэк без визарда: юзер просто вставляет готовый токен нужного скоупа (для
+«Scan» это одна галка в дашборде — визард тут оверкилл, template-link достаточно).
+
+Хранение и приватность: токены — в `chrome.storage.local` (приватно для
+расширения, но нешифровано — честно говорим в UI), наружу не уходят никуда,
+кроме api.cloudflare.com. Скоупы минимальные, аудит — по списку «наших» токенов
+через префикс имени. Согласуется с правилом `cf-auth` (Scoped Bearer, канал
+выбирается до первой CF-операции).
+
 ---
 
 ## 9. Слой 301.st (дистрибуция и бренд)
@@ -166,10 +263,13 @@ Manifest V3, WXT. Сеть — только к сканируемому тарг
 - **Панель новостей** в дашборде: лента продуктовых апдейтов 301.st (тянем JSON/
   RSS с 301.st). Внутри UI расширения — это ок по стор-политикам.
 - **Кросс-промо** других тулов 301.st (Redirect Inspector, Cloudflare Tools и
-  т.д.) и spintax.net как встроенного эталона: spintax.net уже даёт полный набор
-  сигналов (llms.txt, markdown, Content-Signal, Agent Skills, живой MCP-сервер) —
-  показываем его кнопкой «пример 100/100», это и обучает стандарту, и мягко
-  заводит в экосистему.
+  т.д.) и spintax.net как встроенного эталона: spintax.net даёт полный набор
+  сигналов (llms.txt, markdown-негошиэйшн, Content-Signal, Agent Skills, живой
+  MCP-сервер + Server Card на всех трёх путях, API Catalog, Web Bot Auth
+  directory, DNS-AID — закрыто 2026-07-30, ADR 0006 в его репо) — показываем его
+  кнопкой «живой эталон». Формулировка честная, не «100/100»: OAuth/auth.md/A2A у
+  него намеренные honest-404 (нет авторизации и A2A-сервиса) — на эталоне они
+  обязаны отображаться как N/A, не как fail; это тоже обучает стандарту.
 - **Guardrails стора:** промо и новости — только внутри попапа/дашборда. В чужие
   страницы не инжектим. Бренд — «301.st, реализует открытые агент-стандарты»,
   без слов/визуала, намекающих на официальность от Cloudflare.
@@ -178,11 +278,22 @@ Manifest V3, WXT. Сеть — только к сканируемому тарг
 
 ## 10. Разрешения и приватность
 
-- Permissions (минимизируем под ревью стора): `storage`, `alarms`,
-  `notifications`, `contextMenus`, `scripting`/`activeTab`, `clipboardWrite`.
-  Для рефетча за логином и кросс-доменных проб — `host_permissions` (широкие
-  хосты замедляют ревью; рассмотреть `activeTab` + опциональные host-права по
-  запросу).
+- **Модель permissions — путь Redirect Inspector** (минимальные скоупы, ничего
+  «на вырост» — Google это прямо требует; RI с этой моделью ревью проходит):
+  - install-time: `storage`, `alarms`, `host_permissions: <all_urls>`.
+    Rationale — почему НЕ `activeTab` + optional-хосты: кросс-доменные пробы
+    well-known, батч и watch-рескан — это core functionality, а не optional
+    feature (по Chrome docs required permissions для core допустимы); RI с той же
+    моделью ревью проходит. Осознанная цена: in-depth review (1–4 недели,
+    закладываем в сроки) и warning при установке; обоснование пишем в ревью-ноты;
+  - `optional_permissions: ['notifications']` — **runtime-запрос по жесту юзера,
+    никогда при установке** (как opt-in новостей 301.sh в RI); покрывает и
+    новостную ленту, и watch-алерты на регресс;
+  - копирование фикс-промптов — `navigator.clipboard` из popup по жесту, без
+    `clipboardWrite`;
+  - `contextMenus`, `webRequest` (наблюдение реальных заголовков вкладки) и
+    `scripting` (WebMCP-детект) добавляются только в той версии, где фича
+    реально шипится — не раньше.
 - **Zero-telemetry:** сканы и история — локально; наружу только сам таргет,
   опциональный CF API (по явному включению) и новостная лента. Пишем это прямо в
   сторовом описании и в приватности — это и бренд, и продающий аргумент.
@@ -200,6 +311,16 @@ Manifest V3, WXT. Сеть — только к сканируемому тарг
 | Починка | промпт | промпт + one-click для CF-сайтов |
 | Приватность | скан на их стороне | локально |
 
+Оговорка к «за логином»: если у юзера включена блокировка third-party cookies,
+куки к рефетчу расширения не прикрепятся — детектим и честно показываем «скан
+без сессии» вместо тихой деградации; поведение Firefox (Total Cookie Protection)
+сверяем эмпирически до заявлений в сторе.
+
+Козырь доверия: даже собственные поверхности Cloudflare спорят об уровне (web-UI
+79/Level 5 против Level 4 в `/api/scan` на одном сайте в один день, 2026-07-30) —
+мы на каждый вердикт показываем evidence сырой пробы, юзер видит «почему», а не
+только цифру.
+
 ---
 
 ## 12. Этапы
@@ -208,24 +329,44 @@ Manifest V3, WXT. Сеть — только к сканируемому тарг
   тестами. Верифицируемо без браузера.
 - **M1 — popup.** Скан текущей вкладки, скор, чеклист, фикс-промпты в буфер.
 - **M2 — dashboard.** Сохранённые сайты, батч, история/графики, настройки.
+- **M2.5 — repair kits.** §8.0: SKILL.md + stack-рецепты + verify-цикл для
+  top-fail проверок × основных стеков; дальше — итеративно по спросу. Порядок с
+  M3 гибкий; контент-работа, почти без кода.
 - **M3 — watch.** Alarms + diff + notifications на регресс.
 - **M4 — fix-apply.** One-click через CF Rules API для CF-сайтов (advanced).
+  Сюда же — полный CF Connect визард §8.1 (минт зонных токенов).
 - **M5 — 301.st слой.** Новостная панель, кросс-промо, spintax.net как эталон.
 
 M0 переиспользуется целиком; M4/M5 порядок взаимозаменяем; CF URL Scanner API как
-опция подключается на любом этапе после M1.
+опция подключается на любом этапе после M1 — для него достаточно лёгкой формы
+§8.1 (вставка токена / curl-автопарс + verify), минт-ступень не нужна.
 
 ---
 
 ## 13. Открытые вопросы
 
-- Имя: Agent Readiness Inspector? Что-то короче/брендируемее под 301.st.
-- Дефолт скоринга: только client-side, или предлагать CF URL Scanner API как
-  «официальный» второй скор сразу.
-- Ширина host_permissions под рефетч за логином против скорости стор-ревью.
+- ~~Имя: Agent Readiness Inspector? Что-то короче/брендируемее под 301.st.~~
+  **Решено (2026-07-30): Agent Readiness Inspector.** Веттинг: точных коллизий
+  нет, «Agent Readiness» — уже генерик (SEL, Microsoft, Factory, Chrome), в
+  трейдмарках Cloudflare отсутствует; пара к Redirect Inspector. Кандидат
+  CWS-тайтла: «Agent Readiness Inspector — AI Agent, llms.txt & robots.txt
+  Checker» (68 симв.; дескриптор финализируем в branding.md по данным о болях).
+  Табу: «Agent Readiness Score» как имя собственное и слоган «Is it agent
+  ready» — единственное, что реально пахнет Cloudflare.
+- ~~Дефолт скоринга: только client-side, или предлагать CF URL Scanner API как
+  «официальный» второй скор сразу.~~ **Решено (2026-07-30):** дефолт —
+  client-side; внешний скан — опция по кнопке за токеном (§5, §8.1), позиционируем
+  как «official view» с диффом «изнутри vs снаружи», не как замену нашего скана.
+- ~~Ширина host_permissions под рефетч за логином против скорости стор-ревью.~~
+  **Решено (2026-07-30):** путь RI — минимальный install-time набор
+  (`storage`, `alarms`, `<all_urls>`), notifications строго optional с
+  runtime-запросом; остальные permissions — вместе с фичей (§10).
 - Монетизация: полностью бесплатно + новостной канал, или pro-тир (мониторинг /
   fix-apply) поверх бесплатного сканера.
-- Какие опциональные проверки включать по умолчанию (llms.txt — off, как у
-  Cloudflare; Web Bot Auth/WebMCP — детект-если-есть).
+- ~~Какие опциональные проверки включать по умолчанию.~~ **Решено (2026-07-30),
+  зафиксировано в §3:** llms.txt — info вне скора; A2A — off by default (как у
+  CF); Web Bot Auth — детект-если-есть (`keys: []` валиден); WebMCP —
+  `detected`/`not detectable`, не pass/fail; DNS-AID — «нужен внешний скан».
 - Хостинг фикс-промптов и весов: в бандле (офлайн) или тянуть с 301.st (свежесть
-  под движущийся стандарт).
+  под движущийся стандарт). Repair kits §8.0 усиливают аргумент за 301.st
+  (объём + свежесть рецептов); бандл — минимальный фолбэк с короткими промптами.
