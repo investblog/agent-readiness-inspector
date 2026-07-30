@@ -44,3 +44,4 @@ context/attachments/
 *.zip
 stats.html
 drift-out/
+dev/smoke-*.png

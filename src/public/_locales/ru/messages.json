@@ -10,5 +10,131 @@
 	},
 	"scanButton": {
 		"message": "Сканировать вкладку"
+	},
+	"scanning": {
+		"message": "Сканирую…"
+	},
+	"retry": {
+		"message": "Повторить"
+	},
+	"rescan": {
+		"message": "Пересканировать"
+	},
+	"toggleTheme": {
+		"message": "Переключить тему"
+	},
+	"copyFixPrompt": {
+		"message": "Скопировать фикс-промпт"
+	},
+	"copied": {
+		"message": "Скопировано!"
+	},
+	"copyFailed": {
+		"message": "Не скопировалось"
+	},
+	"cannotScanPage": {
+		"message": "Эту страницу нельзя просканировать — откройте обычный http(s)-сайт."
+	},
+	"level": {
+		"message": "Уровень"
+	},
+	"unscoredPreview": {
+		"message": "превью, вне скора"
+	},
+	"unreachedProbes": {
+		"message": "$COUNT$ проб(ы) не ответили (таймаут или сеть) и засчитаны как отсутствующие.",
+		"placeholders": {
+			"count": { "content": "$1" }
+		}
+	},
+	"scannedAt": {
+		"message": "Скан в $TIME$ — проверки выполняются локально в вашем браузере.",
+		"placeholders": {
+			"time": { "content": "$1" }
+		}
+	},
+	"craftedAt301": {
+		"message": "301.st — открытые агент-стандарты, ноль телеметрии"
+	},
+	"category_discoverability": {
+		"message": "Обнаружимость"
+	},
+	"category_contentAccessibility": {
+		"message": "Контент"
+	},
+	"category_botAccessControl": {
+		"message": "Доступ ботов"
+	},
+	"category_discovery": {
+		"message": "API, Auth и MCP"
+	},
+	"category_commerce": {
+		"message": "Коммерция"
+	},
+	"check_robotsTxt": {
+		"message": "robots.txt"
+	},
+	"check_sitemap": {
+		"message": "Sitemap"
+	},
+	"check_linkHeaders": {
+		"message": "Link-заголовки (RFC 8288)"
+	},
+	"check_dnsAid": {
+		"message": "DNS-AID"
+	},
+	"check_markdownNegotiation": {
+		"message": "Markdown-негошиэйшн"
+	},
+	"check_llmsTxt": {
+		"message": "llms.txt (инфо)"
+	},
+	"check_contentSignals": {
+		"message": "Content Signals"
+	},
+	"check_robotsTxtAiRules": {
+		"message": "Правила для ИИ-краулеров в robots.txt"
+	},
+	"check_webBotAuth": {
+		"message": "Web Bot Auth"
+	},
+	"check_agentSkills": {
+		"message": "Индекс Agent Skills"
+	},
+	"check_apiCatalog": {
+		"message": "API Catalog (RFC 9727)"
+	},
+	"check_authMd": {
+		"message": "auth.md"
+	},
+	"check_a2aAgentCard": {
+		"message": "A2A Agent Card"
+	},
+	"check_mcpServerCard": {
+		"message": "MCP Server Card"
+	},
+	"check_oauthDiscovery": {
+		"message": "OAuth/OIDC discovery"
+	},
+	"check_oauthProtectedResource": {
+		"message": "OAuth Protected Resource"
+	},
+	"check_webMcp": {
+		"message": "WebMCP (тулы на странице)"
+	},
+	"check_x402": {
+		"message": "Платежи x402"
+	},
+	"check_ucp": {
+		"message": "UCP"
+	},
+	"check_acp": {
+		"message": "ACP"
+	},
+	"check_ap2": {
+		"message": "AP2"
+	},
+	"check_mpp": {
+		"message": "MPP"
 	}
 }

@@ -4,8 +4,15 @@ Detailed plan with DoD per milestone: `docs/ROADMAP.md` (built 2026-07-30 from
 the revised spec). This file is the index.
 
 - [ ] M0 — check-engine: all §3 checks + versioned matrix config + fixtures + calibration harness
-- [ ] M1 — popup: current-tab scan, score/level, evidence checklist, fix-prompts
+- [x] M1 — main surface (side panel / popup): current-tab scan, score/level,
+      evidence checklist, fix-prompt copy; live smoke green (spintax 75/L4,
+      soft-404 exemplar 0/L0) — DONE 2026-07-30
 - [ ] M1.5 — store beta: own icons, privacy policy, listing, Chrome + AMO submit
+      - [ ] Firefox UX debt: host permissions are opt-in there → tab.url is
+        undefined until granted; add permissions.request() flow + FF-specific
+        error copy before AMO submit (M1-b review)
+      - [ ] 3P-cookie block detection → session indicator (protocol field
+        `session` already reserved)
 - [ ] M2 — dashboard: saved sites, batch, history, light CF Connect + external scan diff
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
 - [ ] M3 — watch: alarms + diff + regression notifications (can move earlier if M2 drags)

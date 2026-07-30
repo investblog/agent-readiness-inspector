@@ -10,5 +10,131 @@
 	},
 	"scanButton": {
 		"message": "Scan this tab"
+	},
+	"scanning": {
+		"message": "Scanning…"
+	},
+	"retry": {
+		"message": "Retry"
+	},
+	"rescan": {
+		"message": "Rescan"
+	},
+	"toggleTheme": {
+		"message": "Toggle theme"
+	},
+	"copyFixPrompt": {
+		"message": "Copy fix prompt"
+	},
+	"copied": {
+		"message": "Copied!"
+	},
+	"copyFailed": {
+		"message": "Copy failed"
+	},
+	"cannotScanPage": {
+		"message": "This page can't be scanned — open a regular http(s) website."
+	},
+	"level": {
+		"message": "Level"
+	},
+	"unscoredPreview": {
+		"message": "preview, not scored"
+	},
+	"unreachedProbes": {
+		"message": "$COUNT$ probe(s) got no response (timeout or network) and were judged as absent.",
+		"placeholders": {
+			"count": { "content": "$1" }
+		}
+	},
+	"scannedAt": {
+		"message": "Scanned at $TIME$ — checks run locally in your browser.",
+		"placeholders": {
+			"time": { "content": "$1" }
+		}
+	},
+	"craftedAt301": {
+		"message": "301.st — open agent standards, zero telemetry"
+	},
+	"category_discoverability": {
+		"message": "Discoverability"
+	},
+	"category_contentAccessibility": {
+		"message": "Content"
+	},
+	"category_botAccessControl": {
+		"message": "Bot Access"
+	},
+	"category_discovery": {
+		"message": "API, Auth & MCP"
+	},
+	"category_commerce": {
+		"message": "Commerce"
+	},
+	"check_robotsTxt": {
+		"message": "robots.txt"
+	},
+	"check_sitemap": {
+		"message": "Sitemap"
+	},
+	"check_linkHeaders": {
+		"message": "Link headers (RFC 8288)"
+	},
+	"check_dnsAid": {
+		"message": "DNS-AID"
+	},
+	"check_markdownNegotiation": {
+		"message": "Markdown negotiation"
+	},
+	"check_llmsTxt": {
+		"message": "llms.txt (info)"
+	},
+	"check_contentSignals": {
+		"message": "Content Signals"
+	},
+	"check_robotsTxtAiRules": {
+		"message": "AI crawler rules in robots.txt"
+	},
+	"check_webBotAuth": {
+		"message": "Web Bot Auth"
+	},
+	"check_agentSkills": {
+		"message": "Agent Skills index"
+	},
+	"check_apiCatalog": {
+		"message": "API Catalog (RFC 9727)"
+	},
+	"check_authMd": {
+		"message": "auth.md"
+	},
+	"check_a2aAgentCard": {
+		"message": "A2A Agent Card"
+	},
+	"check_mcpServerCard": {
+		"message": "MCP Server Card"
+	},
+	"check_oauthDiscovery": {
+		"message": "OAuth/OIDC discovery"
+	},
+	"check_oauthProtectedResource": {
+		"message": "OAuth Protected Resource"
+	},
+	"check_webMcp": {
+		"message": "WebMCP (in-page tools)"
+	},
+	"check_x402": {
+		"message": "x402 payments"
+	},
+	"check_ucp": {
+		"message": "UCP"
+	},
+	"check_acp": {
+		"message": "ACP"
+	},
+	"check_ap2": {
+		"message": "AP2"
+	},
+	"check_mpp": {
+		"message": "MPP"
 	}
 }
