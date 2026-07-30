@@ -105,8 +105,26 @@ const MCP_TIERS: readonly { probe: string; tier: string }[] = [
   { probe: PROBE.mcpJsonLegacy, tier: 'de-facto legacy' },
 ];
 
+function isMcpEntry(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') return false;
+  const entry = value as Record<string, unknown>;
+  return (
+    typeof entry.name === 'string' ||
+    typeof entry.url === 'string' ||
+    typeof entry.command === 'string' ||
+    (entry.transport !== null && typeof entry.transport === 'object')
+  );
+}
+
 function isMcpCard(json: unknown): boolean {
   const card = json as Record<string, unknown>;
+  // third real-world shape (cloudflare.com fixture): a client-config-style
+  // { mcpServers: { key: {...} } } map — identity lives inside the entries,
+  // so at least one entry must actually carry identity/endpoint fields
+  // (spec §3: «идентифицирующие поля», not any non-empty object)
+  if (card.mcpServers !== null && typeof card.mcpServers === 'object' && !Array.isArray(card.mcpServers)) {
+    if (Object.values(card.mcpServers as object).some(isMcpEntry)) return true;
+  }
   const hasIdentity = typeof card.name === 'string' || typeof card.title === 'string';
   const hasEndpoint =
     typeof card.url === 'string' ||

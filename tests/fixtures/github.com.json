@@ -1,0 +1,228 @@
+{
+  "origin": "https://github.com",
+  "capturedAt": "2026-07-30T14:19:26.457Z",
+  "responses": {
+    "/": {
+      "url": "https://github.com/",
+      "status": 200,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Accept-Language, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "\n\n\n\n\n\n\n\n<!DOCTYPE html>\n<html\n  lang=\"en\"\n  data-color-mode=\"dark\" data-dark-theme=\"dark\"\n  data-color-mode=\"light\" data-light-theme=\"light\" data-dark-theme=\"dark\"\n  data-a11y-animated-images=\"system\" data-a11y-link-underlines=\"true\"\n  \n  >\n\n\n\n\n  <head>\n    <meta charset=\"utf-8\">\n  <link rel=\"dns-prefetch\" href=\"https://github.githubassets.com\">\n  <link rel=\"dns-prefetch\" href=\"https://avatars.githubusercontent.com\">\n  <link rel=\"dns-prefetch\" href=\"https://github-cloud.s3.amazonaws.com\">\n  <link rel=\"dns-prefetch\" href=\"https://user-images.githubusercontent.com/\">\n  <link rel=\"preconnect\" href=\"https://github.githubassets.com\" crossorigin>\n  <link rel=\"preconnect\" href=\"https://avatars.githubusercontent.com\">\n\n  \n    <link crossorigin=\"anonymous\" rel=\"preload\" as=\"script\" href=\"https://github.githubassets.com/assets/global-banner-disable-746737b0f4a6c543.js\" />\n\n  <link rel=\"preload\" href=\"https://github.githubassets.com/assets/MonaSansVF-wdth-wght-opsz-902d64c7ad02.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\n\n  <link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/light-62b06818b06b09b7.css\" /><link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/light_high_contrast-44cd405df9340c5c.css\" /><link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/dark-f3311053b052c5d4.css\" /><link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/dark_high_contrast-6739a26cef6aaf8e.css\" /><link data-color-theme=\"light\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/light-62b06818b06b09b7.css\" /><link data-color-theme=\"light_high_contrast\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/light_high_contrast-44cd405df9340c5c.css\" /><link data-color-theme=\"light_colorblind\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/light_colorblind-646991fe4831aa4c.css\" /><link data-color-theme=\"light_colorblind_high_contrast\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/light_colorblind_high_contrast-4a10ec40fc7845a6.css\" /><link data-color-theme=\"light_tritanopia\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/light_tritanopia-ad55fa69f5aaa75d.css\" /><link data-color-theme=\"light_tritanopia_high_contrast\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/light_tritanopia_high_contrast-eed7315d90377f7a.css\" /><link data-color-theme=\"dark\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark-f3311053b052c5d4.css\" /><link data-color-theme=\"dark_high_contrast\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark_high_contrast-6739a26cef6aaf8e.css\" /><link data-color-theme=\"dark_colorblind\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark_colorblind-46654068ac8d8b19.css\" /><link data-color-theme=\"dark_colorblind_high_contrast\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark_colorblind_high_contrast-ce6091c5adfeb70f.css\" /><link data-color-theme=\"dark_tritanopia\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark_tritanopia-a1584556afb3c856.css\" /><link data-color-theme=\"dark_tritanopia_high_contrast\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark_tritanopia_high_contrast-f48b2521c34c41b6.css\" /><link data-color-theme=\"dark_dimmed\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark_dimmed-6199d2c64677af2d.css\" /><link data-color-theme=\"dark_dimmed_high_contrast\" crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" data-href=\"https://github.githubassets.com/assets/dark_dimmed_high_contrast-a8e662a03107fa71.css\" />\n\n  <style type=\"text/css\">\n    :root {\n      --tab-size-preference: 4;\n    }\n\n    pre, code {\n      tab-size: var(--tab-size-preference);\n    }\n  </style>\n\n    <link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/primer-primitives-ac2f4b33720c6312.css\" />\n    <link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/primer-bb3e7caff8347285.css\" />\n    <link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/global-67c4d6ca3aa6c428.css\" />\n    <link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/github-cf976967feea1e66.css\" />\n  <link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/site-90074dbf2d8071b5.css\" />\n<link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/landing-pages-44288f2c24a4c584.css\" />\n<link crossorigin=\"anonymous\" media=\"all\" rel=\"stylesheet\" href=\"https://github.githubassets.com/assets/home-9b7c451c90b8cd38.css\" />\n\n  \n\n  <script type=\"application/json\" id=\"client-env\">{\"locale\":\"en\",\"featureFlags\":[\"actions_enable_background_steps\",\"actions_incremental_log_parsing\",\"actions_progressive_log_ingestion\",\"actions_workflow_run_logs_cluster_staleness\",\"actions_workflow_run_logs_scheduler_yield\",\"activity_diff_file_tree\",\"activity_repos_file_tree\",\"activity_repos_overview_header\",\"activity_repos_overview_sidebar\",\"agent_author_search_expansion\",\"agent_author_search_expansion_ui_pulls\",\"alternate_user_config_repo\",\"artifact_ui_v2\",\"billing_billable_licenses_cost_center_bucket_fix\",\"billing_cost_center_list_assigned_resources\",\"billing_cost_center_user_level_budgets\",\"billing_discount_threshold_notification\",\"billing_multi_user_cost_center_total_user_count\",\"billing_user_level_budgets\",\"billing_user_level_budgets_manage\",\"ccr_files_changed_model_picker\",\"ccr_mcp_skills_ga\",\"code_quality_enablement_banner_targeting\",\"code_quality_new_repo_selection_card\",\"code_quality_remove_preview\",\"code_view_raf_sticky_lines\",\"code_view_react_header\",\"codespaces_prebuild_region_target_update\",\"coding_agent_tbb_quota_banner\",\"coding_agent_third_party_model_ui\",\"contentful_primer_code_blocks\",\"copilot_agent_snippy\",\"copilot_api_agentic_issue_marshal_yaml\",\"copilot_ask_mode_dropdown\",\"copilot_automations_pagination\",\"copilot_chat_attach_multiple_images\",\"copilot_chat_auto_mode_picker_paid\",\"copilot_chat_category_rate_limit_messages\",\"copilot_chat_clear_model_selection_for_default_change\",\"copilot_chat_compact_tables\",\"copilot_chat_docked_panel\",\"copilot_chat_enable_tool_call_logs\",\"copilot_chat_feedback_bar\",\"copilot_chat_header_reorder\",\"copilot_chat_input_commands\",\"copilot_chat_interspersed_tool_calls\",\"copilot_chat_max_upsell\",\"copilot_chat_model_picker_promotions\",\"copilot_chat_models_browser_cache\",\"copilot_chat_opening_thread_switch\",\"copilot_chat_prettify_pasted_code\",\"copilot_chat_reduce_quota_checks\",\"copilot_chat_token_usage_v2\",\"copilot_chat_vision_dotcom_chat_ga_gate\",\"copilot_chat_vision_in_claude\",\"copilot_chat_vision_preview_gate\",\"copilot_cli_install_cta_max_plan\",\"copilot_css_textarea_autosize\",\"copilot_custom_copilots\",\"copilot_custom_copilots_feature_preview\",\"copilot_diff_explain_conversation_intent\",\"copilot_diff_reference_context\",\"copilot_duplicate_thread\",\"copilot_extensions_removal_on_marketplace\",\"copilot_file_block_ref_matching\",\"copilot_fix_failed_workflows_all_skus\",\"copilot_ftp_hyperspace_upgrade_prompt\",\"copilot_hide_hovercard\",\"copilot_immersive_code_block_transition_wrap\",\"copilot_immersive_embedded_deferred_payload\",\"copilot_immersive_embedded_draggable\",\"copilot_immersive_embedded_header_button\",\"copilot_immersive_embedded_implicit_references\",\"copilot_immersive_embedded_skip_copilot_api_token_for_dotcom_context\",\"copilot_imme",
+      "truncated": true
+    },
+    "/::accept-markdown": {
+      "url": "https://github.com/",
+      "status": 406,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Accept-Language,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": ""
+    },
+    "/index.md": {
+      "url": "https://github.com/index.md",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/robots.txt": {
+      "url": "https://github.com/robots.txt",
+      "status": 200,
+      "headers": {
+        "content-type": "text/plain",
+        "vary": "Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "# If you would like to crawl GitHub contact us via https://support.github.com?tags=dotcom-robots\n# We also provide an extensive API: https://docs.github.com\nUser-agent: bingbot\nDisallow: /ekansa/Open-Context-Data\nDisallow: /ekansa/opencontext-*\nDisallow: /account-login\nDisallow: */tarball/\nDisallow: */zipball/\nDisallow: /Explodingstuff/\nDisallow: /copilot/\nDisallow: /copilot/c/\n\nUser-agent: adidxbot\nDisallow: /ekansa/Open-Context-Data\nDisallow: /ekansa/opencontext-*\nDisallow: /account-login\nDisallow: */tarball/\nDisallow: */zipball/\nDisallow: /Explodingstuff/\nDisallow: /copilot/\nDisallow: /copilot/c/\n\nUser-agent: BingPreview\nDisallow: /ekansa/Open-Context-Data\nDisallow: /ekansa/opencontext-*\nDisallow: /account-login\nDisallow: */tarball/\nDisallow: */zipball/\nDisallow: /Explodingstuff/\nDisallow: /copilot/\nDisallow: /copilot/c/\n\nUser-agent: baidu\ncrawl-delay: 1\n\n\nUser-agent: *\n\nDisallow: /*/*/pulse\nDisallow: /*/*/projects\nDisallow: /*/*/forks\nDisallow: /*/*/issues/new\nDisallow: /*/*/milestones/new\nDisallow: /*/*/issues/search\nDisallow: /*/*/commits/\nDisallow: /*/*/branches\nDisallow: /*/*/contributors\nDisallow: /*/*/tags\nDisallow: /*/*/stargazers\nDisallow: /*/*/watchers\nDisallow: /*/*/network\nDisallow: /*/*/graphs\nDisallow: /*/*/compare\n\nDisallow: /*/tree/\nDisallow: /gist/\nDisallow: /*/download\nDisallow: /*/revisions\nDisallow: /*/commits/*?author\nDisallow: /*/commits/*?path\nDisallow: /*/comments\nDisallow: /*/archive/\nDisallow: /*/blame/\nDisallow: /*/raw/\nDisallow: /*/cache/\nDisallow: /.git/\nDisallow: */.git/\nDisallow: /*.git$\nDisallow: /search/advanced\nDisallow: /search$\nDisallow: /*q=\nDisallow: /*.atom$\n\nDisallow: /ekansa/Open-Context-Data\nDisallow: /ekansa/opencontext-*\nDisallow: */tarball/\nDisallow: */zipball/\n\nDisallow: /*source=*\nDisallow: /*ref_cta=*\nDisallow: /*plan=*\nDisallow: /*return_to=*\nDisallow: /*ref_loc=*\nDisallow: /*setup_organization=*\nDisallow: /*source_repo=*\nDisallow: /*ref_page=*\nDisallow: /*source=*\nDisallow: /*referrer=*\nDisallow: /*report=*\nDisallow: /*author=*\nDisallow: /*since=*\nDisallow: /*until=*\nDisallow: /*commits?author=*\nDisallow: /*report-abuse?report=*\nDisallow: /*tab=*\nAllow: /*?tab=achievements&achievement=*\n\nDisallow: /account-login\nDisallow: /Explodingstuff/\n\nDisallow: /copilot/\nDisallow: /copilot/c/\n\n"
+    },
+    "/sitemap.xml": {
+      "url": "https://github.com/sitemap.xml",
+      "status": 406,
+      "headers": {
+        "content-type": "application/xml",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": ""
+    },
+    "/llms.txt": {
+      "url": "https://github.com/llms.txt",
+      "status": 200,
+      "headers": {
+        "content-type": "text/plain",
+        "vary": "Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "# GitHub\n\n> GitHub is a developer platform for building, shipping, and maintaining software. It provides cloud-based Git repository hosting, CI/CD via GitHub Actions, project management with Issues and Projects, code review via pull requests, AI-powered development with GitHub Copilot, and APIs (REST and GraphQL) for automation and integration.\n\n## How to use\n\nTo retrieve full article content, page lists, or search results programmatically, please use the APIs below. To find a specific article, use the **Search API** with a query. To browse all available pages, use the **Page List API** to get a list of paths, then fetch individual articles with the **Article API**. The `/api/article/body` endpoint returns markdown, ideal for LLM consumption. These APIs return structured markdown and JSON and are the preferred way for LLMs and automated tools to access GitHub documentation.\n\n* [Versions API](https://docs.github.com/api/pagelist/versions): Lists all available documentation versions.\n* [Languages API](https://docs.github.com/api/pagelist/languages): Lists all available languages.\n* [Page List API](https://docs.github.com/api/pagelist/en/free-pro-team@latest): Returns every docs page path for a given language and version.\n* [Article API](https://docs.github.com/api/article): Returns the full rendered content and context of any docs page as JSON. Example: `curl \"https://docs.github.com/api/article?pathname=/en/get-started/start-your-journey/about-github-and-git\"`\n* [Article Body API](https://docs.github.com/api/article/body): Returns the full rendered content of any docs page as markdown. Example: `curl \"https://docs.github.com/api/article/body?pathname=/en/get-started/start-your-journey/about-github-and-git\"`\n* [Search API](https://docs.github.com/api/search/v1): Search across all docs content. Example: `curl \"https://docs.github.com/api/search/v1?query=actions&language=en&version=free-pro-team@latest\"`\n* [GitHub MCP server](https://github.com/github/github-mcp-server): For agents that connect via Model Context Protocol, the GitHub MCP server provides tools for working with GitHub itself: repositories, issues, pull requests, workflows, and code. It does not currently include docs search.\n\n## Building with GitHub, for coding agents and automation\n\n* [Extend Copilot Chat with MCP](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp): Connect MCP servers to Copilot Chat to share context from other applications.\n* [Use the GitHub MCP Server](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/use-the-github-mcp-server): Learn how to use the GitHub Model Context Protocol (MCP) server to interact with repositories, issues, pull requests, and other GitHub features, directly from Copilot Chat in your IDE.\n* [Set up the GitHub MCP Server](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/set-up-the-github-mcp-server): Learn how to configure the GitHub Model Context Protocol (MCP) server.\n* [About cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent): Copilot can research a repository, create an implementation plan, and make code changes on a branch. You can review the diff, iterate, and create a pull request when you're ready.\n* [Create custom agents in your IDE](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/create-custom-agents-in-your-ide): You can create specialized agents with tailored expertise for specific development tasks.\n* [GitHub CLI](https://docs.github.com/en/github-cli/github-cli): GitHub CLI is an open source tool for using GitHub from your computer's command line. When you're working from the command line, you can use the GitHub CLI to save time and avoid switching context.\n* [Quickstart](https://docs.github.com/en/github-cli/github-cli/quickstart): Start using GitHub CLI to work with GitHub in the command line.\n* [REST API](https://docs.github.com/en/rest): Create integrations, retrieve data, and automate your workflows with the GitHub REST API.\n* [GraphQL API](https://docs.github.com/en/graphql): To create integrations, retrieve data, and automate your workflows, use the GitHub GraphQL API. The GitHub GraphQL API offers more precise and flexible queries than the GitHub REST API.\n* [GitHub Actions](https://docs.github.com/en/actions): Automate, customize, and execute your software development workflows right in your repository with GitHub Actions. You can discover, create, and share actions to perform any job you'd like, including CI/CD, and combine actions in a completely customized workflow.\n\n## GitHub Copilot\n\n> You can use GitHub Copilot to enhance your productivity and assist as you work on code.\n\n* [GitHub Copilot](https://docs.github.com/en/copilot): You can use GitHub Copilot to enhance your productivity and assist as you work on code.\n* [Copilot requests](https://docs.github.com/en/copilot/concepts/billing/copilot-requests): Learn about requests in Copilot, including premium requests, how they work, and how to manage your usage effectively.\n* [Individual plans](https://docs.github.com/en/copilot/concepts/billing/individual-plans): GitHub offers several Copilot plans for individual developers, each with different features, model access, and usage limits to support a wide range of coding needs.\n* [Usage-based billing for individuals](https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals): Your Copilot plan will include a monthly allowance of GitHub AI Credits. If you exhaust your AI credits, you can pay extra to keep working.\n* [Usage-based billing for organizations and enterprises](https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-organizations-and-enterprises): Prepare for the transition to usage-based billing for Copilot Business and Copilot Enterprise.\n* [Usage limits](https://docs.github.com/en/copilot/concepts/usage-limits): Learn about GitHub Copilot usage limits and what to do if you hit a limit.\n* [Features](https://docs.github.com/en/copilot/get-started/features): GitHub Copilot offers a suite of features for users and administrators.\n* [Plans](https://docs.github.com/en/copilot/get-started/plans): Learn about the available plans for Copilot.\n* [Quickstart](https://docs.github.com/en/copilot/get-started/quickstart): Quickly learn how to use GitHub Copilot.\n* [What is GitHub Copilot?](https://docs.github.com/en/copilot/get-started/what-is-github-copilot): Learn what Copilot is and what you can do with it.\n* [Copilot CLI best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices): Learn how to get the most out of GitHub Copilot CLI.\n* [Install Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli): Learn how to install Copilot CLI so that you can use Copilot directly from the command line.\n* [Overview](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/overview): Learn how to use GitHub Copilot from the command line.\n* [Add repository instructions](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-repository-instructions): Create repository custom instructions files that give Copilot additional context on how to understand your project and how to build, test and validate its changes.\n* [Set up for students](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/enable-copilot/set-up-for-students): Get free access to Copilot's premium features as a verified student.\n* [Get IDE code suggestions](https://docs.github.com/en/copilot/how-tos/get-code-suggestions/get-ide-code-suggestions): Use GitHub Copilot to get code suggestions in your editor.\n* [Preparing for usage-based billing](https://docs.github.com/en/copilot/how-tos/manage-and-track-spending/prepare-for-your-move-to-usage-based-billing): If you're on a Copilot Pro or Copilot Pro+ plan, review your estimated costs under usage-based billing and take steps to prepare before the transition.\n* [Troubleshoot common issues](https://docs.github.com/en/copi",
+      "truncated": true
+    },
+    "/llms-full.txt": {
+      "url": "https://github.com/llms-full.txt",
+      "status": 406,
+      "headers": {
+        "content-type": "text/plain",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": ""
+    },
+    "/.well-known/http-message-signatures-directory": {
+      "url": "https://github.com/.well-known/http-message-signatures-directory",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/agent-skills/index.json": {
+      "url": "https://github.com/.well-known/agent-skills/index.json",
+      "status": 404,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "{\"error\":\"Not Found\"}"
+    },
+    "/.well-known/api-catalog": {
+      "url": "https://github.com/.well-known/api-catalog",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/auth.md": {
+      "url": "https://github.com/.well-known/auth.md",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/agent-card.json": {
+      "url": "https://github.com/.well-known/agent-card.json",
+      "status": 404,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "{\"error\":\"Not Found\"}"
+    },
+    "/.well-known/agent.json": {
+      "url": "https://github.com/.well-known/agent.json",
+      "status": 404,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "{\"error\":\"Not Found\"}"
+    },
+    "/.well-known/mcp/server-card": {
+      "url": "https://github.com/.well-known/mcp/server-card",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/mcp-server": {
+      "url": "https://github.com/.well-known/mcp-server",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/mcp/server-card.json": {
+      "url": "https://github.com/.well-known/mcp/server-card.json",
+      "status": 404,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "{\"error\":\"Not Found\"}"
+    },
+    "/.well-known/mcp/server-cards.json": {
+      "url": "https://github.com/.well-known/mcp/server-cards.json",
+      "status": 404,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "{\"error\":\"Not Found\"}"
+    },
+    "/.well-known/mcp.json": {
+      "url": "https://github.com/.well-known/mcp.json",
+      "status": 404,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "{\"error\":\"Not Found\"}"
+    },
+    "/.well-known/oauth-authorization-server": {
+      "url": "https://github.com/.well-known/oauth-authorization-server",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/oauth-protected-resource": {
+      "url": "https://github.com/.well-known/oauth-protected-resource",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/ucp": {
+      "url": "https://github.com/.well-known/ucp",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    },
+    "/.well-known/x402": {
+      "url": "https://github.com/.well-known/x402",
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With",
+        "server": "github.com"
+      },
+      "body": "Not Found"
+    }
+  }
+}

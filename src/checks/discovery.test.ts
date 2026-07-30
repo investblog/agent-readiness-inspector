@@ -142,6 +142,24 @@ describe('mcpServerCard check (tiered, spec §3)', () => {
     expect(run('mcpServerCard', {}).status).toBe('fail');
   });
 
+  it('accepts the client-config mcpServers map shape (cloudflare.com fixture)', () => {
+    const r = run('mcpServerCard', {
+      [PROBE.mcpJsonLegacy]: { body: JSON.stringify({ mcpServers: { site: { name: 'Site MCP' } } }) },
+    });
+    expect(r.status).toBe('pass');
+    const empty = run('mcpServerCard', { [PROBE.mcpJsonLegacy]: { body: '{"mcpServers": {}}' } });
+    expect(empty.status).toBe('fail');
+  });
+
+  it('rejects mcpServers maps whose entries carry no identity/endpoint (gameability guard)', () => {
+    expect(run('mcpServerCard', { [PROBE.mcpJsonLegacy]: { body: '{"mcpServers": {"a": 1}}' } }).status).toBe('fail');
+    expect(run('mcpServerCard', { [PROBE.mcpJsonLegacy]: { body: '{"mcpServers": ["a"]}' } }).status).toBe('fail');
+    const transport = run('mcpServerCard', {
+      [PROBE.mcpJsonLegacy]: { body: JSON.stringify({ mcpServers: { s: { transport: { url: 'https://m.e' } } } }) },
+    });
+    expect(transport.status).toBe('pass');
+  });
+
   it('accepts servers[]-shaped cards and rejects remotes: null (validation hole guard)', () => {
     const servers = run('mcpServerCard', {
       [PROBE.mcpJsonLegacy]: { body: JSON.stringify({ name: 'X', servers: [{ url: 'https://m.e.com' }] }) },
