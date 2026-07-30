@@ -1,5 +1,8 @@
+import { contentSignals, robotsTxtAiRules, webBotAuth } from './bot-access';
 import type { CheckId } from './config';
 import { checkMeta, MATRIX } from './config';
+import { llmsTxt, markdownNegotiation } from './content';
+import { dnsAid, linkHeaders, sitemap } from './discoverability';
 import { fixPrompt } from './prompts';
 import { robotsTxt } from './robots';
 import type { CheckContext, CheckFn, CheckResult } from './types';
@@ -7,6 +10,14 @@ import type { CheckContext, CheckFn, CheckResult } from './types';
 // Implementation registry — filled out check by check through M0.
 const IMPLEMENTATIONS: Partial<Record<CheckId, CheckFn>> = {
   robotsTxt,
+  sitemap,
+  linkHeaders,
+  dnsAid,
+  markdownNegotiation,
+  llmsTxt,
+  contentSignals,
+  robotsTxtAiRules,
+  webBotAuth,
 };
 
 export function implementedIds(): CheckId[] {

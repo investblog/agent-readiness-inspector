@@ -12,6 +12,8 @@ export const PROBE = {
   root: '/',
   /** GET / with `Accept: text/markdown` (Cloudflare Markdown for Agents). */
   rootMarkdown: '/::accept-markdown',
+  /** `.md`-suffix convention (Mintlify) — a separate convention from negotiation. */
+  rootMdSuffix: '/index.md',
   robotsTxt: '/robots.txt',
   sitemap: '/sitemap.xml',
   llmsTxt: '/llms.txt',
@@ -97,7 +99,7 @@ export const MATRIX = [
     docUrl: 'https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/',
     scored: true,
     defaultEnabled: true,
-    probes: [PROBE.rootMarkdown],
+    probes: [PROBE.rootMarkdown, PROBE.rootMdSuffix],
   },
   {
     id: 'llmsTxt',
@@ -270,6 +272,29 @@ export function checkMeta(id: CheckId): CheckMeta {
   if (!meta) throw new Error(`unknown check id: ${id}`);
   return meta;
 }
+
+/**
+ * AI crawler user-agents an explicit robots.txt group can address — versioned
+ * DATA like the matrix. Vendor six + common trainers; extend via drift/self-config
+ * (upstream canon: github.com/ai-robots-txt/ai.robots.txt).
+ */
+export const AI_BOT_USER_AGENTS = [
+  'GPTBot',
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'ClaudeBot',
+  'Claude-User',
+  'Claude-SearchBot',
+  'anthropic-ai',
+  'PerplexityBot',
+  'Perplexity-User',
+  'Google-Extended',
+  'Meta-ExternalAgent',
+  'Meta-ExternalFetcher',
+  'CCBot',
+  'Bytespider',
+  'Applebot-Extended',
+] as const;
 
 export interface LevelBand {
   level: number;
