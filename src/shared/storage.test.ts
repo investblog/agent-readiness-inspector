@@ -3,28 +3,8 @@ import type { CheckId, CheckStatus } from '@/checks';
 import { MATRIX, resolveCheckIds } from '@/checks';
 import type { ScanSuccess } from './messaging';
 import { snapshotFromScan } from './snapshots';
-import { type AreaLike, MAX_SNAPSHOTS_PER_SITE, SCHEMA_VERSION, type ScanSnapshot, StorageLayer } from './storage';
-
-class FakeArea implements AreaLike {
-  data = new Map<string, unknown>();
-
-  async get(keys?: string | string[] | null): Promise<Record<string, unknown>> {
-    const wanted = keys === null || keys === undefined ? [...this.data.keys()] : Array.isArray(keys) ? keys : [keys];
-    const out: Record<string, unknown> = {};
-    for (const key of wanted) {
-      if (this.data.has(key)) out[key] = structuredClone(this.data.get(key));
-    }
-    return out;
-  }
-
-  async set(items: Record<string, unknown>): Promise<void> {
-    for (const [key, value] of Object.entries(items)) this.data.set(key, structuredClone(value));
-  }
-
-  async remove(keys: string | string[]): Promise<void> {
-    for (const key of Array.isArray(keys) ? keys : [keys]) this.data.delete(key);
-  }
-}
+import { MAX_SNAPSHOTS_PER_SITE, SCHEMA_VERSION, type ScanSnapshot, StorageLayer } from './storage';
+import { FakeArea } from './test-support';
 
 const ORIGIN = 'https://example.com';
 

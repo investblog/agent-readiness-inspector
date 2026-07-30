@@ -7,7 +7,8 @@
 
 import type { CheckId, CheckStatus } from '@/checks';
 
-export const SCHEMA_VERSION = 1;
+/** v1: sites/history/settings. v2: + watch fields (M3). */
+export const SCHEMA_VERSION = 2;
 /** FIFO retention per site — keeps ~100 sites × 50 snapshots well under the
  * ~10MB storage.local quota without the unlimitedStorage permission (spec §10). */
 export const MAX_SNAPSHOTS_PER_SITE = 50;
@@ -15,6 +16,11 @@ export const MAX_SNAPSHOTS_PER_SITE = 50;
 export interface SiteMeta {
   addedAt: number;
   lastScanAt?: number;
+  /** v2: rescan this site on the watch schedule (spec §7). */
+  watch?: boolean;
+  /** v2: signature of the last announced regression — deduplicates alerts. */
+  lastAlertSignature?: string;
+  lastAlertAt?: number;
 }
 
 /** Compact history record: statuses only — evidence is heavy and reproducible
@@ -26,11 +32,28 @@ export interface ScanSnapshot {
   statuses: Partial<Record<CheckId, CheckStatus>>;
 }
 
+export interface WatchSettings {
+  /** Hours between watch cycles; the UI clamps to >= 1 (spec §7 / alarms floor). */
+  intervalHours: number;
+  /** Show a browser notification on regression (needs the optional permission). */
+  notify: boolean;
+}
+
+export const DEFAULT_WATCH: WatchSettings = { intervalHours: 24, notify: true };
+
 export interface Settings {
   /** Per-check enable/disable on top of defaultEnabled (llmsTxt/a2a toggles). */
   checkOverrides?: Partial<Record<CheckId, boolean>>;
   cfAccountId?: string;
   cfToken?: string;
+  /** v2 (M3). */
+  watch?: WatchSettings;
+}
+
+/** Cursor state so a watch cycle can span several alarm firings (SW 5-min cap). */
+export interface WatchState {
+  cursor?: string;
+  lastRunAt?: number;
 }
 
 /** Minimal storage-area contract (browser.storage.local satisfies it). */
@@ -43,6 +66,7 @@ export interface AreaLike {
 const KEY_VERSION = 'schemaVersion';
 const KEY_SITES = 'sites';
 const KEY_SETTINGS = 'settings';
+const KEY_WATCH_STATE = 'watchState';
 const historyKey = (origin: string): string => `history:${origin}`;
 
 export class StorageLayer {
@@ -61,14 +85,29 @@ export class StorageLayer {
     return next;
   }
 
-  /** Idempotent: stamps the schema version; future versions migrate stepwise here. */
+  /**
+   * Idempotent, stepwise: each version bump only ADDS what the new one needs.
+   * v2 introduced only OPTIONAL fields, so there is nothing to rewrite — the
+   * defaults are resolved on read (`getWatchSettings`), which also keeps a
+   * fresh install and an upgraded store the same shape.
+   */
   async migrate(): Promise<void> {
-    const { [KEY_VERSION]: version } = await this.area.get(KEY_VERSION);
-    if (version === undefined) {
+    const { [KEY_VERSION]: stored, [KEY_SITES]: sites } = await this.area.get([KEY_VERSION, KEY_SITES]);
+    if (stored === SCHEMA_VERSION) return;
+
+    if (typeof stored === 'number' && stored > SCHEMA_VERSION) {
+      // the user downgraded the extension: leave the newer data untouched
+      console.warn(`[agent-readiness] storage schema v${stored} is newer than v${SCHEMA_VERSION}; not migrating`);
+      return;
+    }
+
+    if (sites === undefined) {
+      // genuinely empty store (a missing/corrupt version alone must never wipe data)
       await this.area.set({ [KEY_VERSION]: SCHEMA_VERSION, [KEY_SITES]: {} });
       return;
     }
-    // schemaVersion 1 is current — nothing to migrate yet
+    // v1 → v2: optional fields only; existing sites/history/settings stay as they are
+    await this.area.set({ [KEY_VERSION]: SCHEMA_VERSION });
   }
 
   async getSites(): Promise<Record<string, SiteMeta>> {
@@ -130,6 +169,59 @@ export class StorageLayer {
   async getSettings(): Promise<Settings> {
     const { [KEY_SETTINGS]: settings } = await this.area.get(KEY_SETTINGS);
     return (settings as Settings | undefined) ?? {};
+  }
+
+  /** Watch settings with defaults applied — one shape for fresh and migrated stores. */
+  async getWatchSettings(): Promise<WatchSettings> {
+    const { watch } = await this.getSettings();
+    return { ...DEFAULT_WATCH, ...watch };
+  }
+
+  /** Sites flagged for scheduled rescans (spec §7). */
+  async getWatchedOrigins(): Promise<string[]> {
+    const sites = await this.getSites();
+    return Object.entries(sites)
+      .filter(([, meta]) => meta.watch === true)
+      .map(([origin]) => origin)
+      .sort();
+  }
+
+  setWatch(origin: string, watch: boolean): Promise<void> {
+    return this.enqueue(async () => {
+      const sites = await this.getSites();
+      const site = sites[origin];
+      if (!site) return;
+      site.watch = watch;
+      if (!watch) {
+        site.lastAlertSignature = undefined;
+        site.lastAlertAt = undefined;
+      }
+      await this.area.set({ [KEY_SITES]: sites });
+    });
+  }
+
+  /** Records that a regression was announced, so it is not repeated. */
+  markAlerted(origin: string, signature: string, at: number = Date.now()): Promise<void> {
+    return this.enqueue(async () => {
+      const sites = await this.getSites();
+      const site = sites[origin];
+      if (!site) return;
+      site.lastAlertSignature = signature;
+      site.lastAlertAt = at;
+      await this.area.set({ [KEY_SITES]: sites });
+    });
+  }
+
+  async getWatchState(): Promise<WatchState> {
+    const { [KEY_WATCH_STATE]: state } = await this.area.get(KEY_WATCH_STATE);
+    return (state as WatchState | undefined) ?? {};
+  }
+
+  setWatchState(patch: Partial<WatchState>): Promise<void> {
+    return this.enqueue(async () => {
+      const merged = { ...(await this.getWatchState()), ...patch };
+      await this.area.set({ [KEY_WATCH_STATE]: merged });
+    });
   }
 
   updateSettings(patch: Partial<Settings>): Promise<Settings> {
