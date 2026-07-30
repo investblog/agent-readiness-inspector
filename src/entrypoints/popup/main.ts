@@ -7,9 +7,11 @@ import '@/assets/css/theme.css';
 import '@/assets/css/popup.css';
 import { browser } from 'wxt/browser';
 import type { CategoryId, CheckResult } from '@/checks';
+import { svg301Logo } from '@/shared/brand';
 import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
 import type { ScanResponse, ScanSuccess } from '@/shared/messaging';
+import { getStoreInfo } from '@/shared/store-links';
 import { initTheme, toggleTheme } from '@/shared/theme';
 
 // ---- Mode & bootstrap ----
@@ -224,6 +226,15 @@ async function bootstrap(): Promise<void> {
   }
   $('target-origin').textContent = currentOrigin.replace(/^https?:\/\//, '');
   await scan();
+}
+
+$('footer-brand').append(svg301Logo(14));
+const store = getStoreInfo();
+if (store) {
+  const rate = $('rate-link') as HTMLAnchorElement;
+  rate.href = store.url;
+  rate.textContent = `${t('rateUs')} · ${store.label}`;
+  rate.hidden = false;
 }
 
 $('theme-toggle').append(icon('theme', 16));

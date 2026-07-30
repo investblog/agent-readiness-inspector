@@ -13,6 +13,11 @@ the revised spec). This file is the index.
         error copy before AMO submit (M1-b review)
       - [ ] 3P-cookie block detection → session indicator (protocol field
         `session` already reserved)
+      - [ ] Store links: fill store-links.ts URLs after publication; decide
+        whether Edge gets its own build (BROWSER===chrome would show the
+        Chrome store link to Edge users otherwise)
+      - [ ] Store banner (RI has assets/banner-1400x560.png as the format
+        reference) — make ours together with own icons
 - [ ] M2 — dashboard: saved sites, batch, history, light CF Connect + external scan diff
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
 - [ ] M3 — watch: alarms + diff + regression notifications (can move earlier if M2 drags)

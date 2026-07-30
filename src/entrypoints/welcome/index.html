@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to Agent Readiness Inspector</title>
+  </head>
+  <body>
+    <main class="welcome">
+      <header class="welcome__header">
+        <img src="/icons/48.png" alt="" width="40" height="40" class="welcome__icon" />
+        <h1 class="welcome__title" data-i18n="welcomeHeading">Agent Readiness Inspector</h1>
+      </header>
+
+      <section class="welcome__hero">
+        <p class="welcome__tagline" data-i18n="welcomeTagline">X-ray your site for AI agents.</p>
+        <p class="welcome__subtitle" data-i18n="welcomeSubtitle">
+          See what AI agents really see — robots.txt, markdown, MCP, Content Signals — right in your browser.
+        </p>
+      </section>
+
+      <section class="welcome__steps">
+        <div class="welcome__step">
+          <span class="welcome__step-number">1</span>
+          <h2 class="welcome__step-title" data-i18n="stepScan">Scan</h2>
+          <p class="welcome__step-desc" data-i18n="stepScanDesc">
+            One click on the toolbar icon audits the current tab against the open agent standards.
+          </p>
+        </div>
+        <div class="welcome__step">
+          <span class="welcome__step-number">2</span>
+          <h2 class="welcome__step-title" data-i18n="stepFix">Fix</h2>
+          <p class="welcome__step-desc" data-i18n="stepFixDesc">
+            Every failed check ships a ready-to-paste prompt for your coding agent.
+          </p>
+        </div>
+        <div class="welcome__step">
+          <span class="welcome__step-number">3</span>
+          <h2 class="welcome__step-title" data-i18n="stepVerify">Verify</h2>
+          <p class="welcome__step-desc" data-i18n="stepVerifyDesc">
+            Rescan and watch the score climb — evidence for every verdict, nothing hidden.
+          </p>
+        </div>
+      </section>
+
+      <section class="welcome__tips">
+        <h2 class="welcome__tips-title" data-i18n="tipsTitle">Tips</h2>
+        <ul class="welcome__tips-list">
+          <li class="welcome__tip">
+            <svg class="welcome__tip-icon" aria-hidden="true"><use href="#i-mono-scan"></use></svg>
+            <span data-i18n="tipIcon">Click the toolbar icon — Chrome opens the side panel, so the report stays next to the page</span>
+          </li>
+          <li class="welcome__tip">
+            <svg class="welcome__tip-icon" aria-hidden="true"><use href="#i-mono-chevron-down"></use></svg>
+            <span data-i18n="tipEvidence">Expand any check to see the raw evidence behind its verdict</span>
+          </li>
+          <li class="welcome__tip">
+            <svg class="welcome__tip-icon" aria-hidden="true"><use href="#i-mono-copy"></use></svg>
+            <span data-i18n="tipPrompt">Copy a fix prompt and hand it to Cursor, Claude Code or your agent of choice</span>
+          </li>
+          <li class="welcome__tip">
+            <svg class="welcome__tip-icon" aria-hidden="true"><use href="#i-mono-external"></use></svg>
+            <span data-i18n="tipReference">Curious what a high score looks like? Try the scan on spintax.net — a living reference of the standards</span>
+          </li>
+        </ul>
+      </section>
+
+      <div class="welcome__action">
+        <button id="cta" class="welcome__cta" type="button" data-i18n="ctaButton">
+          Try it on a living reference
+        </button>
+      </div>
+
+      <footer class="welcome__footer">
+        <span id="version"></span>
+        <span class="welcome__footer-sep">&middot;</span>
+        <a
+          href="https://301.st/?utm_source=agent-readiness-inspector&amp;utm_medium=extension&amp;utm_campaign=welcome"
+          target="_blank"
+          rel="noreferrer noopener"
+          class="welcome__sponsor"
+          title="301.st — Smart Traffic"
+        >
+          <span data-i18n="craftedAt">Crafted at</span>
+          <span id="brand-logo"></span>
+        </a>
+        <span class="welcome__footer-sep">&middot;</span>
+        <a
+          href="https://github.com/investblog/agent-readiness-inspector/issues"
+          target="_blank"
+          rel="noreferrer noopener"
+          class="welcome__social-link"
+          data-i18n-title="feedbackGithub"
+          title="Feedback &amp; Issues"
+          >GitHub</a
+        >
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

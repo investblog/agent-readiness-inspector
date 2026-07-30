@@ -8,9 +8,6 @@
 	"popupTitle": {
 		"message": "Agent Readiness Inspector"
 	},
-	"scanButton": {
-		"message": "Scan this tab"
-	},
 	"scanning": {
 		"message": "Scanning…"
 	},
@@ -44,17 +41,18 @@
 	"unreachedProbes": {
 		"message": "$COUNT$ probe(s) got no response (timeout or network) and were judged as absent.",
 		"placeholders": {
-			"count": { "content": "$1" }
+			"count": {
+				"content": "$1"
+			}
 		}
 	},
 	"scannedAt": {
 		"message": "Scanned at $TIME$ — checks run locally in your browser.",
 		"placeholders": {
-			"time": { "content": "$1" }
+			"time": {
+				"content": "$1"
+			}
 		}
-	},
-	"craftedAt301": {
-		"message": "301.st — open agent standards, zero telemetry"
 	},
 	"category_discoverability": {
 		"message": "Discoverability"
@@ -136,5 +134,62 @@
 	},
 	"check_mpp": {
 		"message": "MPP"
+	},
+	"welcomeTitle": {
+		"message": "Welcome to Agent Readiness Inspector"
+	},
+	"welcomeHeading": {
+		"message": "Agent Readiness Inspector"
+	},
+	"welcomeTagline": {
+		"message": "X-ray your site for AI agents."
+	},
+	"welcomeSubtitle": {
+		"message": "See what AI agents really see — robots.txt, markdown, MCP, Content Signals — right in your browser."
+	},
+	"stepScan": {
+		"message": "Scan"
+	},
+	"stepScanDesc": {
+		"message": "One click on the toolbar icon audits the current tab against the open agent standards."
+	},
+	"stepFix": {
+		"message": "Fix"
+	},
+	"stepFixDesc": {
+		"message": "Every failed check ships a ready-to-paste prompt for your coding agent."
+	},
+	"stepVerify": {
+		"message": "Verify"
+	},
+	"stepVerifyDesc": {
+		"message": "Rescan and watch the score climb — evidence for every verdict, nothing hidden."
+	},
+	"tipsTitle": {
+		"message": "Tips"
+	},
+	"tipIcon": {
+		"message": "Click the toolbar icon — Chrome opens the side panel, so the report stays next to the page"
+	},
+	"tipEvidence": {
+		"message": "Expand any check to see the raw evidence behind its verdict"
+	},
+	"tipPrompt": {
+		"message": "Copy a fix prompt and hand it to Cursor, Claude Code or your agent of choice"
+	},
+	"tipReference": {
+		"message": "Curious what a high score looks like? Try the scan on spintax.net — a living reference of the standards"
+	},
+	"ctaButton": {
+		"message": "Try it on a living reference"
+	},
+	"craftedAt": {
+		"message": "Crafted at"
+	},
+	"feedbackGithub": {
+		"message": "Feedback & Issues"
+	},
+	"rateUs": {
+		"message": "Rate us"
 	}
 }

@@ -370,16 +370,26 @@ body.sidepanel {
 
 .panel-footer {
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   padding: var(--space-2) var(--space-4);
   border-top: var(--border-width) var(--border-style) var(--border-subtle);
   font-size: var(--fs-xs);
 }
 
 .panel-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--muted);
   text-decoration: none;
 }
 
 .panel-footer a:hover {
   color: var(--primary);
+}
+
+.footer-spacer {
+  flex: 1;
 }

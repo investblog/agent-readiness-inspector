@@ -44,6 +44,18 @@ export default defineBackground(() => {
     ?.setPanelBehavior?.({ openPanelOnActionClick: true })
     ?.catch((error: unknown) => console.warn('[agent-readiness] setPanelBehavior failed', error));
 
+  // Onboarding + uninstall feedback (RI pattern)
+  browser.runtime.onInstalled.addListener(({ reason }) => {
+    if (reason === 'install') {
+      void browser.tabs.create({ url: browser.runtime.getURL('/welcome.html') });
+    }
+  });
+  browser.runtime
+    .setUninstallURL?.(
+      'https://301.st/contact?utm_source=agent-readiness-inspector&utm_medium=extension&utm_campaign=uninstall',
+    )
+    ?.catch((error: unknown) => console.warn('[agent-readiness] setUninstallURL failed', error));
+
   // wxt/browser is polyfill-style: returning a Promise from the listener
   // delivers its resolution as the response (async channel stays open)
   browser.runtime.onMessage.addListener((message: unknown): Promise<ScanResponse> | undefined => {

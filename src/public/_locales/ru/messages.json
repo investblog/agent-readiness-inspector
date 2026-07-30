@@ -8,9 +8,6 @@
 	"popupTitle": {
 		"message": "Agent Readiness Inspector"
 	},
-	"scanButton": {
-		"message": "Сканировать вкладку"
-	},
 	"scanning": {
 		"message": "Сканирую…"
 	},
@@ -44,17 +41,18 @@
 	"unreachedProbes": {
 		"message": "$COUNT$ проб(ы) не ответили (таймаут или сеть) и засчитаны как отсутствующие.",
 		"placeholders": {
-			"count": { "content": "$1" }
+			"count": {
+				"content": "$1"
+			}
 		}
 	},
 	"scannedAt": {
 		"message": "Скан в $TIME$ — проверки выполняются локально в вашем браузере.",
 		"placeholders": {
-			"time": { "content": "$1" }
+			"time": {
+				"content": "$1"
+			}
 		}
-	},
-	"craftedAt301": {
-		"message": "301.st — открытые агент-стандарты, ноль телеметрии"
 	},
 	"category_discoverability": {
 		"message": "Обнаружимость"
@@ -136,5 +134,62 @@
 	},
 	"check_mpp": {
 		"message": "MPP"
+	},
+	"welcomeTitle": {
+		"message": "Добро пожаловать в Agent Readiness Inspector"
+	},
+	"welcomeHeading": {
+		"message": "Agent Readiness Inspector"
+	},
+	"welcomeTagline": {
+		"message": "Рентген сайта для ИИ-агентов."
+	},
+	"welcomeSubtitle": {
+		"message": "Узнайте, что агенты реально видят — robots.txt, markdown, MCP, Content Signals — прямо в браузере."
+	},
+	"stepScan": {
+		"message": "Скан"
+	},
+	"stepScanDesc": {
+		"message": "Один клик по иконке — и текущая вкладка проверена по открытым агент-стандартам."
+	},
+	"stepFix": {
+		"message": "Фикс"
+	},
+	"stepFixDesc": {
+		"message": "К каждой проваленной проверке — готовый промпт для вашего кодового агента."
+	},
+	"stepVerify": {
+		"message": "Проверка"
+	},
+	"stepVerifyDesc": {
+		"message": "Пересканируйте и смотрите, как растёт скор — evidence на каждый вердикт, ничего скрытого."
+	},
+	"tipsTitle": {
+		"message": "Подсказки"
+	},
+	"tipIcon": {
+		"message": "Клик по иконке — Chrome откроет боковую панель, отчёт останется рядом со страницей"
+	},
+	"tipEvidence": {
+		"message": "Раскройте любую проверку, чтобы увидеть сырые доказательства вердикта"
+	},
+	"tipPrompt": {
+		"message": "Скопируйте фикс-промпт и отдайте Cursor, Claude Code или своему агенту"
+	},
+	"tipReference": {
+		"message": "Хотите увидеть высокий скор? Просканируйте spintax.net — живой эталон стандартов"
+	},
+	"ctaButton": {
+		"message": "Попробовать на живом эталоне"
+	},
+	"craftedAt": {
+		"message": "Сделано в"
+	},
+	"feedbackGithub": {
+		"message": "Отзывы и баги"
+	},
+	"rateUs": {
+		"message": "Оценить"
 	}
 }
