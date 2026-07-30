@@ -18,7 +18,10 @@ the revised spec). This file is the index.
         Chrome store link to Edge users otherwise)
       - [ ] Store banner (RI has assets/banner-1400x560.png as the format
         reference) — make ours together with own icons
-- [ ] M2 — dashboard: saved sites, batch, history, light CF Connect + external scan diff
+- [x] M2 — dashboard: saved sites, batch, history, light CF Connect + external
+      scan diff — DONE 2026-07-30 (plan: .agents/plans/done/m2-dashboard.md)
+      - [ ] Verify the external scan live: needs a Cloudflare token with
+        `URL Scanner: Edit` (only DoD item left open in M2)
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
 - [ ] M3 — watch: alarms + diff + regression notifications (can move earlier if M2 drags)
 - [ ] M4 — fix-apply + full CF Connect wizard (spec §8.1)
