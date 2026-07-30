@@ -14,5 +14,8 @@ export const ICON_NAMES = [
   'chevron-down',
   'chevron-up',
   'theme',
+  'save',
+  'saved',
+  'dashboard',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];

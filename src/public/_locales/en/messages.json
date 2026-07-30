@@ -191,5 +191,11 @@
 	},
 	"rateUs": {
 		"message": "Rate us"
+	},
+	"saveSite": {
+		"message": "Save site — record scan history"
+	},
+	"savedSite": {
+		"message": "Saved — every scan is recorded to history"
 	}
 }

@@ -99,6 +99,10 @@ body.sidepanel {
   color: var(--text);
 }
 
+.icon-btn--active {
+  color: var(--primary);
+}
+
 /* ---- States ---- */
 
 .panel-state {

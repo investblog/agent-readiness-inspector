@@ -1,8 +1,10 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
-import { runChecks, scoreResults } from '@/checks';
+import { resolveCheckIds, runChecks, scoreResults } from '@/checks';
 import { probeKeysFor, runProbes } from '@/probe/probe-layer';
 import { isScanRequest, type ScanResponse } from '@/shared/messaging';
+import { snapshotFromScan } from '@/shared/snapshots';
+import { storage } from '@/shared/storage';
 
 async function handleScan(origin: string): Promise<ScanResponse> {
   let parsed: URL;
@@ -21,9 +23,14 @@ async function handleScan(origin: string): Promise<ScanResponse> {
     void browser.runtime.getPlatformInfo?.().catch(() => {});
   }, 20_000);
   try {
-    const { responses, unreached } = await runProbes(parsed.origin, probeKeysFor());
-    const results = runChecks({ origin: parsed.origin, responses });
-    return {
+    // background is the single source of truth for the enabled-check set
+    const store = await storage();
+    const { checkOverrides } = await store.getSettings();
+    const include = resolveCheckIds(checkOverrides);
+
+    const { responses, unreached } = await runProbes(parsed.origin, probeKeysFor(include));
+    const results = runChecks({ origin: parsed.origin, responses }, { include });
+    const scan: ScanResponse = {
       ok: true,
       origin: parsed.origin,
       scannedAt: Date.now(),
@@ -32,6 +39,15 @@ async function handleScan(origin: string): Promise<ScanResponse> {
       unreachedProbes: unreached,
       session: 'unknown',
     };
+    // single write point: history is recorded only for saved sites (privacy
+    // rule). Best-effort — a storage failure (e.g. quota) must never turn a
+    // successful scan into a UI error.
+    try {
+      await store.appendSnapshot(parsed.origin, snapshotFromScan(scan));
+    } catch (error) {
+      console.warn('[agent-readiness] history write failed', error);
+    }
+    return scan;
   } finally {
     clearInterval(keepalive);
   }

@@ -49,6 +49,11 @@ export function defaultCheckIds(): CheckId[] {
   return MATRIX.filter((m) => m.defaultEnabled).map((m) => m.id);
 }
 
+/** Default set adjusted by user toggles (settings.checkOverrides, M2). */
+export function resolveCheckIds(overrides?: Partial<Record<CheckId, boolean>>): CheckId[] {
+  return MATRIX.filter((m) => overrides?.[m.id] ?? m.defaultEnabled).map((m) => m.id);
+}
+
 export interface RunOptions {
   /** Explicit check selection; defaults to all default-enabled checks. */
   include?: readonly CheckId[];

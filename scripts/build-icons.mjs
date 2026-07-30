@@ -28,6 +28,9 @@ const ICONS = {
   'chevron-down': 'chevron-down',
   'chevron-up': 'chevron-up',
   theme: 'theme-light-dark',
+  save: 'bookmark-plus-outline',
+  saved: 'bookmark-check',
+  dashboard: 'view-dashboard-outline',
 };
 
 const ROOT = process.cwd();

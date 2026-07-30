@@ -11,6 +11,7 @@ import { svg301Logo } from '@/shared/brand';
 import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
 import type { ScanResponse, ScanSuccess } from '@/shared/messaging';
+import { storage } from '@/shared/storage';
 import { getStoreInfo } from '@/shared/store-links';
 import { initTheme, toggleTheme } from '@/shared/theme';
 
@@ -216,6 +217,29 @@ async function scan(): Promise<void> {
   }
 }
 
+// ---- Save-site toggle (history is recorded only for saved sites, spec M2) ----
+
+async function renderSaveButton(): Promise<void> {
+  const btn = $('save-site');
+  if (!currentOrigin) {
+    btn.hidden = true;
+    return;
+  }
+  const saved = await (await storage()).isSaved(currentOrigin);
+  btn.replaceChildren(icon(saved ? 'saved' : 'save', 16));
+  btn.title = t(saved ? 'savedSite' : 'saveSite');
+  btn.classList.toggle('icon-btn--active', saved);
+  btn.hidden = false;
+}
+
+$('save-site').addEventListener('click', async () => {
+  if (!currentOrigin) return;
+  const store = await storage();
+  if (await store.isSaved(currentOrigin)) await store.removeSite(currentOrigin);
+  else await store.addSite(currentOrigin);
+  await renderSaveButton();
+});
+
 async function bootstrap(): Promise<void> {
   currentOrigin = await resolveTargetOrigin();
   if (!currentOrigin) {
@@ -225,6 +249,7 @@ async function bootstrap(): Promise<void> {
     return;
   }
   $('target-origin').textContent = currentOrigin.replace(/^https?:\/\//, '');
+  await renderSaveButton();
   await scan();
 }
 
