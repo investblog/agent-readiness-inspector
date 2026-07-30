@@ -70,6 +70,26 @@
         </section>
 
         <section class="settings-block">
+          <h2 data-i18n="settingsWatch">Watch mode</h2>
+          <p class="settings-hint" data-i18n="settingsWatchHint">
+            Watched sites are rescanned on a schedule; you are told when a check that used to pass starts
+            failing. Everything stays local.
+          </p>
+          <div class="watch-settings">
+            <label class="toggle">
+              <span data-i18n="watchInterval">Rescan every</span>
+              <input id="watch-interval" type="number" min="1" max="168" step="1" />
+              <span data-i18n="watchIntervalUnit">hours</span>
+            </label>
+            <label class="toggle">
+              <input id="watch-notify" type="checkbox" />
+              <span data-i18n="watchNotify">Notify me about regressions</span>
+            </label>
+            <span id="watch-permission" class="settings-hint" hidden></span>
+          </div>
+        </section>
+
+        <section class="settings-block">
           <h2 data-i18n="settingsCf">Cloudflare account (optional)</h2>
           <p class="settings-hint" data-i18n="settingsCfHint">
             Lets you run an external scan through Cloudflare's URL Scanner and compare it with the in-browser

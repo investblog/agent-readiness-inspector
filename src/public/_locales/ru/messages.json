@@ -409,5 +409,73 @@
 	},
 	"cfError_cancelled": {
 		"message": "Внешний скан отменён"
+	},
+	"settingsWatch": {
+		"message": "Режим наблюдения"
+	},
+	"settingsWatchHint": {
+		"message": "Отмеченные сайты пересканируются по расписанию; вы узнаете, когда проверка, которая проходила, начнёт падать. Всё остаётся локально."
+	},
+	"watchInterval": {
+		"message": "Пересканировать каждые"
+	},
+	"watchIntervalUnit": {
+		"message": "ч"
+	},
+	"watchNotify": {
+		"message": "Уведомлять о регрессах"
+	},
+	"watchPermissionMissing": {
+		"message": "Для уведомлений нужно ещё одно разрешение — включите наблюдение за сайтом и разрешите по запросу."
+	},
+	"watchOnAction": {
+		"message": "Наблюдаю — пересканирую по расписанию"
+	},
+	"watchOffAction": {
+		"message": "Наблюдать за регрессами"
+	},
+	"watchEnabledNote": {
+		"message": "Наблюдаю за сайтом."
+	},
+	"watchDisabledNote": {
+		"message": "Наблюдение выключено."
+	},
+	"alertTitle": {
+		"message": "Готовность к агентам упала: $HOST$",
+		"placeholders": {
+			"host": {
+				"content": "$1"
+			}
+		}
+	},
+	"alertChecksRegressed": {
+		"message": "Проверок стало падать: $COUNT$ — $CHECKS$",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			},
+			"checks": {
+				"content": "$2"
+			}
+		}
+	},
+	"alertLevelDropped": {
+		"message": "Уровень готовности упал на $DELTA$",
+		"placeholders": {
+			"delta": {
+				"content": "$1"
+			}
+		}
+	},
+	"regressionBadge": {
+		"message": "регресс"
+	},
+	"regressionBadgeTitle": {
+		"message": "Проверки, начавшие падать с последнего алерта: $CHECKS$",
+		"placeholders": {
+			"checks": {
+				"content": "$1"
+			}
+		}
 	}
 }

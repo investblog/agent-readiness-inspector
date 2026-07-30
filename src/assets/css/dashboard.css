@@ -422,3 +422,38 @@ body {
 .diff-row .btn {
   margin-top: var(--space-2);
 }
+
+/* ---- Watch settings ---- */
+
+.watch-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.watch-settings input[type='number'] {
+  width: 64px;
+  padding: 2px var(--space-2);
+  border: var(--border-width) var(--border-style) var(--input-border, var(--border-strong));
+  border-radius: var(--radius);
+  background: var(--input-bg, var(--bg));
+  color: var(--text);
+  font: inherit;
+}
+
+.icon-btn--active {
+  color: var(--primary);
+}
+
+.regression-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}

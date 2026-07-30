@@ -35,6 +35,8 @@ const ICONS = {
   add: 'plus',
   tabs: 'tab-plus',
   close: 'close',
+  watchOn: 'bell-ring-outline',
+  watchOff: 'bell-off-outline',
 };
 
 const ROOT = process.cwd();

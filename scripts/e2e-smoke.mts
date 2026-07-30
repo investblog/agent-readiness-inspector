@@ -99,6 +99,57 @@ try {
     await page.close();
   }
 
+  // ---- Watch scenario (M3): a planted baseline must produce a regression alert ----
+  {
+    const page = await ctx.newPage();
+    await page.goto(`chrome-extension://${extensionId}/dashboard.html`);
+    try {
+      await page.waitForSelector('#sites-body tr', { timeout: 10_000 });
+      // watch toggle is the 2nd action button in the row
+      await page.click('#sites-body tr:first-child td.col-actions button:nth-child(2)');
+      await page.waitForTimeout(800);
+
+      const origin = await page.getAttribute('#sites-body tr:first-child', 'data-origin');
+      const alarm = await worker.evaluate(async () => {
+        const a = await chrome.alarms.get('agent-readiness:watch');
+        return a ? a.periodInMinutes : null;
+      });
+
+      // plant a perfect past so the next real scan is unambiguously a regression
+      await worker.evaluate(async (target) => {
+        await chrome.storage.local.set({
+          [`history:${target}`]: [
+            {
+              scannedAt: Date.now() - 86_400_000,
+              composite: 100,
+              level: 5,
+              statuses: { robotsTxt: 'pass', authMd: 'pass', oauthDiscovery: 'pass' },
+            },
+          ],
+        });
+        await chrome.alarms.create('agent-readiness:watch', { when: Date.now() + 1000 });
+      }, origin);
+
+      let signature: string | undefined;
+      const deadline = Date.now() + 120_000;
+      while (Date.now() < deadline && !signature) {
+        await page.waitForTimeout(3000);
+        signature = await worker.evaluate(async (target) => {
+          const { sites } = await chrome.storage.local.get('sites');
+          return sites?.[target as string]?.lastAlertSignature || undefined;
+        }, origin);
+      }
+
+      const ok = alarm !== null && Boolean(signature);
+      if (!ok) failures += 1;
+      console.log(`[smoke] ${ok ? 'OK  ' : 'FAIL'} watch: alarm=${alarm}min regression="${signature ?? 'none'}"`);
+    } catch (error) {
+      failures += 1;
+      console.error(`[smoke] FAIL watch: ${(error as Error).message}`);
+    }
+    await page.close();
+  }
+
   if (failures > 0) {
     console.error(`[smoke] ${failures} target(s) failed`);
     process.exitCode = 1;

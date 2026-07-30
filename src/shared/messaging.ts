@@ -39,6 +39,19 @@ export interface ScanFailure {
 
 export type ScanResponse = ScanSuccess | ScanFailure;
 
+/**
+ * Asks the background to re-read watch settings and fix its alarm. The
+ * background owns the alarm outright — two contexts creating/clearing it can
+ * race and silently kill watch mode.
+ */
+export interface RescheduleWatchRequest {
+  type: 'rescheduleWatch';
+}
+
+export function isRescheduleWatchRequest(msg: unknown): msg is RescheduleWatchRequest {
+  return typeof msg === 'object' && msg !== null && (msg as { type?: unknown }).type === 'rescheduleWatch';
+}
+
 export function isScanRequest(msg: unknown): msg is ScanRequest {
   return (
     typeof msg === 'object' &&

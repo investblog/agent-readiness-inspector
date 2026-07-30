@@ -8,6 +8,12 @@ the revised spec). This file is the index.
       evidence checklist, fix-prompt copy; live smoke green (spintax 75/L4,
       soft-404 exemplar 0/L0) — DONE 2026-07-30
 - [ ] M1.5 — store beta: own icons, privacy policy, listing, Chrome + AMO submit
+      - [x] Privacy policy drafted: docs/privacy-policy.md (needs a public URL)
+      - [x] Icon candidates rendered at 16/32/48/128 on both themes:
+        `npx tsx scripts/make-icon-candidates.mts` → dev/icons/contact-sheet.png
+        (recommendation: agentEye — holds up at 16px and matches the "see what
+        agents see" positioning; runner-up: level)
+      - [ ] PICK an icon, then wire the winner's SVG into src/public/icons/*.png
       - [ ] Firefox UX debt: host permissions are opt-in there → tab.url is
         undefined until granted; add permissions.request() flow + FF-specific
         error copy before AMO submit (M1-b review)

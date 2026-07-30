@@ -200,14 +200,18 @@ export class StorageLayer {
     });
   }
 
-  /** Records that a regression was announced, so it is not repeated. */
-  markAlerted(origin: string, signature: string, at: number = Date.now()): Promise<void> {
+  /**
+   * Records that a regression was announced, so it is not repeated.
+   * `at` is omitted when clearing after a recovery: `lastAlertAt` must keep
+   * meaning "when we last alerted", not "when we last looked".
+   */
+  markAlerted(origin: string, signature: string, at?: number): Promise<void> {
     return this.enqueue(async () => {
       const sites = await this.getSites();
       const site = sites[origin];
       if (!site) return;
       site.lastAlertSignature = signature;
-      site.lastAlertAt = at;
+      if (at !== undefined) site.lastAlertAt = at;
       await this.area.set({ [KEY_SITES]: sites });
     });
   }

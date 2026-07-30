@@ -21,5 +21,7 @@ export const ICON_NAMES = [
   'add',
   'tabs',
   'close',
+  'watchOn',
+  'watchOff',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];

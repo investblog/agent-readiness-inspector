@@ -409,5 +409,73 @@
 	},
 	"cfError_cancelled": {
 		"message": "External scan cancelled"
+	},
+	"settingsWatch": {
+		"message": "Watch mode"
+	},
+	"settingsWatchHint": {
+		"message": "Watched sites are rescanned on a schedule; you are told when a check that used to pass starts failing. Everything stays local."
+	},
+	"watchInterval": {
+		"message": "Rescan every"
+	},
+	"watchIntervalUnit": {
+		"message": "hours"
+	},
+	"watchNotify": {
+		"message": "Notify me about regressions"
+	},
+	"watchPermissionMissing": {
+		"message": "Notifications need one more permission — toggle watch on a site and allow it when asked."
+	},
+	"watchOnAction": {
+		"message": "Watching — rescanned on schedule"
+	},
+	"watchOffAction": {
+		"message": "Watch this site for regressions"
+	},
+	"watchEnabledNote": {
+		"message": "Watching this site."
+	},
+	"watchDisabledNote": {
+		"message": "Stopped watching this site."
+	},
+	"alertTitle": {
+		"message": "Agent readiness dropped: $HOST$",
+		"placeholders": {
+			"host": {
+				"content": "$1"
+			}
+		}
+	},
+	"alertChecksRegressed": {
+		"message": "$COUNT$ check(s) started failing: $CHECKS$",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			},
+			"checks": {
+				"content": "$2"
+			}
+		}
+	},
+	"alertLevelDropped": {
+		"message": "The readiness level dropped by $DELTA$",
+		"placeholders": {
+			"delta": {
+				"content": "$1"
+			}
+		}
+	},
+	"regressionBadge": {
+		"message": "regression"
+	},
+	"regressionBadgeTitle": {
+		"message": "Checks that started failing since the last alert: $CHECKS$",
+		"placeholders": {
+			"checks": {
+				"content": "$1"
+			}
+		}
 	}
 }

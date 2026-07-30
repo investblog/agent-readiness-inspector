@@ -196,6 +196,15 @@ function renderRow(origin: string, state: RowState, uiState: RowUi): HTMLTableRo
   const levelCell = document.createElement('td');
   levelCell.className = 'level-cell';
   levelCell.textContent = last ? `L${last.level}` : t('neverScanned');
+  // the plan's fallback surface: watch works without the notification
+  // permission, so an unresolved regression must be visible here too
+  if (state.meta.lastAlertSignature) {
+    const badge = document.createElement('span');
+    badge.className = 'regression-badge';
+    badge.textContent = t('regressionBadge');
+    badge.title = t('regressionBadgeTitle', state.meta.lastAlertSignature.split('|')[0] || '—');
+    levelCell.append(document.createTextNode(' '), badge);
+  }
   tr.append(levelCell);
 
   const lastCell = document.createElement('td');
@@ -221,6 +230,18 @@ function renderRow(origin: string, state: RowState, uiState: RowUi): HTMLTableRo
   remove.append(icon('remove', 15));
   remove.disabled = batchRunning; // predictable: no removals mid-batch
   remove.addEventListener('click', () => void removeSite(origin));
+  const watchBtn = document.createElement('button');
+  watchBtn.type = 'button';
+  watchBtn.className = 'icon-btn';
+  const watched = state.meta.watch === true;
+  watchBtn.title = t(watched ? 'watchOnAction' : 'watchOffAction');
+  watchBtn.setAttribute('aria-label', `${watchBtn.title} ${label}`);
+  watchBtn.setAttribute('aria-pressed', String(watched));
+  watchBtn.append(icon(watched ? 'watchOn' : 'watchOff', 15));
+  watchBtn.classList.toggle('icon-btn--active', watched);
+  watchBtn.disabled = batchRunning;
+  watchBtn.addEventListener('click', () => void toggleWatch(origin, !watched));
+
   const external = document.createElement('button');
   external.type = 'button';
   external.className = 'icon-btn';
@@ -230,7 +251,7 @@ function renderRow(origin: string, state: RowState, uiState: RowUi): HTMLTableRo
   external.disabled = Boolean(uiState.externalScanning) || batchRunning || !cfCreds;
   external.hidden = !cfCreds; // only meaningful once a token is connected
   external.addEventListener('click', () => void externalScan(origin));
-  actions.append(rescan, external, remove);
+  actions.append(rescan, watchBtn, external, remove);
   tr.append(actions);
 
   return tr;
@@ -536,6 +557,53 @@ async function addOpenTabs(): Promise<void> {
   renderTable();
 }
 
+// ---- Watch mode (spec §7) ----
+
+/** The background owns the alarm — ask it to re-read settings (no direct alarms call). */
+async function requestReschedule(): Promise<void> {
+  await browser.runtime.sendMessage({ type: 'rescheduleWatch' }).catch(() => {});
+}
+
+async function toggleWatch(origin: string, watch: boolean): Promise<void> {
+  const store = await storage();
+  await store.setWatch(origin, watch);
+  // schedule FIRST: the permission prompt is a modal that blocks this handler
+  // until the user answers, and watching must not depend on that answer
+  await requestReschedule();
+  await refreshRow(origin);
+  setToolbarNote(t(watch ? 'watchEnabledNote' : 'watchDisabledNote'));
+  if (watch) {
+    void ensureNotificationPermission().then(() => renderWatchSettings());
+  }
+}
+
+/** Asks for the optional permission from this user gesture (spec §10). */
+async function ensureNotificationPermission(): Promise<boolean> {
+  const { notify } = await (await storage()).getWatchSettings();
+  if (!notify) return false;
+  if (await browser.permissions.contains({ permissions: ['notifications'] })) return true;
+  try {
+    return await browser.permissions.request({ permissions: ['notifications'] });
+  } catch {
+    return false; // must be called from a gesture; never fatal
+  }
+}
+
+async function renderWatchSettings(): Promise<void> {
+  const store = await storage();
+  const { intervalHours, notify } = await store.getWatchSettings();
+  const interval = $('watch-interval') as HTMLInputElement;
+  const notifyBox = $('watch-notify') as HTMLInputElement;
+  interval.value = String(intervalHours);
+  notifyBox.checked = notify;
+
+  const granted = await browser.permissions.contains({ permissions: ['notifications'] });
+  const note = $('watch-permission');
+  // the checkbox alone would lie: notifications need the optional permission
+  note.hidden = !notify || granted;
+  note.textContent = t('watchPermissionMissing');
+}
+
 // ---- Settings: optional checks ----
 
 /** Checks worth exposing: the off-by-default ones plus anything the user turned off. */
@@ -663,6 +731,25 @@ $('batch-cancel').addEventListener('click', () => {
   batchCancelled = true;
 });
 
+($('watch-interval') as HTMLInputElement).addEventListener('change', async (event) => {
+  const input = event.target as HTMLInputElement;
+  const hours = Math.min(168, Math.max(1, Math.round(Number(input.value) || 24)));
+  input.value = String(hours);
+  const store = await storage();
+  await store.updateSettings({ watch: { ...(await store.getWatchSettings()), intervalHours: hours } });
+  await requestReschedule();
+  setToolbarNote(t('settingsSaved'));
+});
+
+($('watch-notify') as HTMLInputElement).addEventListener('change', async (event) => {
+  const checked = (event.target as HTMLInputElement).checked;
+  const store = await storage();
+  await store.updateSettings({ watch: { ...(await store.getWatchSettings()), notify: checked } });
+  if (checked) await ensureNotificationPermission();
+  await renderWatchSettings();
+  setToolbarNote(t('settingsSaved'));
+});
+
 $('cf-save').append(document.createTextNode(t('cfSave')));
 $('cf-clear').append(document.createTextNode(t('cfClear')));
 ($('cf-form') as HTMLFormElement).addEventListener('submit', (event) => {
@@ -674,6 +761,7 @@ $('cf-clear').addEventListener('click', () => void clearCfCreds());
 void (async () => {
   await loadCfCreds();
   await renderCheckToggles();
+  await renderWatchSettings();
   await loadState();
   renderTable();
 })();
