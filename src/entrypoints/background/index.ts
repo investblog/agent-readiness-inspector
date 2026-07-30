@@ -1,12 +1,13 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
+import type { CheckId } from '@/checks';
 import { resolveCheckIds, runChecks, scoreResults } from '@/checks';
 import { probeKeysFor, runProbes } from '@/probe/probe-layer';
 import { isScanRequest, type ScanResponse } from '@/shared/messaging';
 import { snapshotFromScan } from '@/shared/snapshots';
 import { storage } from '@/shared/storage';
 
-async function handleScan(origin: string): Promise<ScanResponse> {
+async function handleScan(origin: string, requestedInclude?: CheckId[]): Promise<ScanResponse> {
   let parsed: URL;
   try {
     parsed = new URL(origin);
@@ -23,10 +24,11 @@ async function handleScan(origin: string): Promise<ScanResponse> {
     void browser.runtime.getPlatformInfo?.().catch(() => {});
   }, 20_000);
   try {
-    // background is the single source of truth for the enabled-check set
+    // background is the single source of truth for the enabled-check set,
+    // unless the caller asks for an explicit one (external-scan diff)
     const store = await storage();
     const { checkOverrides } = await store.getSettings();
-    const include = resolveCheckIds(checkOverrides);
+    const include = requestedInclude ?? resolveCheckIds(checkOverrides);
 
     const { responses, unreached } = await runProbes(parsed.origin, probeKeysFor(include));
     const results = runChecks({ origin: parsed.origin, responses }, { include });
@@ -76,7 +78,7 @@ export default defineBackground(() => {
   // delivers its resolution as the response (async channel stays open)
   browser.runtime.onMessage.addListener((message: unknown): Promise<ScanResponse> | undefined => {
     if (!isScanRequest(message)) return undefined;
-    return handleScan(message.origin).catch(
+    return handleScan(message.origin, message.include).catch(
       (error: unknown): ScanResponse => ({
         ok: false,
         error: error instanceof Error ? error.message : String(error),

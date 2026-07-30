@@ -299,3 +299,126 @@ body {
 .dash-footer a:hover {
   color: var(--primary);
 }
+
+/* ---- Settings ---- */
+
+.settings {
+  border: var(--border-width) var(--border-style) var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  padding: var(--space-3) var(--space-4);
+}
+
+.settings > summary {
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+}
+
+.settings-block {
+  margin-top: var(--space-4);
+}
+
+.settings-block h2 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.settings-hint {
+  margin: 0 0 var(--space-2);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+
+.check-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+}
+
+.cf-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cf-form input {
+  flex: 1 1 220px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) var(--border-style) var(--input-border, var(--border-strong));
+  border-radius: var(--radius);
+  background: var(--input-bg, var(--bg));
+  color: var(--text);
+  font: inherit;
+}
+
+.cf-status {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.cf-status--ok {
+  color: var(--success);
+}
+
+.cf-status--error {
+  color: var(--danger);
+}
+
+/* ---- External-scan diff row ---- */
+
+.diff-row td {
+  background: var(--bg-soft);
+}
+
+.diff-head {
+  margin: 0 0 var(--space-2);
+  font-weight: var(--fw-medium);
+}
+
+.diff-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px 0;
+  font-size: var(--fs-xs);
+}
+
+.diff-name {
+  min-width: 180px;
+}
+
+.diff-verdicts {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.diff-reason {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.diff-icon--divergent {
+  color: var(--warning);
+}
+
+.diff-icon--expected,
+.diff-icon--onlyOurs,
+.diff-icon--onlyTheirs {
+  color: var(--muted);
+}
+
+.diff-row .btn {
+  margin-top: var(--space-2);
+}

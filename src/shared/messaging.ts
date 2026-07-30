@@ -2,12 +2,18 @@
 // origin. The engine runs in the background (single source of verdicts); the
 // panel only renders.
 
-import type { CheckResult, Scorecard } from '@/checks';
+import type { CheckId, CheckResult, Scorecard } from '@/checks';
 
 export interface ScanRequest {
   type: 'scan';
   /** http(s) origin to audit, e.g. https://example.com */
   origin: string;
+  /**
+   * Explicit check selection. Omit for the user's configured set (the normal
+   * case); the external-scan diff passes the full matrix so that checks CF
+   * reports are compared rather than showing up as "only theirs".
+   */
+  include?: CheckId[];
 }
 
 export interface ScanSuccess {

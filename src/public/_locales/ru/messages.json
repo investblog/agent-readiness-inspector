@@ -285,5 +285,129 @@
 	},
 	"noTabsToAdd": {
 		"message": "Нет вкладок для сканирования (откройте http(s)-страницу или выдайте доступ к сайтам в Firefox)."
+	},
+	"settingsTitle": {
+		"message": "Настройки"
+	},
+	"settingsChecks": {
+		"message": "Опциональные проверки"
+	},
+	"settingsChecksHint": {
+		"message": "Выключенные по умолчанию проверки повторяют тул Cloudflare. Включение влияет на все сканы."
+	},
+	"settingsSaved": {
+		"message": "Настройки сохранены."
+	},
+	"settingsCf": {
+		"message": "Аккаунт Cloudflare (опционально)"
+	},
+	"settingsCfHint": {
+		"message": "Позволяет запустить внешний скан через URL Scanner Cloudflare и сравнить его с результатом из браузера. Вставьте токен или целиком тестовый curl со страницы токена. Хранится локально в браузере (без шифрования), уходит только на api.cloudflare.com."
+	},
+	"cfAccountPlaceholder": {
+		"message": "Account ID"
+	},
+	"cfTokenPlaceholder": {
+		"message": "API-токен (URL Scanner: Edit)"
+	},
+	"cfSave": {
+		"message": "Проверить и сохранить"
+	},
+	"cfClear": {
+		"message": "Отключить"
+	},
+	"cfVerifying": {
+		"message": "Проверяю токен…"
+	},
+	"cfConnected": {
+		"message": "Подключено — внешний скан доступен для сохранённых сайтов."
+	},
+	"cfCleared": {
+		"message": "Данные удалены."
+	},
+	"cfInvalidAccount": {
+		"message": "Account ID — это 32 hex-символа."
+	},
+	"cfInvalidToken": {
+		"message": "API-токен выглядит слишком коротким."
+	},
+	"externalScanAction": {
+		"message": "Внешний скан (Cloudflare URL Scanner)"
+	},
+	"externalScanRunning": {
+		"message": "Сканирую со стороны Cloudflare — это занимает до минуты…"
+	},
+	"diffSummary": {
+		"message": "Cloudflare видит уровень $LEVEL_NUM$ ($LEVEL$) · необъяснённых расхождений: $COUNT$",
+		"placeholders": {
+			"level": {
+				"content": "$1"
+			},
+			"level_num": {
+				"content": "$2"
+			},
+			"count": {
+				"content": "$3"
+			}
+		}
+	},
+	"diffVerdicts": {
+		"message": "здесь: $OURS$ · снаружи: $THEIRS$",
+		"placeholders": {
+			"ours": {
+				"content": "$1"
+			},
+			"theirs": {
+				"content": "$2"
+			}
+		}
+	},
+	"diffAllMatch": {
+		"message": "Все проверки совпадают с внешним сканом."
+	},
+	"diffClose": {
+		"message": "Закрыть"
+	},
+	"diffReasonDns": {
+		"message": "ожидаемо: DNS-записи из браузера не пробить"
+	},
+	"diffReasonWebMcp": {
+		"message": "ожидаемо: детект на странице требует открытой вкладки"
+	},
+	"diffReasonMcp": {
+		"message": "ожидаемо: мы принимаем формы MCP-карт, встречающиеся в поле"
+	},
+	"diffReasonA2a": {
+		"message": "ожидаемо: мы читаем и legacy-путь agent.json"
+	},
+	"cfTokenStored": {
+		"message": "токен сохранён — оставьте пустым, чтобы не менять"
+	},
+	"cfError_tokenRejected": {
+		"message": "Cloudflare отклонил токен — проверьте права (URL Scanner: Edit)"
+	},
+	"cfError_verifyFailed": {
+		"message": "Не удалось проверить токен"
+	},
+	"cfError_rateLimited": {
+		"message": "Лимит Cloudflare — подождите несколько секунд и повторите"
+	},
+	"cfError_submitFailed": {
+		"message": "Не удалось запустить внешний скан"
+	},
+	"cfError_noUuid": {
+		"message": "Cloudflare принял скан, но не вернул идентификатор"
+	},
+	"cfError_resultFailed": {
+		"message": "Не удалось получить результат скана"
+	},
+	"cfError_noReadiness": {
+		"message": "Скан завершился без данных agent-readiness"
+	},
+	"cfError_timedOut": {
+		"message": "Внешний скан занял слишком много времени"
+	},
+	"cfError_cancelled": {
+		"message": "Внешний скан отменён"
 	}
 }

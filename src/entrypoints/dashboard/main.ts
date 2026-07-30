@@ -8,7 +8,19 @@
 import '@/assets/css/theme.css';
 import '@/assets/css/dashboard.css';
 import { browser } from 'wxt/browser';
+import type { CheckId, CheckResult } from '@/checks';
+import { MATRIX } from '@/checks';
 import { svg301Logo } from '@/shared/brand';
+import {
+  CfApiError,
+  type CfCredentials,
+  isValidAccountId,
+  isValidToken,
+  parseCurlCredentials,
+  runExternalScan,
+  verifyToken,
+} from '@/shared/cf-api';
+import { type DiffRow, diffScans } from '@/shared/diff';
 import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
 import type { ScanResponse } from '@/shared/messaging';
@@ -89,14 +101,37 @@ function bandFor(composite: number): 'good' | 'mid' | 'low' {
 
 // ---- Table rendering ----
 
+/** Persisted per-site data — always re-read from storage. */
 interface RowState {
   meta: SiteMeta;
   history: ScanSnapshot[];
+}
+
+/**
+ * Transient per-row UI state. Kept in its OWN map on purpose: it used to live
+ * on RowState, and a storage refresh silently wiped it (the external diff was
+ * discarded microseconds after being computed). Storage refreshes may not
+ * touch this map, so no future field can be forgotten again.
+ */
+interface RowUi {
   scanning?: boolean;
   error?: string;
+  diff?: { rows: DiffRow[]; level: number; levelName: string; divergences: number };
+  externalScanning?: boolean;
+  externalError?: string;
 }
 
 const rows = new Map<string, RowState>();
+const rowUi = new Map<string, RowUi>();
+
+function ui(origin: string): RowUi {
+  let state = rowUi.get(origin);
+  if (!state) {
+    state = {};
+    rowUi.set(origin, state);
+  }
+  return state;
+}
 
 async function loadState(): Promise<void> {
   const store = await storage();
@@ -105,9 +140,12 @@ async function loadState(): Promise<void> {
   for (const [origin, meta] of Object.entries(sites)) {
     rows.set(origin, { meta, history: await store.getHistory(origin) });
   }
+  for (const origin of [...rowUi.keys()]) {
+    if (!rows.has(origin)) rowUi.delete(origin); // drop UI state of removed sites
+  }
 }
 
-function renderRow(origin: string, state: RowState): HTMLTableRowElement {
+function renderRow(origin: string, state: RowState, uiState: RowUi): HTMLTableRowElement {
   const tr = document.createElement('tr');
   tr.dataset.origin = origin;
 
@@ -137,12 +175,12 @@ function renderRow(origin: string, state: RowState): HTMLTableRowElement {
 
   const scoreCell = document.createElement('td');
   const last = state.history.at(-1);
-  if (state.scanning) {
+  if (uiState.scanning) {
     scoreCell.append(Object.assign(document.createElement('span'), { className: 'row-spinner' }));
-  } else if (state.error) {
+  } else if (uiState.error) {
     const err = document.createElement('span');
     err.className = 'row-error';
-    err.title = state.error;
+    err.title = uiState.error;
     err.textContent = t('scanFailedShort');
     scoreCell.append(err);
   } else if (last) {
@@ -173,7 +211,7 @@ function renderRow(origin: string, state: RowState): HTMLTableRowElement {
   rescan.title = t('rescan');
   rescan.setAttribute('aria-label', `${t('rescan')} ${label}`); // icon-only: name it
   rescan.append(icon('scan', 15));
-  rescan.disabled = Boolean(state.scanning) || batchRunning;
+  rescan.disabled = Boolean(uiState.scanning) || batchRunning;
   rescan.addEventListener('click', () => void scanOne(origin));
   const remove = document.createElement('button');
   remove.type = 'button';
@@ -183,9 +221,100 @@ function renderRow(origin: string, state: RowState): HTMLTableRowElement {
   remove.append(icon('remove', 15));
   remove.disabled = batchRunning; // predictable: no removals mid-batch
   remove.addEventListener('click', () => void removeSite(origin));
-  actions.append(rescan, remove);
+  const external = document.createElement('button');
+  external.type = 'button';
+  external.className = 'icon-btn';
+  external.title = t('externalScanAction');
+  external.setAttribute('aria-label', `${t('externalScanAction')} ${label}`);
+  external.append(icon('external', 15));
+  external.disabled = Boolean(uiState.externalScanning) || batchRunning || !cfCreds;
+  external.hidden = !cfCreds; // only meaningful once a token is connected
+  external.addEventListener('click', () => void externalScan(origin));
+  actions.append(rescan, external, remove);
   tr.append(actions);
 
+  return tr;
+}
+
+// ---- External scan diff row (spec §5: inside vs outside) ----
+
+const DIFF_KIND_ICON = { match: 'pass', expected: 'na', divergent: 'warn', onlyOurs: 'na', onlyTheirs: 'na' } as const;
+
+function diffRowElement(origin: string, uiState: RowUi): HTMLTableRowElement {
+  const tr = document.createElement('tr');
+  tr.className = 'diff-row';
+  const cell = document.createElement('td');
+  cell.colSpan = 6;
+
+  if (uiState.externalScanning) {
+    cell.append(Object.assign(document.createElement('span'), { className: 'row-spinner' }));
+    cell.append(document.createTextNode(` ${t('externalScanRunning')}`));
+    tr.append(cell);
+    return tr;
+  }
+  if (uiState.externalError) {
+    const err = document.createElement('p');
+    err.className = 'row-error';
+    err.textContent = uiState.externalError;
+    cell.append(err);
+    tr.append(cell);
+    return tr;
+  }
+
+  const diff = uiState.diff;
+  if (!diff) {
+    tr.append(cell);
+    return tr;
+  }
+
+  const head = document.createElement('p');
+  head.className = 'diff-head';
+  head.textContent = t('diffSummary', diff.levelName, String(diff.level), String(diff.divergences));
+  cell.append(head);
+
+  const interesting = diff.rows.filter((r) => r.kind !== 'match');
+  if (interesting.length === 0) {
+    const allMatch = document.createElement('p');
+    allMatch.className = 'settings-hint';
+    allMatch.textContent = t('diffAllMatch');
+    cell.append(allMatch);
+  }
+  for (const row of interesting) {
+    const item = document.createElement('div');
+    item.className = `diff-item diff-item--${row.kind}`;
+    const status = icon(DIFF_KIND_ICON[row.kind], 14);
+    status.classList.add(`diff-icon--${row.kind}`);
+    const name = document.createElement('span');
+    name.className = 'diff-name';
+    // an id we don't know (CF added a check) must not render as a raw i18n key
+    const localized = t(`check_${row.id}`);
+    name.textContent = localized === `check_${row.id}` ? row.id : localized;
+    const verdicts = document.createElement('span');
+    verdicts.className = 'diff-verdicts';
+    verdicts.textContent = t('diffVerdicts', row.ours ?? '—', row.theirs ?? '—');
+    item.append(status, name, verdicts);
+    if (row.reasonKey) {
+      const reason = document.createElement('span');
+      reason.className = 'diff-reason';
+      reason.textContent = t(row.reasonKey);
+      item.append(reason);
+    }
+    cell.append(item);
+  }
+
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'btn btn--small';
+  close.append(icon('close', 12), document.createTextNode(t('diffClose')));
+  close.addEventListener('click', () => {
+    const state = ui(origin);
+    state.diff = undefined;
+    state.externalError = undefined;
+    renderTable();
+  });
+  cell.append(close);
+
+  tr.append(cell);
   return tr;
 }
 
@@ -195,7 +324,12 @@ function renderTable(): void {
   const origins = [...rows.keys()].sort();
   for (const origin of origins) {
     const state = rows.get(origin);
-    if (state) body.append(renderRow(origin, state));
+    if (!state) continue;
+    const uiState = ui(origin);
+    body.append(renderRow(origin, state, uiState));
+    if (uiState.diff || uiState.externalScanning || uiState.externalError) {
+      body.append(diffRowElement(origin, uiState));
+    }
   }
   ($('sites-table') as HTMLElement).hidden = origins.length === 0;
   $('empty-state').hidden = origins.length > 0;
@@ -211,16 +345,10 @@ async function refreshRow(origin: string): Promise<void> {
     const meta = sites[origin];
     if (!meta) {
       rows.delete(origin);
+      rowUi.delete(origin);
     } else {
-      const previous = rows.get(origin);
-      // keep transient row state: a concurrent refresh must not clear a spinner
-      // and re-enable rescan mid-scan (would allow a duplicate scan)
-      rows.set(origin, {
-        meta,
-        history: await store.getHistory(origin),
-        error: previous?.error,
-        scanning: previous?.scanning,
-      });
+      // storage data only — transient UI state lives in rowUi and is untouched
+      rows.set(origin, { meta, history: await store.getHistory(origin) });
     }
   } catch (error) {
     console.warn('[agent-readiness] row refresh failed', error);
@@ -229,8 +357,8 @@ async function refreshRow(origin: string): Promise<void> {
 }
 
 async function scanOne(origin: string): Promise<void> {
-  const state = rows.get(origin);
-  if (!state || state.scanning) return;
+  const state = ui(origin);
+  if (!rows.has(origin) || state.scanning) return;
   state.scanning = true;
   state.error = undefined;
   renderTable();
@@ -239,13 +367,75 @@ async function scanOne(origin: string): Promise<void> {
     if (!response || !('ok' in response)) throw new Error('no response from background');
     if (!response.ok) throw new Error(response.error);
   } catch (error) {
-    const current = rows.get(origin);
-    if (current) current.error = error instanceof Error ? error.message : String(error);
+    ui(origin).error = error instanceof Error ? error.message : String(error);
   } finally {
-    const current = rows.get(origin);
-    if (current) current.scanning = false;
+    ui(origin).scanning = false;
     await refreshRow(origin);
   }
+}
+
+// ---- External scan (official URL Scanner, spec §5/§8.1) ----
+
+/** Localized wording for CF failures; the English detail stays as the title. */
+function describeCfError(error: unknown): string {
+  if (error instanceof CfApiError) {
+    const localized = t(`cfError_${error.code}`);
+    return localized === `cfError_${error.code}` ? error.message : `${localized} (${error.message})`;
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
+let cfCreds: CfCredentials | null = null;
+/** Free tier allows one scan per 10s — serialize and space submissions. */
+const EXTERNAL_MIN_INTERVAL_MS = 10_000;
+let lastExternalScanAt = 0;
+let externalQueue: Promise<unknown> = Promise.resolve();
+
+async function externalScan(origin: string): Promise<void> {
+  const state = ui(origin);
+  if (!rows.has(origin) || !cfCreds || state.externalScanning) return;
+  state.externalScanning = true;
+  state.externalError = undefined;
+  state.diff = undefined;
+  renderTable();
+
+  const task = async (): Promise<void> => {
+    const creds = cfCreds;
+    if (!creds || !rows.has(origin)) return;
+    try {
+      const wait = lastExternalScanAt + EXTERNAL_MIN_INTERVAL_MS - Date.now();
+      if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+      lastExternalScanAt = Date.now();
+
+      const readiness = await runExternalScan(creds, origin);
+      // compare against a fresh local run over the FULL matrix (same basis as
+      // scripts/calibrate.mts) so off-by-default checks CF reports are compared
+      // rather than surfacing as "only theirs"
+      const response = (await browser.runtime.sendMessage({
+        type: 'scan',
+        origin,
+        include: MATRIX.map((m) => m.id),
+      })) as { ok: true; results: CheckResult[] } | { ok: false; error: string };
+      if (!response.ok) throw new Error(response.error);
+      const summary = diffScans(response.results, readiness);
+      ui(origin).diff = {
+        rows: summary.rows,
+        level: readiness.level,
+        levelName: readiness.levelName,
+        divergences: summary.divergences,
+      };
+    } catch (error) {
+      ui(origin).externalError = describeCfError(error);
+    } finally {
+      ui(origin).externalScanning = false;
+      await refreshRow(origin);
+    }
+  };
+  // run on both settle paths so one failure can never poison the chain
+  // (same guard as StorageLayer.enqueue)
+  const next = externalQueue.then(task, task);
+  externalQueue = next.catch(() => {});
+  await next;
 }
 
 // ---- Batch (page-orchestrated: concurrency 2, politeness stagger) ----
@@ -324,6 +514,7 @@ async function addOrigin(origin: string): Promise<void> {
 async function removeSite(origin: string): Promise<void> {
   await (await storage()).removeSite(origin);
   rows.delete(origin);
+  rowUi.delete(origin);
   renderTable();
 }
 
@@ -342,6 +533,99 @@ async function addOpenTabs(): Promise<void> {
   const store = await storage();
   for (const origin of origins) await store.addSite(origin);
   await loadState(); // one storage round-trip + one rebuild, not one per tab
+  renderTable();
+}
+
+// ---- Settings: optional checks ----
+
+/** Checks worth exposing: the off-by-default ones plus anything the user turned off. */
+async function renderCheckToggles(): Promise<void> {
+  const store = await storage();
+  const { checkOverrides = {} } = await store.getSettings();
+  const container = $('check-toggles');
+  container.replaceChildren();
+
+  const optional = MATRIX.filter((m) => !m.defaultEnabled || checkOverrides[m.id] === false);
+  for (const meta of optional) {
+    const label = document.createElement('label');
+    label.className = 'toggle';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = checkOverrides[meta.id] ?? meta.defaultEnabled;
+    input.addEventListener('change', async () => {
+      const settings = await (await storage()).getSettings();
+      const overrides = { ...settings.checkOverrides };
+      if (input.checked === meta.defaultEnabled) delete overrides[meta.id as CheckId];
+      else overrides[meta.id as CheckId] = input.checked;
+      await (await storage()).updateSettings({ checkOverrides: overrides });
+      setToolbarNote(t('settingsSaved'));
+      await renderCheckToggles(); // list membership depends on the overrides
+    });
+    const text = document.createElement('span');
+    text.textContent = t(`check_${meta.id}`);
+    label.append(input, text);
+    container.append(label);
+  }
+}
+
+// ---- Settings: Cloudflare credentials ----
+
+function setCfStatus(message: string, kind: 'ok' | 'error' | 'info' = 'info'): void {
+  const el = $('cf-status');
+  el.textContent = message;
+  el.className = `cf-status cf-status--${kind}`;
+  el.hidden = false;
+}
+
+async function loadCfCreds(): Promise<void> {
+  const { cfAccountId, cfToken } = await (await storage()).getSettings();
+  cfCreds = cfAccountId && cfToken ? { accountId: cfAccountId, token: cfToken } : null;
+  ($('cf-account') as HTMLInputElement).value = cfAccountId ?? '';
+  // leave the token field EMPTY when one is stored: pre-filling dots would make
+  // the field fail validation on any later save (e.g. fixing the account id)
+  const tokenInput = $('cf-token') as HTMLInputElement;
+  tokenInput.value = '';
+  tokenInput.placeholder = cfToken ? t('cfTokenStored') : t('cfTokenPlaceholder');
+  $('cf-clear').hidden = !cfCreds;
+  if (cfCreds) setCfStatus(t('cfConnected'), 'ok');
+}
+
+async function saveCfCreds(): Promise<void> {
+  const accountInput = $('cf-account') as HTMLInputElement;
+  const tokenInput = $('cf-token') as HTMLInputElement;
+
+  // a pasted test-curl fills both fields at once (301-ui pattern)
+  const pasted = parseCurlCredentials(`${accountInput.value}\n${tokenInput.value}`);
+  if (pasted) {
+    accountInput.value = pasted.accountId;
+    tokenInput.value = pasted.token;
+  }
+  const accountId = accountInput.value.trim();
+  const stored = await (await storage()).getSettings();
+  // an empty field means "keep the stored token" (it is never rendered back)
+  const token = tokenInput.value.trim() || stored.cfToken || '';
+  if (!isValidAccountId(accountId)) return setCfStatus(t('cfInvalidAccount'), 'error');
+  if (!isValidToken(token)) return setCfStatus(t('cfInvalidToken'), 'error');
+
+  setCfStatus(t('cfVerifying'));
+  try {
+    await verifyToken(token);
+    await (await storage()).updateSettings({ cfAccountId: accountId, cfToken: token });
+    await loadCfCreds();
+    setCfStatus(t('cfConnected'), 'ok');
+    renderTable(); // external-scan buttons appear
+  } catch (error) {
+    setCfStatus(describeCfError(error), 'error');
+  }
+}
+
+async function clearCfCreds(): Promise<void> {
+  await (await storage()).updateSettings({ cfAccountId: undefined, cfToken: undefined });
+  cfCreds = null;
+  ($('cf-account') as HTMLInputElement).value = '';
+  ($('cf-token') as HTMLInputElement).value = '';
+  $('cf-clear').hidden = true;
+  setCfStatus(t('cfCleared'), 'info');
   renderTable();
 }
 
@@ -379,7 +663,17 @@ $('batch-cancel').addEventListener('click', () => {
   batchCancelled = true;
 });
 
+$('cf-save').append(document.createTextNode(t('cfSave')));
+$('cf-clear').append(document.createTextNode(t('cfClear')));
+($('cf-form') as HTMLFormElement).addEventListener('submit', (event) => {
+  event.preventDefault();
+  void saveCfCreds();
+});
+$('cf-clear').addEventListener('click', () => void clearCfCreds());
+
 void (async () => {
+  await loadCfCreds();
+  await renderCheckToggles();
   await loadState();
   renderTable();
 })();

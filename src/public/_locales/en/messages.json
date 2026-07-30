@@ -285,5 +285,129 @@
 	},
 	"noTabsToAdd": {
 		"message": "No scannable tabs found (open an http(s) page, or grant site access in Firefox)."
+	},
+	"settingsTitle": {
+		"message": "Settings"
+	},
+	"settingsChecks": {
+		"message": "Optional checks"
+	},
+	"settingsChecksHint": {
+		"message": "Off-by-default checks mirror Cloudflare's tool. Turning one on affects every scan."
+	},
+	"settingsSaved": {
+		"message": "Settings saved."
+	},
+	"settingsCf": {
+		"message": "Cloudflare account (optional)"
+	},
+	"settingsCfHint": {
+		"message": "Lets you run an external scan through Cloudflare's URL Scanner and compare it with the in-browser result. Paste a token, or the whole test curl from the token page. Stored locally in your browser (unencrypted), sent only to api.cloudflare.com."
+	},
+	"cfAccountPlaceholder": {
+		"message": "Account ID"
+	},
+	"cfTokenPlaceholder": {
+		"message": "API token (URL Scanner: Edit)"
+	},
+	"cfSave": {
+		"message": "Verify & save"
+	},
+	"cfClear": {
+		"message": "Disconnect"
+	},
+	"cfVerifying": {
+		"message": "Verifying token…"
+	},
+	"cfConnected": {
+		"message": "Connected — external scan is available on saved sites."
+	},
+	"cfCleared": {
+		"message": "Credentials removed."
+	},
+	"cfInvalidAccount": {
+		"message": "Account ID must be 32 hex characters."
+	},
+	"cfInvalidToken": {
+		"message": "API token looks too short."
+	},
+	"externalScanAction": {
+		"message": "External scan (Cloudflare URL Scanner)"
+	},
+	"externalScanRunning": {
+		"message": "Scanning from Cloudflare's side — this takes up to a minute…"
+	},
+	"diffSummary": {
+		"message": "Cloudflare sees level $LEVEL_NUM$ ($LEVEL$) · $COUNT$ unexplained difference(s)",
+		"placeholders": {
+			"level": {
+				"content": "$1"
+			},
+			"level_num": {
+				"content": "$2"
+			},
+			"count": {
+				"content": "$3"
+			}
+		}
+	},
+	"diffVerdicts": {
+		"message": "here: $OURS$ · outside: $THEIRS$",
+		"placeholders": {
+			"ours": {
+				"content": "$1"
+			},
+			"theirs": {
+				"content": "$2"
+			}
+		}
+	},
+	"diffAllMatch": {
+		"message": "Every check agrees with the external scan."
+	},
+	"diffClose": {
+		"message": "Close"
+	},
+	"diffReasonDns": {
+		"message": "expected: DNS records can't be probed from a browser"
+	},
+	"diffReasonWebMcp": {
+		"message": "expected: in-page detection needs the page open"
+	},
+	"diffReasonMcp": {
+		"message": "expected: we accept the MCP card shapes deployed in the wild"
+	},
+	"diffReasonA2a": {
+		"message": "expected: we also read the legacy agent.json path"
+	},
+	"cfTokenStored": {
+		"message": "token saved — leave empty to keep it"
+	},
+	"cfError_tokenRejected": {
+		"message": "Cloudflare rejected the token — check its permissions (URL Scanner: Edit)"
+	},
+	"cfError_verifyFailed": {
+		"message": "Could not verify the token"
+	},
+	"cfError_rateLimited": {
+		"message": "Cloudflare rate limit — wait a few seconds and retry"
+	},
+	"cfError_submitFailed": {
+		"message": "Could not start the external scan"
+	},
+	"cfError_noUuid": {
+		"message": "Cloudflare accepted the scan but returned no id"
+	},
+	"cfError_resultFailed": {
+		"message": "Could not fetch the scan result"
+	},
+	"cfError_noReadiness": {
+		"message": "The scan finished without agent-readiness data"
+	},
+	"cfError_timedOut": {
+		"message": "The external scan took too long"
+	},
+	"cfError_cancelled": {
+		"message": "External scan cancelled"
 	}
 }

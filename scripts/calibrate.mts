@@ -18,6 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { CheckContext, CheckResult, CheckStatus, ProbeResponse } from '../src/checks/index';
 import { MATRIX, runChecks, scoreResults } from '../src/checks/index';
+import { EXPECTED_DIVERGENCES, normalizeCfStatus } from '../src/shared/diff';
 // @ts-expect-error plain-JS module without type declarations
 import { captureOrigin } from './capture-fixtures.mjs';
 
@@ -28,34 +29,28 @@ const SCAN_API = 'https://isitagentready.com/api/scan';
 const DEFAULT_ORIGINS = ['https://spintax.net', 'https://www.cloudflare.com', 'https://vercel.com'];
 
 /**
- * Documented, EXPECTED divergences. DIRECTIONAL: an entry absorbs a mismatch
- * only when OUR status equals `ours` — the opposite direction (e.g. our
- * mcpServerCard failing a site CF passes) is a real finding, not allowed.
- * Review this list whenever it grows — it is the "объяснённые расхождения"
- * half of the M1.5 gate.
+ * Documented, EXPECTED divergences — SHARED with the product diff
+ * (src/shared/diff.ts). DIRECTIONAL: an entry absorbs a mismatch only when OUR
+ * status equals `ours`; the opposite direction is a real finding. The reasons
+ * below expand the UI's short i18n wording for the CI report.
  */
-const ALLOWLIST: Record<string, { ours: CheckStatus; reason: string }> = {
-  dnsAid: {
-    ours: 'na',
-    reason: 'we cannot probe DNS locally (na by design, spec §3); CF evaluates DNS records server-side',
-  },
-  webMcp: {
-    ours: 'na',
-    reason: 'in-page detection requires the M1 MAIN-world script; engine returns na without it (spec §3)',
-  },
-  mcpServerCard: {
-    ours: 'pass',
-    reason:
-      'deliberate divergence (spec §3 tiers): we accept the de-facto mcpServers/serverInfo shapes; ' +
-      'CF requires top-level name/serverInfo.name and fails its own cloudflare.com mcp.json',
-  },
-  a2aAgentCard: {
-    ours: 'pass',
-    reason:
-      'deliberate divergence (spec §3): we accept the legacy /.well-known/agent.json path ' +
-      '(cloudflare.com itself serves it); CF probes only the current agent-card.json path',
-  },
+const REASONS: Record<string, string> = {
+  dnsAid: 'we cannot probe DNS locally (na by design, spec §3); CF evaluates DNS records server-side',
+  webMcp: 'in-page detection requires the MAIN-world script; engine returns na without it (spec §3)',
+  mcpServerCard:
+    'deliberate divergence (spec §3 tiers): we accept the de-facto mcpServers/serverInfo shapes; ' +
+    'CF requires top-level name/serverInfo.name and fails its own cloudflare.com mcp.json',
+  a2aAgentCard:
+    'deliberate divergence (spec §3): we accept the legacy /.well-known/agent.json path ' +
+    '(cloudflare.com itself serves it); CF probes only the current agent-card.json path',
 };
+
+const ALLOWLIST: Record<string, { ours: CheckStatus; reason: string }> = Object.fromEntries(
+  Object.entries(EXPECTED_DIVERGENCES).map(([id, entry]) => [
+    id,
+    { ours: entry.ours, reason: REASONS[id] ?? entry.reasonKey },
+  ]),
+);
 
 interface CfCheck {
   status: string;
@@ -65,12 +60,6 @@ interface CfScan {
   level: number;
   levelName: string;
   checks: Record<string, Record<string, CfCheck>>;
-}
-
-function normalizeCfStatus(status: string): CheckStatus | string {
-  if (status === 'neutral') return 'na';
-  if (status === 'pass' || status === 'fail') return status;
-  return status; // unknown upstream status — surfaces as a mismatch, by design
 }
 
 async function cfScan(origin: string): Promise<CfScan> {
