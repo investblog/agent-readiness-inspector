@@ -1,0 +1,51 @@
+name: drift-watch
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency: drift-watch
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Diff upstream sources against snapshots
+        id: drift
+        run: node scripts/drift-watch.mjs
+
+      - name: Commit updated snapshots
+        if: steps.drift.outputs.changed != ''
+        run: |
+          git config user.name "drift-watch"
+          git config user.email "actions@users.noreply.github.com"
+          git add ci/drift/snapshots
+          git commit -m "drift: snapshot update (${{ steps.drift.outputs.changed }})"
+          git push
+
+      - name: File issues for changed sources
+        if: steps.drift.outputs.changed != '' || steps.drift.outputs.errors != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create drift --color D93F0B --description "Upstream source changed" 2>/dev/null || true
+          for id in ${{ steps.drift.outputs.changed }} ${{ steps.drift.outputs.errors }}; do
+            title="Drift: $id"
+            existing=$(gh issue list --label drift --state open --search "in:title \"$title\"" --json number --jq '.[0].number' || true)
+            if [ -n "$existing" ]; then
+              gh issue comment "$existing" --body-file "drift-out/$id.md"
+            else
+              gh issue create --title "$title" --label drift --body-file "drift-out/$id.md"
+            fi
+          done

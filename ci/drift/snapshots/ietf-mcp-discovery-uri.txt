@@ -1,0 +1,4 @@
+name: draft-serra-mcp-discovery-uri
+rev: 04
+state: /api/v1/doc/state/1/,/api/v1/doc/state/150/
+expires: 2026-09-27T14:33:21Z

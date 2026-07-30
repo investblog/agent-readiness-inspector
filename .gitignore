@@ -43,3 +43,4 @@ context/attachments/
 .output/
 *.zip
 stats.html
+drift-out/

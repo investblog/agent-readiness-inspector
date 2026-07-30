@@ -1,0 +1,4 @@
+repo: cloudflare/agent-skills-discovery-rfc
+sha: 1bd1167983fa5ac9cd47987710c525308eda1a98
+date: 2026-03-24T20:59:23Z
+message: Re-apply PR #8 changes that were missed during the `v0.2.0` merge (#11)

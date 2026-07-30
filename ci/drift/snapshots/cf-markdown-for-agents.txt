@@ -1,0 +1,830 @@
+Markdown for Agents · Cloudflare Fundamentals docs
+Skip to content
+Documentation Index
+Fetch the complete documentation index at: https://developers.cloudflare.com/fundamentals/llms.txt
+Use this file to discover all available pages before exploring further.
+Docs
+Directory
+API
+SDKs
+Changelog
+Search
+Log in
+Cloudflare Fundamentals
+/
+Overview
+Concepts
+How Cloudflare DNS works
+Traffic flow through Cloudflare
+Accounts, zones, and profiles
+Cloudflare IP addresses
+Get started
+Accounts
+Create account
+Account security
+Add abuse contact
+Allow Cloudflare access
+Leaked Password Notifications
+Manage active sessions
+Review audit logs - v1
+Audit Logs - v2
+SCIM provisioning
+Overview
+Authentik
+Microsoft Entra
+Okta
+Troubleshooting
+Secure compromised account
+Set up SSO ↗
+Zone holds
+Find account and zone IDs
+Change Super Administrator
+Organizations
+Beta
+Overview
+Organizations for Enterprise
+Organizations for MSSP and Distributors
+Policy sharing
+Limitations and troubleshooting
+Members and permissions
+Members and permissions
+Manage
+Policies
+Roles
+Role scopes
+User Groups
+New
+Set up dashboard SSO
+User profiles
+Overview
+Verify email address
+Log in to Cloudflare
+Profile settings
+Account recovery
+Delete your Cloudflare account
+Email address and password
+Multi-Factor Email Authentication
+Two-factor authentication
+Domains
+Overview
+Add multiple sites via automation
+Change your domain version
+Manage subdomains
+Move a domain between Cloudflare accounts
+Onboard a domain
+Pause Cloudflare
+Redirect one domain to another
+Remove a domain
+Star domains
+Performance
+Improve SEO
+Maintenance mode
+Minimize downtime
+Optimize site speed ↗
+Prepare for surges or spikes in web traffic ↗
+Test speed
+Security
+Prevent DDoS attacks ↗
+Protect your origin server
+Recovering from a hacked site
+Scan for PCI compliance
+Secure your website ↗
+Under a DDoS attack?
+Cloudflare's API
+Get started
+Create API token
+Get Global API key (legacy)
+Get Origin CA keys
+Deprecated
+Token formats
+Account API tokens
+How to
+Make API calls
+Create tokens via API
+Control API Access
+Restrict tokens
+Roll tokens
+API token template URLs
+Reference
+REST API ↗
+API
+GraphQL API ↗
+Wrangler API ↗
+API token permissions
+API deprecations
+API token templates
+Rate limits
+SDKs
+Troubleshooting
+OAuth Applications on Cloudflare
+Overview
+Create your OAuth client
+Integrate your OAuth client with Cloudflare
+Authorizing an application
+Reference
+Migration guides
+SCIM migration
+Policies
+Cloudflare Cookies
+Compliance documentation
+Content Security Policies (CSPs)
+Delivering Videos with Cloudflare
+Licenses
+Project Cybersafe Schools
+Abuse
+Overview
+Review abuse policies
+Complaint types
+Providing specific URLs
+Customer abuse report obligations
+View and submit reports
+Blocked Content
+SDK ecosystem support policy
+Troubleshooting
+/cdn-cgi/ endpoint
+Account and domain management best practices
+Cloudflare and Google Analytics
+Cloudflare crawlers
+Cloudflare HTTP headers
+Cloudflare Ray ID
+Cloudy AI agent
+Beta
+Connection limits
+Cryptographic Attestation of Personhood
+Error responses
+Glossary
+Markdown for Agents
+Beta
+Network Layers
+Network ports
+Partners
+Redirects
+Scans and penetration testing policy
+TCP connections
+Under Attack mode
+RSS Feeds
+Available RSS Feeds
+Consuming RSS Feeds
+Agent resources
+Agent setup ↗
+Cloudflare Skills ↗
+Code Mode MCP Server ↗
+Domain-specific MCP Servers ↗
+MCP
+Cloudflare Fundamentals llms.txt ↗
+Cloudflare Fundamentals llms-full.txt ↗
+Cloudflare Docs llms.txt ↗
+Cloudflare Docs llms-full.txt ↗
+Home
+/
+Cloudflare Fundamentals
+/
+Reference
+/
+Markdown for Agents
+Markdown for Agents
+Last updated
+Jul 13, 2026
+|
+Copy as Markdown
+|
+View as Markdown
+|
+Agent setup
+Overview
+What is Markdown for Agents
+How to use
+Response headers
+Token count headers
+Content Signals Policy
+Output format
+YAML frontmatter
+JSON-LD
+How to enable
+Enable for specific subdomains or paths
+Enable for specific subdomains or paths
+Enable for all custom hostnames
+Enable for specific custom hostnames
+Availability and Pricing
+Try it with Cloudflare
+Limitations
+Other Markdown conversion APIs
+What is Markdown for Agents
+Markdown has quickly become the lingua franca for agents and AI systems as a whole. The format’s explicit structure makes it ideal for AI processing, ultimately resulting in better results while minimizing token waste.
+Cloudflare's network supports real-time content conversion at the source, for enabled zones using
+content negotiation
+↗
+headers. When AI systems request pages from any website that uses Cloudflare and has Markdown for Agents enabled, they can express the preference for
+text/markdown
+in the request and our network will automatically and efficiently convert the HTML to Markdown, when possible, on the fly.
+Read the
+announcement
+↗
+in our blog for more information.
+How to use
+To fetch the Markdown version of any page from a zone with Markdown for Agents enabled, the client needs to add the
+Accept
+negotiation header with
+text/markdown
+as one of the options. Cloudflare will detect this, fetch the original HTML version from the origin, and convert it to Markdown before serving it to the client.
+Here's a curl example with the
+Accept
+negotiation header requesting this page from our developer documentation:
+curl
+https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/
+\
+-H
+"Accept: text/markdown"
+Or if you’re building an AI Agent using Workers, you can use TypeScript:
+const
+r
+=
+await
+fetch
+(
+`https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/`
+,
+{
+headers: {
+Accept:
+"text/markdown"
+,
+},
+},
+);
+const
+tokenCount
+=
+r.headers.
+get
+(
+"x-markdown-tokens"
+);
+const
+originalTokenCount
+=
+r.headers.
+get
+(
+"x-original-tokens"
+);
+const
+markdown
+=
+await
+r.
+text
+();
+const
+r
+=
+await
+fetch
+(
+`https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/`
+,
+{
+headers: {
+Accept:
+"text/markdown"
+,
+},
+},
+);
+const
+tokenCount
+=
+r.headers.
+get
+(
+"x-markdown-tokens"
+);
+const
+originalTokenCount
+=
+r.headers.
+get
+(
+"x-original-tokens"
+);
+const
+markdown
+=
+await
+r.
+text
+();
+The response to this request is now formatting in markdown:
+HTTP/2
+200
+date
+:
+Wed, 11 Feb 2026 11:44:48 GMT
+content-type
+:
+text/markdown; charset=utf-8
+content-length
+:
+2899
+vary
+:
+accept
+cache-control
+:
+public, max-age=3600
+strict-transport-security
+:
+max-age=63072000; includeSubDomains
+x-markdown-tokens
+:
+725
+x-original-tokens
+:
+12345
+content-signal
+:
+ai-train=yes, search=yes, ai-input=yes
+---
+title
+:
+Markdown for Agents · Cloudflare Agents docs
+---
+## What is Markdown for Agents
+Markdown has quickly become the lingua franca for agents and AI systems
+as a whole. The format’s explicit structure makes it ideal for AI processing,
+ultimately resulting in better results while minimizing token waste.
+...
+Response headers
+Markdown for Agents preserves the headers from your origin response on the converted response, so security- and cache-relevant headers survive conversion. This includes headers such as
+Strict-Transport-Security
+(HSTS),
+Content-Security-Policy
+(CSP),
+X-Frame-Options
+,
+Set-Cookie
+, CORS headers (for example,
+Access-Control-Allow-Origin
+), and caching headers (
+Cache-Control
+,
+Expires
+,
+Age
+).
+Because the body is replaced with converted Markdown, the following changes are applied:
+Content-Type
+is set to
+text/markdown; charset=utf-8
+.
+Vary
+includes
+Accept
+(any
+Vary
+dimensions your origin already declared are preserved) so that caches store separate variants for Markdown and HTML.
+Content-Length
+is recalculated to match the size of the Markdown response.
+Headers that describe the original body are removed, because they no longer match the converted response:
+Content-Encoding
+,
+Content-Range
+,
+Transfer-Encoding
+,
+ETag
+, and
+Last-Modified
+.
+ETag
+and
+Last-Modified
+are dropped because conditional requests (
+If-None-Match
+,
+If-Modified-Since
+) cannot be honored for converted responses.
+Markdown for Agents also adds the token count headers described below.
+Token count headers
+Note that we include token count headers with the converted response.
+x-markdown-tokens
+indicates the estimated number of tokens in the Markdown document, and
+x-original-tokens
+indicates the estimated number of tokens in the original HTML document before conversion. You can use these values in your flow, for example to calculate the size of a context window, estimate the token savings from Markdown conversion, or decide on your chunking strategy.
+Content Signals Policy
+Content Signals
+↗
+is a framework that allows anyone to express their preferences for how their content can be used after it has been accessed.
+If your origin already sets a
+content-signal
+header, Markdown for Agents preserves that value on the converted response — your origin's policy is authoritative. This lets you define custom Content Signal policies by setting the
+content-signal
+header at your origin.
+When the origin response does not include a
+content-signal
+header, Markdown for Agents adds a default
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+, signaling that the content can be used for AI Training, Search results, and AI Input, which includes agentic use.
+Output format
+Markdown for Agents returns a Markdown document with a consistent, predictable structure so AI systems can rely on it without per-site parsing logic. The response always follows this layout:
+YAML frontmatter
+with metadata extracted from the page's
+<meta>
+tags. Only emitted when at least one supported meta tag is present.
+Body Markdown
+converted from the document body. Non-content elements (such as headers, footers, navigation, scripts, and styles) are stripped during pre-processing. For the full list of elements that are removed, refer to
+HTML pre-processing
+in the Workers AI Markdown Conversion documentation.
+JSON-LD
+structured data preserved as a fenced
+json
+code block at the end of the document. Only emitted when the source HTML contains JSON-LD.
+YAML frontmatter
+When the source HTML contains supported
+<meta>
+tags, Markdown for Agents prepends a YAML frontmatter block to the response. The block uses the following fields:
+Field
+Source
+<meta>
+tag
+title
+<meta name="title">
+, with fallback to
+<meta property="og:title">
+description
+<meta name="description">
+, with fallback to
+<meta property="og:description">
+image
+<meta property="og:image">
+Only fields with a value are emitted. If the source HTML does not contain any of the supported meta tags, the frontmatter block is omitted entirely.
+For
+title
+and
+description
+, the standard
+<meta name="...">
+form always takes priority over the Open Graph
+<meta property="og:...">
+form, regardless of the order they appear in the HTML. Open Graph values are used only as fallbacks when the standard form is missing.
+Example output:
+---
+title
+:
+My Page Title
+description
+:
+A short summary of the page.
+image
+:
+https://example.com/cover.png
+---
+# Page heading
+...
+JSON-LD
+JSON-LD
+↗
+is a structured-data format used by search engines and AI systems to interpret a page's semantic content. Markdown for Agents preserves any
+<script type="application/ld+json">
+blocks from the source HTML by appending them at the end of the converted Markdown inside a single fenced
+json
+code block.
+If the source HTML contains multiple JSON-LD scripts, all of them are concatenated within the same code block, each on its own line.
+JSON-LD is the only
+<script>
+content preserved in the output — all other
+<script>
+and
+<style>
+content is stripped during
+HTML pre-processing
+.
+Example output:
+... main markdown content ...
+```json
+{
+"@context"
+:
+"https://schema.org"
+,
+"@type"
+:
+"Article"
+,
+"headline"
+:
+"Article Title"
+,
+"author"
+: {
+"@type"
+:
+"Person"
+,
+"name"
+:
+"Jane Doe"
+}
+}
+```
+How to enable
+To enable Markdown for Agents for your zone in the dashboard:
+Log into the
+Cloudflare dashboard
+↗
+and select your account (you need a Pro or Business plan).
+Select the zone you want to configure.
+Visit the
+AI Crawl Control
+↗
+section.
+Enable
+Markdown for Agents
+.
+Enable for specific subdomains or paths
+To enable Markdown for Agents for specific subdomains or paths instead of your entire zone, create a
+configuration rule
+:
+Log in to the
+Cloudflare dashboard
+↗
+and select your account.
+Select the zone you want to configure.
+Go to
+Rules
+>
+Overview
+and select
+Create rule
+>
+Configuration Rules
+.
+Under
+When incoming requests match
+, build an expression to match your subdomain (for example,
+http.host eq "docs.example.com"
+) or path.
+Under
+Then the settings are
+, select
+Add setting
+>
+Markdown for Agents
+and set it to
+On
+.
+Select
+Deploy
+.
+To enable Markdown for Agents for your zone using APIs, send a
+PATCH
+to
+/client/v4/zones/{zone_tag}/settings/content_converter
+with the payload
+{"value": "on"}
+to the Cloudflare API.
+You will need to create an API token with the Zone Settings edit permissions enabled.
+Example:
+Enable Markdown for Agents
+bash
+curl
+-X
+PATCH
+'https://api.cloudflare.com/client/v4/zones/{zone_tag}/settings/content_converter'
+\
+--header
+'Content-Type: application/json'
+\
+--header
+"Authorization: Bearer {api_token}"
+--data-raw
+'{"value": "on"}'
+Enable for specific subdomains or paths
+To enable Markdown for Agents for specific subdomains or paths instead of your entire zone, create a
+configuration rule
+:
+Enable Markdown for Agents for a subdomain
+bash
+curl
+--request
+PUT
+\
+--url
+"https://api.cloudflare.com/client/v4/zones/{zone_id}/rulesets/phases/http_config_settings/entrypoint"
+\
+--header
+"Authorization: Bearer {api_token}"
+\
+--header
+"Content-Type: application/json"
+\
+--data
+'{
+"rules": [{
+"expression": "http.host eq \"docs.example.com\"",
+"action": "set_config",
+"action_parameters": {
+"content_converter": true
+},
+"description": "Enable Markdown for Agents for docs subdomain"
+}]
+}'
+You can also use path-based expressions like
+starts_with(http.request.uri.path, "/blog/")
+. For more information on building expressions, refer to
+Rules language
+.
+If you are using
+Cloudflare for SaaS
+and want to enable Markdown for Agents for your
+custom hostnames
+, you have two options:
+Enable for all custom hostnames
+To enable Markdown for Agents for all custom hostnames on your SaaS zone:
+Log into the
+Cloudflare dashboard
+↗
+and select your account.
+Select your SaaS zone.
+Look for
+Quick Actions
+.
+Toggle the
+Markdown for Agents
+button to enable.
+Enable for specific custom hostnames
+Enabling Markdown for Agents for specific custom hostnames requires an
+advanced subscription
+with access to
+custom metadata
+.
+Step 1: Set custom metadata on the custom hostname
+When creating or updating a custom hostname via API, add
+content_converter
+to the
+custom_metadata
+object:
+curl
+--request
+PATCH
+\
+--url
+"https://api.cloudflare.com/client/v4/zones/{zone_id}/custom_hostnames/{custom_hostname_id}"
+\
+--header
+"Authorization: Bearer {api_token}"
+\
+--header
+"Content-Type: application/json"
+\
+--data
+'{
+"custom_metadata": {
+"content_converter": "enabled"
+}
+}'
+Step 2: Create a Configuration Rule
+Create a Configuration Rule on your SaaS zone that matches custom hostnames with the metadata and enables content conversion:
+curl
+--request
+PUT
+\
+--url
+"https://api.cloudflare.com/client/v4/zones/{zone_id}/rulesets/phases/http_config_settings/entrypoint"
+\
+--header
+"Authorization: Bearer {api_token}"
+\
+--header
+"Content-Type: application/json"
+\
+--data
+'{
+"rules": [{
+"expression": "lookup_json_string(cf.hostname.metadata, \"content_converter\") eq \"enabled\"",
+"action": "set_config",
+"action_parameters": {
+"content_converter": true
+},
+"description": "Enable content converter for opted-in custom hostnames"
+}]
+}'
+This will enable the feature on custom hostnames that have the
+content_converter
+custom metadata tag set.
+Availability and Pricing
+Markdown for Agents is available to Pro, Business and Enterprise plans, and SSL for SaaS customers at no cost.
+Try it with Cloudflare
+We have enabled this feature in our
+Developer Documentation
+↗
+and our
+Blog
+↗
+, inviting all AI crawlers and agents to consume our content using markdown instead of HTML.
+curl
+https://blog.cloudflare.com/markdown-for-agents/
+\
+-H
+"Accept: text/markdown"
+Limitations
+We only convert from HTML, other types of documents may be included in the future.
+The origin response cannot exceed 2 MB (2,097,152 bytes).
+Other Markdown conversion APIs
+If you’re building AI systems that require arbitrary document conversion from outside Cloudflare or Markdown for Agents is not available from the content source, we provide other ways to convert documents to Markdown for your applications:
+Workers AI
+AI.toMarkdown()
+supports multiple document types and summarization.
+The Browser Run
+/markdown
+endpoint supports markdown conversion if you need to render a dynamic page or application in a real browser before converting it.
+Previous
+Glossary
+Next
+Network Layers
+Was this helpful?
+Yes
+No
+Edit page
+Report issue
+On this page
+Overview
+What is Markdown for Agents
+How to use
+Response headers
+Token count headers
+Content Signals Policy
+Output format
+YAML frontmatter
+JSON-LD
+How to enable
+Enable for specific subdomains or paths
+Enable for specific subdomains or paths
+Enable for all custom hostnames
+Enable for specific custom hostnames
+Availability and Pricing
+Try it with Cloudflare
+Limitations
+Other Markdown conversion APIs
+Edit page
+Report issue
+Getting started
+Plans
+Contact sales
+Partners
+Find a partner
+Startups
+Under attack?
+Domain name search
+Company
+About
+Careers
+Investors
+Press
+Press kit
+Global network
+Public interest
+Project Galileo
+Athenian Project
+Cloudflare for Campaigns
+Project Fairshot
+Impact/ESG
+Compliance
+Compliance resources
+Trust Hub
+Data Protection
+Responsible AI
+Transparency report
+Report abuse
+Resources
+App innovation report
+Cloudflare Radar
+Case studies
+Status
+Support
+Events
+Blog
+Developers
+Documentation
+Learning center
+Community
+Solutions
+SSE and SASE platform
+Cloudflare AI Cloud
+AI Security
+Frontend Development Platform
+Multi-Tenant Platform Development
+Web Security Platform
+Start Building
+Log In
+© 2026 Cloudflare, Inc.
+Privacy policy
+|
+Report security issues
+|
+Terms of use
+|
+Trademark
+|
+Your privacy choices
+Docs
