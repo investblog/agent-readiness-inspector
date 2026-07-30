@@ -18,8 +18,8 @@ Name DECIDED 2026-07-30: Agent Readiness Inspector. Branding, positioning and
 store-listing copy: docs/branding.md (pains → positioning → CWS title/description).
 
 Infrastructure:
-- [ ] Push repo to GitHub (prerequisite for drift-watch CI)
-- [ ] Drift-watch CI: doc-watch job (auto-Issues on upstream changes; can precede M0)
+- [x] GitHub repo: github.com/investblog/agent-readiness-inspector (public)
+- [x] Drift-watch CI: doc-watch job live (daily cron; 11 sources seeded; `drift` label)
 - [ ] Drift-watch CI: calibration job (needs the M0 harness)
 
 Scaffold debts:
