@@ -126,9 +126,11 @@ export default defineBackground(() => {
 
   // wxt/browser is polyfill-style: returning a Promise from the listener
   // delivers its resolution as the response (async channel stays open)
-  browser.runtime.onMessage.addListener((message: unknown): Promise<ScanResponse | void> | undefined => {
+  browser.runtime.onMessage.addListener((message: unknown): Promise<ScanResponse | undefined> | undefined => {
     if (isRescheduleWatchRequest(message)) {
-      return scheduleWatch().catch((error: unknown) => console.warn('[agent-readiness] reschedule failed', error));
+      return scheduleWatch()
+        .catch((error: unknown) => console.warn('[agent-readiness] reschedule failed', error))
+        .then(() => undefined);
     }
     if (!isScanRequest(message)) return undefined;
     return handleScan(message.origin, message.include).catch(

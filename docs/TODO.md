@@ -29,7 +29,8 @@ the revised spec). This file is the index.
       - [ ] Verify the external scan live: needs a Cloudflare token with
         `URL Scanner: Edit` (only DoD item left open in M2)
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
-- [ ] M3 — watch: alarms + diff + regression notifications (can move earlier if M2 drags)
+- [x] M3 — watch: alarms + diff + regression notifications — DONE 2026-07-31
+      (plan: .agents/plans/done/m3-watch.md)
 - [ ] M4 — fix-apply + full CF Connect wizard (spec §8.1)
 - [ ] M5 — 301.st layer: news panel, cross-promo, spintax.net as living reference
 
