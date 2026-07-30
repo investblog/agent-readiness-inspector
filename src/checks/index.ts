@@ -1,14 +1,25 @@
 import { contentSignals, robotsTxtAiRules, webBotAuth } from './bot-access';
+import { acp, ap2, mpp, ucp, x402 } from './commerce';
 import type { CheckId } from './config';
 import { checkMeta, MATRIX } from './config';
 import { llmsTxt, markdownNegotiation } from './content';
 import { dnsAid, linkHeaders, sitemap } from './discoverability';
+import {
+  a2aAgentCard,
+  agentSkills,
+  apiCatalog,
+  authMd,
+  mcpServerCard,
+  oauthDiscovery,
+  oauthProtectedResource,
+  webMcp,
+} from './discovery';
 import { fixPrompt } from './prompts';
 import { robotsTxt } from './robots';
 import type { CheckContext, CheckFn, CheckResult } from './types';
 
-// Implementation registry — filled out check by check through M0.
-const IMPLEMENTATIONS: Partial<Record<CheckId, CheckFn>> = {
+// Implementation registry — all 22 matrix checks (M0-3 complete).
+const IMPLEMENTATIONS: Record<CheckId, CheckFn> = {
   robotsTxt,
   sitemap,
   linkHeaders,
@@ -18,11 +29,20 @@ const IMPLEMENTATIONS: Partial<Record<CheckId, CheckFn>> = {
   contentSignals,
   robotsTxtAiRules,
   webBotAuth,
+  agentSkills,
+  apiCatalog,
+  authMd,
+  a2aAgentCard,
+  mcpServerCard,
+  oauthDiscovery,
+  oauthProtectedResource,
+  webMcp,
+  x402,
+  ucp,
+  acp,
+  ap2,
+  mpp,
 };
-
-export function implementedIds(): CheckId[] {
-  return Object.keys(IMPLEMENTATIONS) as CheckId[];
-}
 
 /** Ids run when no explicit selection is given (spec §3: A2A/llms.txt are off). */
 export function defaultCheckIds(): CheckId[] {
@@ -38,10 +58,8 @@ export function runChecks(ctx: CheckContext, opts: RunOptions = {}): CheckResult
   const ids = opts.include ?? defaultCheckIds();
   const results: CheckResult[] = [];
   for (const id of ids) {
-    const impl = IMPLEMENTATIONS[id];
-    if (!impl) continue; // not yet implemented — absent from results, not `na`
     const meta = checkMeta(id);
-    const verdict = impl(ctx);
+    const verdict = IMPLEMENTATIONS[id](ctx);
     results.push({
       id,
       category: meta.category,

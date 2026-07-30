@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LEVELS } from './config';
-import { defaultCheckIds, implementedIds, runChecks } from './index';
+import { defaultCheckIds, runChecks } from './index';
 import { levelFor } from './scoring';
 import type { CheckContext } from './types';
 
@@ -15,16 +15,19 @@ describe('defaultEnabled semantics (spec §3)', () => {
   });
 
   it('include overrides the default selection', () => {
-    // a2aAgentCard has no implementation yet — selected but absent from results
-    expect(runChecks(emptyCtx, { include: ['a2aAgentCard'] })).toEqual([]);
-    // and a default run does not sneak it in either
+    // off-by-default check runs when explicitly included…
+    const included = runChecks(emptyCtx, { include: ['a2aAgentCard'] }).map((r) => r.id);
+    expect(included).toEqual(['a2aAgentCard']);
+    // …and a default run does not sneak it in
     const defaults = runChecks(emptyCtx).map((r) => r.id);
     expect(defaults).not.toContain('a2aAgentCard');
   });
 
-  it('runs only implemented checks', () => {
-    const ran = runChecks(emptyCtx).map((r) => r.id);
-    for (const id of ran) expect(implementedIds()).toContain(id);
+  it('a default run yields a result for every default-enabled check (total registry)', () => {
+    const ran = runChecks(emptyCtx)
+      .map((r) => r.id)
+      .sort();
+    expect(ran).toEqual([...defaultCheckIds()].sort());
   });
 });
 

@@ -14,11 +14,23 @@ export interface ProbeResponse {
   body: string;
 }
 
+/**
+ * Non-HTTP detection results supplied by the probe layer (spec §3): WebMCP is
+ * detected by a MAIN-world in-page script, not an HTTP probe. `not-detectable`
+ * = the detection could not run (origin-trial browser without the API, script
+ * not injected) — which must NOT read as "site is not agent-ready".
+ */
+export interface ProbeSignals {
+  webMcp?: 'detected' | 'not-detected' | 'not-detectable';
+}
+
 export interface CheckContext {
   /** Origin under audit, e.g. https://example.com */
   origin: string;
   /** Probe responses keyed by probe key (see PROBE in config). */
   responses: Map<string, ProbeResponse>;
+  /** In-page detection signals; absent = detection layer did not run. */
+  signals?: ProbeSignals;
 }
 
 /** What a check implementation returns; metadata is merged in by the engine. */

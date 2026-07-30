@@ -27,6 +27,26 @@ export function tryParseJson(body: string): unknown {
   }
 }
 
+/**
+ * Classify a well-known JSON probe (spec §3 anti-false-positive ladder):
+ * absent/non-200 → 'absent'; HTML under 200 → 'soft404'; unparseable → 'invalid';
+ * else the parsed JSON. Each check maps these to its own statuses (a
+ * discovery check may fail on 'absent' while a detected-if-present check goes na).
+ */
+export type JsonProbeOutcome =
+  | { kind: 'absent'; status?: number }
+  | { kind: 'soft404' }
+  | { kind: 'invalid' }
+  | { kind: 'json'; json: unknown };
+
+export function classifyJsonProbe(res: ProbeResponse | undefined): JsonProbeOutcome {
+  if (res?.status !== 200) return { kind: 'absent', status: res?.status };
+  if (looksLikeHtml(res.body)) return { kind: 'soft404' };
+  const json = tryParseJson(res.body);
+  if (json === undefined || typeof json !== 'object' || json === null) return { kind: 'invalid' };
+  return { kind: 'json', json };
+}
+
 /** RFC 8288 Link header parse: `<href>; rel="a b"; ...` entries. */
 export interface LinkEntry {
   href: string;
