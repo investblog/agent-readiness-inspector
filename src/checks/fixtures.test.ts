@@ -36,7 +36,7 @@ const NEVER_LOCAL: Record<string, CheckStatus> = { dnsAid: 'na', webMcp: 'na', a
 const EXPECTED: Record<string, { composite: number; level: number; statuses: Partial<Record<CheckId, CheckStatus>> }> =
   {
     'spintax.net': {
-      composite: 75,
+      composite: 69,
       level: 4,
       statuses: {
         robotsTxt: 'pass',
@@ -45,22 +45,22 @@ const EXPECTED: Record<string, { composite: number; level: number; statuses: Par
         markdownNegotiation: 'pass',
         llmsTxt: 'pass',
         contentSignals: 'pass',
-        robotsTxtAiRules: 'fail', // no explicit AI UA groups — M0-5 calibration question
-        webBotAuth: 'pass', // empty-keys JWKS
+        robotsTxtAiRules: 'pass', // calibrated: wildcard rules count (CF criterion)
+        webBotAuth: 'na', // calibrated: empty keys[] is informational (CF neutral)
         agentSkills: 'pass',
         apiCatalog: 'pass',
         authMd: 'fail',
         mcpServerCard: 'pass',
-        oauthDiscovery: 'na',
-        oauthProtectedResource: 'na',
+        oauthDiscovery: 'fail', // calibrated: CF fails missing OAuth/OIDC metadata
+        oauthProtectedResource: 'fail',
         a2aAgentCard: 'fail',
         x402: 'na',
         ucp: 'na',
       },
     },
     'cloudflare.com': {
-      composite: 73,
-      level: 4,
+      composite: 62,
+      level: 3, // matches the live /api/scan level for cloudflare.com (calibration)
       statuses: {
         robotsTxt: 'pass',
         sitemap: 'pass',
@@ -73,16 +73,16 @@ const EXPECTED: Record<string, { composite: number; level: number; statuses: Par
         agentSkills: 'fail',
         apiCatalog: 'fail',
         authMd: 'fail',
-        mcpServerCard: 'pass', // mcpServers-map shape
-        oauthDiscovery: 'na',
-        oauthProtectedResource: 'na',
+        mcpServerCard: 'pass', // mcpServers-map shape — deliberate divergence from CF's own validator
+        oauthDiscovery: 'fail',
+        oauthProtectedResource: 'fail',
         a2aAgentCard: 'pass', // legacy agent.json: "Cloudflare Site Agent"
         x402: 'na',
         ucp: 'na',
       },
     },
     'github.com': {
-      composite: 9,
+      composite: 15,
       level: 1,
       statuses: {
         robotsTxt: 'pass',
@@ -91,22 +91,22 @@ const EXPECTED: Record<string, { composite: number; level: number; statuses: Par
         markdownNegotiation: 'fail', // 406
         llmsTxt: 'pass',
         contentSignals: 'fail',
-        robotsTxtAiRules: 'fail',
+        robotsTxtAiRules: 'pass', // explicit crawler groups exist (wildcard criterion)
         webBotAuth: 'na',
         agentSkills: 'fail',
         apiCatalog: 'fail',
         authMd: 'fail',
         mcpServerCard: 'fail',
-        oauthDiscovery: 'na',
-        oauthProtectedResource: 'na',
+        oauthDiscovery: 'fail',
+        oauthProtectedResource: 'fail',
         a2aAgentCard: 'fail',
         x402: 'na',
         ucp: 'na',
       },
     },
     'vercel.com': {
-      composite: 33,
-      level: 2,
+      composite: 38,
+      level: 2, // matches the live /api/scan level for vercel.com (calibration)
       statuses: {
         robotsTxt: 'pass',
         sitemap: 'pass',
@@ -114,14 +114,14 @@ const EXPECTED: Record<string, { composite: number; level: number; statuses: Par
         markdownNegotiation: 'fail',
         llmsTxt: 'pass',
         contentSignals: 'pass',
-        robotsTxtAiRules: 'fail',
+        robotsTxtAiRules: 'pass',
         webBotAuth: 'na',
         agentSkills: 'fail',
         apiCatalog: 'fail',
         authMd: 'fail',
         mcpServerCard: 'fail',
         oauthDiscovery: 'pass', // real-world AS metadata with issuer
-        oauthProtectedResource: 'na',
+        oauthProtectedResource: 'fail',
         a2aAgentCard: 'fail',
         x402: 'na',
         ucp: 'na',
@@ -144,8 +144,8 @@ const EXPECTED: Record<string, { composite: number; level: number; statuses: Par
         apiCatalog: 'fail',
         authMd: 'fail',
         mcpServerCard: 'fail',
-        oauthDiscovery: 'na', // SPA fallback ≈ absent
-        oauthProtectedResource: 'na',
+        oauthDiscovery: 'fail', // SPA fallback ≈ absent, absent → fail (calibrated)
+        oauthProtectedResource: 'fail',
         a2aAgentCard: 'fail',
         x402: 'na',
         ucp: 'na',

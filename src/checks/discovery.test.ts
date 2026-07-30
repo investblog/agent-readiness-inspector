@@ -160,6 +160,13 @@ describe('mcpServerCard check (tiered, spec §3)', () => {
     expect(transport.status).toBe('pass');
   });
 
+  it('accepts serverInfo.name as identity (calibrated: CF requires name or serverInfo.name)', () => {
+    const r = run('mcpServerCard', {
+      [PROBE.mcpJsonLegacy]: { body: JSON.stringify({ serverInfo: { name: 'X' }, url: 'https://m.e.com' }) },
+    });
+    expect(r.status).toBe('pass');
+  });
+
   it('accepts servers[]-shaped cards and rejects remotes: null (validation hole guard)', () => {
     const servers = run('mcpServerCard', {
       [PROBE.mcpJsonLegacy]: { body: JSON.stringify({ name: 'X', servers: [{ url: 'https://m.e.com' }] }) },
@@ -196,13 +203,24 @@ describe('oauth discovery checks (RFC 8414 / 9728)', () => {
     expect(r.status).toBe('pass');
   });
 
-  it('is na when absent — no authorization is not a failure (spec §3)', () => {
-    expect(run('oauthDiscovery', { [PROBE.oauthAs]: { status: 404 } }).status).toBe('na');
-    expect(run('oauthProtectedResource', {}).status).toBe('na');
+  it('fails when absent (calibrated: CF fails missing OAuth/OIDC metadata, not N/A)', () => {
+    const r = run('oauthDiscovery', { [PROBE.oauthAs]: { status: 404 } });
+    expect(r.status).toBe('fail');
+    expect(r.evidence).toContain('CF criterion');
+    expect(run('oauthProtectedResource', {}).status).toBe('fail');
   });
 
-  it('is na on an HTML soft-404 (SPA fallback ≈ absent)', () => {
-    expect(run('oauthDiscovery', { [PROBE.oauthAs]: { body: '<!doctype html>' } }).status).toBe('na');
+  it('fails on an HTML soft-404 (SPA fallback ≈ absent)', () => {
+    expect(run('oauthDiscovery', { [PROBE.oauthAs]: { body: '<!doctype html>' } }).status).toBe('fail');
+  });
+
+  it('accepts OIDC openid-configuration as an equivalent source for oauthDiscovery', () => {
+    const r = run('oauthDiscovery', {
+      [PROBE.oauthAs]: { status: 404 },
+      [PROBE.oidcConfig]: { body: JSON.stringify({ issuer: 'https://e.com' }) },
+    });
+    expect(r.status).toBe('pass');
+    expect(r.evidence).toContain('openid-configuration');
   });
 
   it('fails metadata missing its mandatory field', () => {

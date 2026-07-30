@@ -31,6 +31,7 @@ export const PROBE = {
   mcpServerCardsJson: '/.well-known/mcp/server-cards.json',
   mcpJsonLegacy: '/.well-known/mcp.json',
   oauthAs: '/.well-known/oauth-authorization-server',
+  oidcConfig: '/.well-known/openid-configuration',
   oauthPr: '/.well-known/oauth-protected-resource',
   ucp: '/.well-known/ucp',
   x402: '/.well-known/x402',
@@ -188,7 +189,7 @@ export const MATRIX = [
     docUrl: 'https://www.rfc-editor.org/rfc/rfc8414',
     scored: true,
     defaultEnabled: true,
-    probes: [PROBE.oauthAs],
+    probes: [PROBE.oauthAs, PROBE.oidcConfig],
   },
   {
     id: 'oauthProtectedResource',
@@ -303,13 +304,12 @@ export interface LevelBand {
 }
 
 /**
- * Level bands — CALIBRATION TARGET (spec §4). Known points: spintax.net
- * composite 79 -> Level 4 via /api/scan (web-UI said 5 the same day — CF
- * surfaces disagree; the spec calibrates against web-UI, M0-5). The interim
- * bands deliberately encode the /api/scan point anyway: it is the only
- * machine-readable source until the M0-5 web-UI calibration exists, and the
- * 79->L4-vs-L5 gap is the KNOWN divergence M0-5 must resolve — do not "fix"
- * it here by eye.
+ * Level bands — calibrated 2026-07-30 against /api/scan (the machine-readable
+ * surface): three live reference points match exactly (spintax L4,
+ * cloudflare.com L3, vercel L2 — see scripts/calibrate.mts). CF's web-UI is
+ * known to disagree with /api/scan on the L4/L5 border (spintax 79: UI said
+ * L5 the same day) — web-UI parity is a deliberate open question for M1.5,
+ * documented in ROADMAP; do not "fix" the bands by eye.
  */
 export const LEVELS = [
   { level: 5, name: 'Agent-Native', minComposite: 80 },

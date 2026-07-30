@@ -63,13 +63,13 @@ Control, Capabilities). Commerce проверяется, но в скор не �
 | Content | Markdown negotiation | `GET /` с `Accept: text/markdown`; плюс суффикс `.md` | `content-type: text/markdown` + `vary: Accept` | тело не HTML (SPA-fallback отдаёт исходную страницу с 200 на любой Accept) |
 | Content | llms.txt (info, **вне скора** — CF выкинул из тула к 2026-07) | `GET /llms.txt`, `/llms-full.txt` | 200 | `content-type` text/plain или text/markdown; тело не HTML; по конвенции начинается с `# `-заголовка |
 | Bot Access | Content Signals | `Content-Signal:` в robots.txt | директива присутствует (ai-train/ai-input/search) | критерий — сам парсинг директивы, отдельной пробы нет |
-| Bot Access | AI-bot rules | правила для GPTBot/ClaudeBot/и т.п. в robots | явные user-agent блоки | то же — парсинг, не статус-код |
-| Bot Access | Web Bot Auth (draft) | `GET /.well-known/http-message-signatures-directory` | **detected-if-present, до калибровки в fail не переводим**: валидный JWKS → pass, отсутствие → `na` с evidence | JSON-parse обязателен; `keys: []` — валидно; HTML под 200 → fail (soft-404: operator.chatgpt.com отдаёт app-shell). Открыт вопрос семантики: возможно это чек agent-origin сайтов, а не универсальный — окончательный статус (scored/advanced/info) снять с web-UI при калибровке M0 |
+| Bot Access | AI-bot rules | правила для GPTBot/ClaudeBot/и т.п. в robots | **калибровано 2026-07-30**: явные AI-группы ИЛИ wildcard-группы (CF: «wildcard rules apply to all crawlers including AI bots»); fail — только если групп нет вовсе | то же — парсинг, не статус-код |
+| Bot Access | Web Bot Auth (draft) | `GET /.well-known/http-message-signatures-directory` | **калибровано 2026-07-30**: JWKS с непустым `keys[]` → pass; пустой `keys[]` → `na` (CF: «informational only»); отсутствие → `na` | JSON-parse обязателен; HTML под 200 → fail (soft-404: operator.chatgpt.com отдаёт app-shell) |
 | Capabilities | Agent Skills | `GET /.well-known/agent-skills/index.json` | валидный JSON со skills[] | JSON-parse + непустой skills[] с name у каждого |
 | Capabilities | API Catalog (RFC 9727) | `GET /.well-known/api-catalog` | валидный linkset | JSON с ключом `linkset` (RFC 9264); в идеале `content-type: application/linkset+json`; голый 200 не считается |
 | Capabilities | MCP Server Card | **ярусная стратегия, не «один правильный путь»**: (a) draft-canonical — `/.well-known/mcp/server-card` (SEP-2127 v2) и `/.well-known/mcp-server` (IETF draft-serra-mcp-discovery-uri); (b) CF-scored — `/.well-known/mcp/server-card.json` (блог) + плюральный `server-cards.json`; (c) de-facto legacy — `/.well-known/mcp.json` | валидный JSON-card на любом ярусе; evidence называет ярус и путь | JSON-parse + идентифицирующие поля (name + url/servers/remotes); HTML/пустой объект → fail |
-| Capabilities | OAuth discovery — **две проверки, как у CF**: AS (RFC 8414) и PR (RFC 9728) | `/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource` | валидный JSON (N/A если нет авторизации) | обязательные поля спеки: `issuer` (8414) / `resource` (9728) |
-| Capabilities | Auth.md (конвенция CF) | путь снять с живого тула при калибровке (в блоге проверки нет) | 200 + markdown | тело не HTML |
+| Capabilities | OAuth discovery — **две проверки, как у CF**: AS (RFC 8414 + OIDC `openid-configuration` как равнозначный источник) и PR (RFC 9728) | `/.well-known/oauth-authorization-server` или `/.well-known/openid-configuration`; `/.well-known/oauth-protected-resource` | **калибровано 2026-07-30: отсутствие → fail** (CF: «No OAuth/OIDC discovery metadata found»; блоговое «N/A если нет авторизации» устарело) | обязательные поля спеки: `issuer` (8414/OIDC) / `resource` (9728); HTML под 200 ≈ отсутствие → fail |
+| Capabilities | Auth.md (конвенция CF) | путь НЕ подтверждён: все калибровочные референсы фейлят authMd с обеих сторон, наблюдать пробу живого тула не на чем — пересмотреть, когда появится сайт с auth.md | 200 + markdown + непустое тело | тело не HTML; пустой 200 → fail |
 | Capabilities | A2A Agent Card (off by default, как у CF) | `/.well-known/agent-card.json`, legacy `/.well-known/agent.json` (пути сверить при калибровке) | валидный JSON agent card | JSON-parse + идентифицирующие поля |
 | Capabilities | WebMCP | MAIN-world скрипт: `document.modelContext ?? navigator.modelContext` + детект полифилла `@mcp-b`; поздние регистрации тулов — наблюдателем | detected | origin-trial: отсутствие API в браузере юзера ≠ fail — статусы `detected` / `not detectable`; требует `scripting` (шипится со своей версией, §10) |
 | Commerce (unscored) | x402 / UCP / ACP / MPP / AP2 | `GET /.well-known/ucp`, `/.well-known/x402`; 402-флоу; ACP/MPP/AP2 — детект снять с калибровки | присутствует | JSON-parse well-known документов; 402 — по семантике ответа (`accepts[]`), не по коду в одиночку |
@@ -82,6 +82,14 @@ draft-serra-mcp-discovery-uri — `mcp-server`; в поле живёт legacy `m
 de-facto legacy): порядок проб внутри ярусов — деталь конфига, pass при любом
 валидном, evidence всегда называет, на каком ярусе и пути найдено. Состав ярусов
 обновляется конфигом (см. замечание по дрейфу ниже).
+
+Документированные расхождения с живым тулом (калибровка 2026-07-30, ALLOWLIST в
+`scripts/calibrate.mts`): мы принимаем de-facto формы карт (`mcpServers`-map,
+`serverInfo.name`) и legacy путь A2A `/.well-known/agent.json` — CF требует
+top-level `name`/`serverInfo.name` и пробит только `agent-card.json`, из-за чего
+фейлит собственный cloudflare.com по обеим проверкам. Это осознанная позиция
+(мы правее CF на их же данных), не баг; калибровочный CI ловит, если CF
+поменяет критерии.
 
 Замечание по soft-404: голый «200 = pass» ловит ложные пассы на SPA/edge-фоллбеках,
 которые отдают HTML-заглушку с 200 на любой путь (Vercel и GitHub отдают честные 404,

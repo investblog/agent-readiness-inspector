@@ -16,9 +16,18 @@ const OUT_DIR = path.join(process.cwd(), 'drift-out');
 const SOURCES = [
   // Cloudflare live tool: check-matrix composition via its scan API (unofficial —
   // CI-only calibration source per spec review; if it dies, that's a drift event too).
-  { id: 'isitagentready-matrix', type: 'scan', url: 'https://isitagentready.com/api/scan', target: 'https://spintax.net' },
+  {
+    id: 'isitagentready-matrix',
+    type: 'scan',
+    url: 'https://isitagentready.com/api/scan',
+    target: 'https://spintax.net',
+  },
   // Cloudflare docs (conventions our checks mirror)
-  { id: 'cf-markdown-for-agents', type: 'html', url: 'https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/' },
+  {
+    id: 'cf-markdown-for-agents',
+    type: 'html',
+    url: 'https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/',
+  },
   { id: 'cf-url-scanner', type: 'html', url: 'https://developers.cloudflare.com/radar/investigate/url-scanner/' },
   // Standards / conventions
   { id: 'contentsignals-org', type: 'html', url: 'https://contentsignals.org/' },
@@ -40,7 +49,10 @@ async function fetchText(url, init = {}) {
     const res = await fetch(url, {
       ...init,
       signal: ctrl.signal,
-      headers: { 'user-agent': 'agent-readiness-inspector drift-watch (github.com/investblog/agent-readiness-inspector)', ...init.headers },
+      headers: {
+        'user-agent': 'agent-readiness-inspector drift-watch (github.com/investblog/agent-readiness-inspector)',
+        ...init.headers,
+      },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.text();
@@ -72,16 +84,26 @@ async function normalize(src) {
     case 'html':
       return htmlToText(await fetchText(src.url));
     case 'datatracker': {
-      const json = JSON.parse(await fetchText(`https://datatracker.ietf.org/api/v1/doc/document/${src.name}/?format=json`));
+      const json = JSON.parse(
+        await fetchText(`https://datatracker.ietf.org/api/v1/doc/document/${src.name}/?format=json`),
+      );
       return `name: ${src.name}\nrev: ${json.rev}\nstate: ${json.states?.join(',') ?? ''}\nexpires: ${json.expires ?? ''}`;
     }
     case 'github-commit': {
-      const json = JSON.parse(await fetchText(`https://api.github.com/repos/${src.repo}/commits?per_page=1`, { headers: { accept: 'application/vnd.github+json' } }));
+      const json = JSON.parse(
+        await fetchText(`https://api.github.com/repos/${src.repo}/commits?per_page=1`, {
+          headers: { accept: 'application/vnd.github+json' },
+        }),
+      );
       const c = json[0];
       return `repo: ${src.repo}\nsha: ${c.sha}\ndate: ${c.commit?.committer?.date}\nmessage: ${(c.commit?.message ?? '').split('\n')[0]}`;
     }
     case 'github-pr': {
-      const pr = JSON.parse(await fetchText(`https://api.github.com/repos/${src.repo}/pulls/${src.pr}`, { headers: { accept: 'application/vnd.github+json' } }));
+      const pr = JSON.parse(
+        await fetchText(`https://api.github.com/repos/${src.repo}/pulls/${src.pr}`, {
+          headers: { accept: 'application/vnd.github+json' },
+        }),
+      );
       return `pr: ${src.repo}#${src.pr}\nstate: ${pr.state}\nmerged: ${pr.merged}\ntitle: ${pr.title}\nhead: ${pr.head?.sha}`;
     }
     case 'scan': {
@@ -100,7 +122,9 @@ async function normalize(src) {
         for (const checkId of Object.keys(group)) lines.push(`${category}/${checkId}`);
       }
       lines.sort();
-      return lines.length ? lines.join('\n') : `UNRECOGNIZED SHAPE, top-level keys: ${Object.keys(json).sort().join(', ')}`;
+      return lines.length
+        ? lines.join('\n')
+        : `UNRECOGNIZED SHAPE, top-level keys: ${Object.keys(json).sort().join(', ')}`;
     }
     default:
       throw new Error(`unknown type ${src.type}`);

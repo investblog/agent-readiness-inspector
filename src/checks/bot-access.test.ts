@@ -45,8 +45,14 @@ describe('robotsTxtAiRules check', () => {
     expect(r.status).toBe('pass');
   });
 
-  it('fails when only wildcard groups exist', () => {
+  it('passes wildcard-only groups (calibrated: CF counts rules applying to all crawlers)', () => {
     const r = run('robotsTxtAiRules', { [PROBE.robotsTxt]: { body: 'User-agent: *\nDisallow: /admin' } });
+    expect(r.status).toBe('pass');
+    expect(r.evidence).toContain('wildcard');
+  });
+
+  it('fails only when robots.txt has no user-agent groups at all', () => {
+    const r = run('robotsTxtAiRules', { [PROBE.robotsTxt]: { body: 'Content-Signal: search=yes' } });
     expect(r.status).toBe('fail');
   });
 
@@ -57,7 +63,7 @@ describe('robotsTxtAiRules check', () => {
   });
 });
 
-describe('webBotAuth check (detected-if-present, spec §3)', () => {
+describe('webBotAuth check (calibrated 2026-07-30, spec §3)', () => {
   it('passes on a valid JWKS with keys', () => {
     const r = run('webBotAuth', {
       [PROBE.webBotAuthDir]: { body: JSON.stringify({ keys: [{ kty: 'OKP' }] }) },
@@ -65,13 +71,13 @@ describe('webBotAuth check (detected-if-present, spec §3)', () => {
     expect(r.status).toBe('pass');
   });
 
-  it('passes an empty keys[] as valid (site signs nothing)', () => {
+  it('treats an empty keys[] as informational na (calibrated: CF neutral)', () => {
     const r = run('webBotAuth', { [PROBE.webBotAuthDir]: { body: '{"keys": []}' } });
-    expect(r.status).toBe('pass');
-    expect(r.evidence).toContain('empty keys[] is valid');
+    expect(r.status).toBe('na');
+    expect(r.evidence).toContain('informational');
   });
 
-  it('is na (not fail) when the directory is absent — calibration decides final semantics', () => {
+  it('is na (not fail) when the directory is absent — informational, CF neutral', () => {
     const r = run('webBotAuth', { [PROBE.webBotAuthDir]: { status: 404 } });
     expect(r.status).toBe('na');
     expect(run('webBotAuth', {}).status).toBe('na');

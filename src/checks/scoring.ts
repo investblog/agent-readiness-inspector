@@ -1,6 +1,7 @@
-// Scoring — spec §4. Composite = passed / applicable (check-weighted, verified
-// against the CF web-UI: spintax 11/14 = 79); `na` is excluded from the
-// denominator; unscored checks (commerce, info) never enter the composite.
+// Scoring — spec §4. Composite = passed / applicable (check-weighted — the
+// formula observed in the CF web-UI); `na` is excluded from the denominator;
+// unscored checks (commerce, info) never enter the composite. Levels are
+// calibrated against /api/scan (see LEVELS in config.ts).
 
 import type { CategoryId } from './config';
 import { LEVELS, type LevelBand } from './config';

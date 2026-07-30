@@ -71,10 +71,7 @@ fs.writeFileSync(
 
 fs.mkdirSync(path.dirname(OUT_PREVIEW), { recursive: true });
 const items = names
-  .map(
-    (n) =>
-      `<div class="item"><svg width="24" height="24"><use href="#i-mono-${n}"/></svg>${n}</div>`,
-  )
+  .map((n) => `<div class="item"><svg width="24" height="24"><use href="#i-mono-${n}"/></svg>${n}</div>`)
   .join('\n');
 fs.writeFileSync(
   OUT_PREVIEW,

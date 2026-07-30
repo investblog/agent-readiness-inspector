@@ -5,14 +5,13 @@ on:
     - cron: '17 6 * * *'
   workflow_dispatch:
 
-permissions:
-  contents: write
-  issues: write
-
 concurrency: drift-watch
 
 jobs:
   drift:
+    permissions:
+      contents: write
+      issues: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,3 +48,38 @@ jobs:
               gh issue create --title "$title" --label drift --body-file "drift-out/$id.md"
             fi
           done
+
+  calibration:
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Calibrate engine against the live tool
+        id: calibrate
+        run: npx tsx scripts/calibrate.mts --ci
+        continue-on-error: true
+
+      - name: File calibration issue on unexplained mismatch
+        if: steps.calibrate.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create drift --color D93F0B --description "Upstream source changed" 2>/dev/null || true
+          title="Calibration: unexplained divergence from isitagentready"
+          existing=$(gh issue list --label drift --state open --search "in:title \"$title\"" --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file "drift-out/calibration.md"
+          else
+            gh issue create --title "$title" --label drift --body-file "drift-out/calibration.md"
+          fi

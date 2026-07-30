@@ -10,8 +10,9 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const DEFAULT_ORIGINS = [
+export const DEFAULT_ORIGINS = [
   'https://spintax.net', // living reference (spec §9)
   'https://www.cloudflare.com', // scorer's own site, serves legacy mcp.json
   'https://github.com', // honest 404s + llms.txt
@@ -20,7 +21,7 @@ const DEFAULT_ORIGINS = [
 ];
 
 // key → request descriptor; mirrors src/checks/config.ts PROBE
-const PROBES = {
+export const PROBES = {
   '/': { path: '/' },
   '/::accept-markdown': { path: '/', headers: { accept: 'text/markdown' } },
   '/index.md': { path: '/index.md' },
@@ -40,6 +41,7 @@ const PROBES = {
   '/.well-known/mcp/server-cards.json': { path: '/.well-known/mcp/server-cards.json' },
   '/.well-known/mcp.json': { path: '/.well-known/mcp.json' },
   '/.well-known/oauth-authorization-server': { path: '/.well-known/oauth-authorization-server' },
+  '/.well-known/openid-configuration': { path: '/.well-known/openid-configuration' },
   '/.well-known/oauth-protected-resource': { path: '/.well-known/oauth-protected-resource' },
   '/.well-known/ucp': { path: '/.well-known/ucp' },
   '/.well-known/x402': { path: '/.well-known/x402' },
@@ -84,21 +86,30 @@ async function probe(origin, key, spec) {
   }
 }
 
-const origins = process.argv.slice(2).length > 0 ? process.argv.slice(2) : DEFAULT_ORIGINS;
-const outDir = path.join(process.cwd(), 'tests', 'fixtures');
-fs.mkdirSync(outDir, { recursive: true });
-
-for (const origin of origins) {
-  const host = new URL(origin).host.replace(/^www\./, '');
-  console.log(`[capture] ${origin}`);
+/** Probe every path for one origin; shared by fixture capture and calibration. */
+export async function captureOrigin(origin) {
   const responses = {};
   for (const [key, spec] of Object.entries(PROBES)) {
     const res = await probe(origin, key, spec);
     if (res) responses[key] = res;
     await new Promise((resolve) => setTimeout(resolve, 150)); // politeness
   }
-  const fixture = { origin, capturedAt: new Date().toISOString(), responses };
-  const file = path.join(outDir, `${host}.json`);
-  fs.writeFileSync(file, `${JSON.stringify(fixture, null, 2)}\n`, 'utf8');
-  console.log(`[capture] -> tests/fixtures/${host}.json (${Object.keys(responses).length} probes)`);
+  return responses;
+}
+
+const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isCli) {
+  const origins = process.argv.slice(2).length > 0 ? process.argv.slice(2) : DEFAULT_ORIGINS;
+  const outDir = path.join(process.cwd(), 'tests', 'fixtures');
+  fs.mkdirSync(outDir, { recursive: true });
+
+  for (const origin of origins) {
+    const host = new URL(origin).host.replace(/^www\./, '');
+    console.log(`[capture] ${origin}`);
+    const responses = await captureOrigin(origin);
+    const fixture = { origin, capturedAt: new Date().toISOString(), responses };
+    const file = path.join(outDir, `${host}.json`);
+    fs.writeFileSync(file, `${JSON.stringify(fixture, null, 2)}\n`, 'utf8');
+    console.log(`[capture] -> tests/fixtures/${host}.json (${Object.keys(responses).length} probes)`);
+  }
 }

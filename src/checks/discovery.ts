@@ -54,8 +54,10 @@ export const apiCatalog: CheckFn = (ctx) => {
   }
 };
 
-// discovery/authMd (Cloudflare convention; exact path pending M0-5 calibration —
-// spec §3). Pass: a markdown document describing auth at the probed path.
+// discovery/authMd (Cloudflare convention). Path UNCONFIRMED: every M0-5
+// calibration reference fails authMd on both sides, so the live tool's probe
+// path could not be observed — revisit when a site with auth.md appears
+// (spec §3). Pass: a markdown document describing auth at the probed path.
 export const authMd: CheckFn = (ctx) => {
   const res = ctx.responses.get(PROBE.authMd);
   if (res?.status !== 200) {
@@ -125,7 +127,11 @@ function isMcpCard(json: unknown): boolean {
   if (card.mcpServers !== null && typeof card.mcpServers === 'object' && !Array.isArray(card.mcpServers)) {
     if (Object.values(card.mcpServers as object).some(isMcpEntry)) return true;
   }
-  const hasIdentity = typeof card.name === 'string' || typeof card.title === 'string';
+  const serverInfo = card.serverInfo as Record<string, unknown> | undefined | null;
+  const hasIdentity =
+    typeof card.name === 'string' ||
+    typeof card.title === 'string' ||
+    (serverInfo !== null && typeof serverInfo === 'object' && typeof serverInfo.name === 'string');
   const hasEndpoint =
     typeof card.url === 'string' ||
     typeof card.endpoint === 'string' ||
@@ -161,38 +167,36 @@ export const mcpServerCard: CheckFn = (ctx) => {
   };
 };
 
-function oauthCheck(probe: string, requiredField: 'issuer' | 'resource'): CheckFn {
+// Calibrated (M0-5): the live CF tool FAILS missing OAuth/OIDC discovery
+// («No OAuth/OIDC discovery metadata found») — the blog-era "N/A if the site
+// has no authorization" no longer holds. HTML soft-404 ≈ absent → also fail.
+function oauthCheck(probes: readonly string[], requiredField: 'issuer' | 'resource'): CheckFn {
   return (ctx) => {
-    const outcome = classifyJsonProbe(ctx.responses.get(probe));
-    switch (outcome.kind) {
-      case 'absent':
-        // spec §3: N/A when the site has no authorization — absence is not a failure
-        return {
-          status: 'na',
-          evidence: `GET ${probe} → ${outcome.status ?? 'no response'} — no OAuth discovery (N/A if the site has no authorization)`,
-        };
-      case 'soft404':
-        return { status: 'na', evidence: `${probe} returns HTML under 200 — treated as absent (SPA fallback)` };
-      case 'invalid':
-        return { status: 'fail', evidence: `${probe} exists but is not valid JSON` };
-      case 'json': {
+    let broken: string | undefined;
+    for (const probe of probes) {
+      const outcome = classifyJsonProbe(ctx.responses.get(probe));
+      if (outcome.kind === 'json') {
         const value = (outcome.json as Record<string, unknown>)[requiredField];
-        if (typeof value !== 'string' || value.length === 0) {
-          return {
-            status: 'fail',
-            evidence: `${probe}: JSON lacks required "${requiredField}" (spec mandatory field)`,
-          };
+        if (typeof value === 'string' && value.length > 0) {
+          return { status: 'pass', evidence: `${probe}: ${requiredField} = ${value}` };
         }
-        return { status: 'pass', evidence: `${probe}: ${requiredField} = ${value}` };
+        broken ??= `${probe}: JSON lacks required "${requiredField}" (spec mandatory field)`;
+      } else if (outcome.kind === 'invalid') {
+        broken ??= `${probe} exists but is not valid JSON`;
       }
     }
+    return {
+      status: 'fail',
+      evidence: broken ?? `no OAuth/OIDC discovery metadata found (${probes.join(', ')}) — CF criterion: fail, not N/A`,
+    };
   };
 }
 
-// discovery/oauthDiscovery (RFC 8414) and discovery/oauthProtectedResource
+// discovery/oauthDiscovery (RFC 8414, with OIDC openid-configuration as an
+// equivalent source — CF checks both) and discovery/oauthProtectedResource
 // (RFC 9728) — two separate checks, mirroring CF (spec §3).
-export const oauthDiscovery: CheckFn = oauthCheck(PROBE.oauthAs, 'issuer');
-export const oauthProtectedResource: CheckFn = oauthCheck(PROBE.oauthPr, 'resource');
+export const oauthDiscovery: CheckFn = oauthCheck([PROBE.oauthAs, PROBE.oidcConfig], 'issuer');
+export const oauthProtectedResource: CheckFn = oauthCheck([PROBE.oauthPr], 'resource');
 
 // discovery/webMcp — in-page detection via the probe layer's MAIN-world script
 // (spec §3): detected → pass; confirmed not present → fail; detection layer
