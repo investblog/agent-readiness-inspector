@@ -12,6 +12,10 @@ export interface ProbeResponse {
   status: number;
   headers: Record<string, string>;
   body: string;
+  /** Where the response actually came from after redirects (res.url). */
+  finalUrl?: string;
+  /** True when the response was reached via redirect(s) — evidence honesty. */
+  redirected?: boolean;
 }
 
 /**
