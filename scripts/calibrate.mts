@@ -167,7 +167,7 @@ for (const origin of targets) {
       const line = `  ${tag} ${m.id}: ours=${m.ours} theirs=${m.theirs}${reason ? ` — ${reason}` : ''}`;
       console.log(line);
       reportLines.push(
-        `- **${tag}** \`${m.id}\`: ours \`${m.ours}\` vs theirs \`${m.theirs}\`` + (reason ? ` — ${reason}` : ''),
+        `- **${tag}** \`${m.id}\`: ours \`${m.ours}\` vs theirs \`${m.theirs}\`${reason ? ` — ${reason}` : ''}`,
         `  - ours: ${m.ourEvidence}`,
         `  - theirs: ${m.theirMessage}`,
       );
