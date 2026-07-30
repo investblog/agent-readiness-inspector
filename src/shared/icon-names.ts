@@ -17,5 +17,9 @@ export const ICON_NAMES = [
   'save',
   'saved',
   'dashboard',
+  'remove',
+  'add',
+  'tabs',
+  'close',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];

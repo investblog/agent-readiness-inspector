@@ -197,5 +197,93 @@
 	},
 	"savedSite": {
 		"message": "Saved — every scan is recorded to history"
+	},
+	"dashboardTitle": {
+		"message": "Dashboard — Agent Readiness Inspector"
+	},
+	"dashboardSubtitle": {
+		"message": "Saved sites, batch scans and score history"
+	},
+	"openDashboard": {
+		"message": "Open dashboard"
+	},
+	"addSitePlaceholder": {
+		"message": "https://example.com"
+	},
+	"addButton": {
+		"message": "Add"
+	},
+	"addOpenTabs": {
+		"message": "Add open tabs"
+	},
+	"scanAll": {
+		"message": "Scan all"
+	},
+	"cancel": {
+		"message": "Cancel"
+	},
+	"batchProgress": {
+		"message": "$DONE$ / $TOTAL$ scanned",
+		"placeholders": {
+			"done": {
+				"content": "$1"
+			},
+			"total": {
+				"content": "$2"
+			}
+		}
+	},
+	"colSite": {
+		"message": "Site"
+	},
+	"colTrend": {
+		"message": "Trend"
+	},
+	"colScore": {
+		"message": "Score"
+	},
+	"colLevel": {
+		"message": "Level"
+	},
+	"colLast": {
+		"message": "Last scan"
+	},
+	"emptyDashboard": {
+		"message": "No saved sites yet. Save the current site from the panel, add one above, or pull in your open tabs."
+	},
+	"neverScanned": {
+		"message": "not scanned"
+	},
+	"removeSiteAction": {
+		"message": "Remove site and its history"
+	},
+	"invalidOrigin": {
+		"message": "Enter a valid http(s) site, e.g. https://example.com"
+	},
+	"sparkTooltip": {
+		"message": "$COUNT$ scan(s), latest score $SCORE$",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			},
+			"score": {
+				"content": "$2"
+			}
+		}
+	},
+	"scanFailedShort": {
+		"message": "scan failed"
+	},
+	"dashboardHeading": {
+		"message": "Dashboard"
+	},
+	"colActions": {
+		"message": "Actions"
+	},
+	"cancelling": {
+		"message": "Cancelling…"
+	},
+	"noTabsToAdd": {
+		"message": "No scannable tabs found (open an http(s) page, or grant site access in Firefox)."
 	}
 }

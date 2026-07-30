@@ -140,9 +140,12 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  /* Darker semantic hues: #18C27A/#FFB347 fail AA contrast on light surfaces */
-  --success: #0E8A58;
-  --warning: #B45309;
+  /* Darker semantic hues: the dark-theme values (#18C27A/#FFB347/#FF4F6E) fail
+     contrast on light surfaces — #FF4F6E missed even the 3:1 non-text floor for
+     status icons. These pass AA 4.5:1 as tinted-badge text and 5.9–6.5:1 as icons. */
+  --success: #0A6E46;
+  --warning: #96450A;
+  --danger: #B01732;
 
   --bg: #FFFFFF;
   --bg-elevated: #F7F7F8;

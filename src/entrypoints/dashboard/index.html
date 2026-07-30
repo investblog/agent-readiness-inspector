@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Readiness Inspector — Dashboard</title>
+  </head>
+  <body>
+    <main class="dash">
+      <header class="dash-header">
+        <div class="dash-title">
+          <h1 data-i18n="dashboardHeading">Dashboard</h1>
+          <p class="dash-subtitle" data-i18n="dashboardSubtitle">Saved sites, batch scans and score history</p>
+        </div>
+        <button id="theme-toggle" type="button" class="icon-btn" data-i18n-title="toggleTheme"></button>
+      </header>
+
+      <section class="dash-toolbar">
+        <form id="add-form" class="add-form">
+          <!-- type=text (not url): normalizeOrigin owns validation and accepts
+               bare domains, native constraint validation would block them -->
+          <input
+            id="add-input"
+            type="text"
+            inputmode="url"
+            autocomplete="off"
+            spellcheck="false"
+            data-i18n-placeholder="addSitePlaceholder"
+            placeholder="https://example.com"
+          />
+          <button id="add-button" type="submit" class="btn"></button>
+        </form>
+        <button id="add-tabs" type="button" class="btn"></button>
+        <span class="toolbar-spacer"></span>
+        <span id="toolbar-note" class="toolbar-note" role="status" hidden></span>
+        <span id="batch-progress" class="batch-progress" role="status" hidden></span>
+        <button id="scan-all" type="button" class="btn btn--primary"></button>
+        <button id="batch-cancel" type="button" class="btn" hidden></button>
+      </section>
+
+      <section id="empty-state" class="dash-empty" hidden>
+        <p data-i18n="emptyDashboard">
+          No saved sites yet. Save the current site from the panel, add one above, or pull in your open tabs.
+        </p>
+      </section>
+
+      <table id="sites-table" class="sites-table" hidden>
+        <thead>
+          <tr>
+            <th scope="col" data-i18n="colSite">Site</th>
+            <th scope="col" data-i18n="colTrend">Trend</th>
+            <th scope="col" data-i18n="colScore">Score</th>
+            <th scope="col" data-i18n="colLevel">Level</th>
+            <th scope="col" data-i18n="colLast">Last scan</th>
+            <th scope="col" class="col-actions"><span class="sr-only" data-i18n="colActions">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="sites-body"></tbody>
+      </table>
+
+      <footer class="dash-footer">
+        <a
+          id="footer-brand"
+          href="https://301.st/?utm_source=agent-readiness-inspector&amp;utm_medium=extension&amp;utm_campaign=dashboard"
+          target="_blank"
+          rel="noreferrer noopener"
+          title="301.st — Smart Traffic"
+        >
+          <span data-i18n="craftedAt">Crafted at</span>
+        </a>
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

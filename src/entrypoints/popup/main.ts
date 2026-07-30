@@ -11,6 +11,7 @@ import { svg301Logo } from '@/shared/brand';
 import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
 import type { ScanResponse, ScanSuccess } from '@/shared/messaging';
+import { normalizeOrigin } from '@/shared/origin';
 import { storage } from '@/shared/storage';
 import { getStoreInfo } from '@/shared/store-links';
 import { initTheme, toggleTheme } from '@/shared/theme';
@@ -50,17 +51,12 @@ function showState(name: keyof typeof states): void {
 // ---- Target origin: explicit ?origin= (testability / deep links) or active tab ----
 
 async function resolveTargetOrigin(): Promise<string | null> {
+  // both paths go through the same validator: an origin can be persisted as a
+  // storage key and later rendered as a link by the dashboard
   const explicit = params.get('origin');
-  if (explicit) return explicit;
+  if (explicit) return normalizeOrigin(explicit);
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.url) return null;
-  try {
-    const url = new URL(tab.url);
-    if (url.protocol === 'http:' || url.protocol === 'https:') return url.origin;
-  } catch {
-    // fall through
-  }
-  return null;
+  return tab?.url ? normalizeOrigin(tab.url) : null;
 }
 
 // ---- Rendering ----
@@ -262,6 +258,8 @@ if (store) {
   rate.hidden = false;
 }
 
+$('open-dashboard').append(icon('dashboard', 16));
+$('open-dashboard').addEventListener('click', () => void browser.runtime.openOptionsPage());
 $('theme-toggle').append(icon('theme', 16));
 $('theme-toggle').addEventListener('click', toggleTheme);
 $('rescan').append(icon('scan', 16));

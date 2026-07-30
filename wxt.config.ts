@@ -31,6 +31,12 @@ export default defineConfig({
       128: 'icons/128.png',
     },
 
+    // Dashboard doubles as the options page, opened as a full tab (spec §6)
+    options_ui: {
+      page: 'dashboard.html',
+      open_in_tab: true,
+    },
+
     // Main surface (spec §6, RI model): one popup.html in two modes.
     // Chromium — side panel opened by the icon (default_popup dropped below);
     // Firefox — popup on click + the same HTML as a sidebar.

@@ -197,5 +197,93 @@
 	},
 	"savedSite": {
 		"message": "Сохранён — каждый скан пишется в историю"
+	},
+	"dashboardTitle": {
+		"message": "Дашборд — Agent Readiness Inspector"
+	},
+	"dashboardSubtitle": {
+		"message": "Сохранённые сайты, батч-сканы и история скора"
+	},
+	"openDashboard": {
+		"message": "Открыть дашборд"
+	},
+	"addSitePlaceholder": {
+		"message": "https://example.com"
+	},
+	"addButton": {
+		"message": "Добавить"
+	},
+	"addOpenTabs": {
+		"message": "Добавить открытые вкладки"
+	},
+	"scanAll": {
+		"message": "Сканировать все"
+	},
+	"cancel": {
+		"message": "Отмена"
+	},
+	"batchProgress": {
+		"message": "Просканировано $DONE$ / $TOTAL$",
+		"placeholders": {
+			"done": {
+				"content": "$1"
+			},
+			"total": {
+				"content": "$2"
+			}
+		}
+	},
+	"colSite": {
+		"message": "Сайт"
+	},
+	"colTrend": {
+		"message": "Тренд"
+	},
+	"colScore": {
+		"message": "Скор"
+	},
+	"colLevel": {
+		"message": "Уровень"
+	},
+	"colLast": {
+		"message": "Последний скан"
+	},
+	"emptyDashboard": {
+		"message": "Пока нет сохранённых сайтов. Сохраните текущий сайт из панели, добавьте вручную или подтяните открытые вкладки."
+	},
+	"neverScanned": {
+		"message": "не сканировался"
+	},
+	"removeSiteAction": {
+		"message": "Удалить сайт и его историю"
+	},
+	"invalidOrigin": {
+		"message": "Введите корректный http(s)-сайт, например https://example.com"
+	},
+	"sparkTooltip": {
+		"message": "Сканов: $COUNT$, последний скор $SCORE$",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			},
+			"score": {
+				"content": "$2"
+			}
+		}
+	},
+	"scanFailedShort": {
+		"message": "скан не удался"
+	},
+	"dashboardHeading": {
+		"message": "Дашборд"
+	},
+	"colActions": {
+		"message": "Действия"
+	},
+	"cancelling": {
+		"message": "Отменяю…"
+	},
+	"noTabsToAdd": {
+		"message": "Нет вкладок для сканирования (откройте http(s)-страницу или выдайте доступ к сайтам в Firefox)."
 	}
 }

@@ -31,6 +31,10 @@ const ICONS = {
   save: 'bookmark-plus-outline',
   saved: 'bookmark-check',
   dashboard: 'view-dashboard-outline',
+  remove: 'trash-can-outline',
+  add: 'plus',
+  tabs: 'tab-plus',
+  close: 'close',
 };
 
 const ROOT = process.cwd();

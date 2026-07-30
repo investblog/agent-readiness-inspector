@@ -1,0 +1,301 @@
+/* =========================================================
+   Dashboard — Agent Readiness Inspector (theme.css tokens)
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-body);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.dash {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 100vh;
+}
+
+/* ---- Header ---- */
+
+.dash-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.dash-title h1 {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+}
+
+.dash-subtitle {
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--bg-soft);
+  color: var(--text);
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- Toolbar ---- */
+
+.dash-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.add-form {
+  display: flex;
+  gap: var(--space-2);
+  flex: 1 1 320px;
+}
+
+.add-form input {
+  flex: 1;
+  min-width: 180px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) var(--border-style) var(--input-border, var(--border-strong));
+  border-radius: var(--radius);
+  background: var(--input-bg, var(--panel));
+  color: var(--text);
+  font: inherit;
+}
+
+.add-form input:focus {
+  outline: none;
+  border-color: var(--input-border-focus, var(--primary));
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) var(--border-style) var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  border-color: var(--primary);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn--primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background: var(--primary-hover);
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.batch-progress {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.toolbar-note {
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Empty state ---- */
+
+.dash-empty {
+  padding: var(--space-6);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---- Table ---- */
+
+.sites-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sites-table th {
+  text-align: left;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: var(--space-2) var(--space-2);
+  border-bottom: var(--border-width) var(--border-style) var(--border-strong);
+}
+
+.sites-table td {
+  padding: var(--space-2);
+  border-bottom: var(--border-width) var(--border-style) var(--border-subtle);
+  vertical-align: middle;
+}
+
+.site-link {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.site-link:hover {
+  color: var(--primary);
+}
+
+.spark-cell {
+  width: 132px;
+  color: var(--muted);
+}
+
+/* single-series micro-chart: one recessive hue; the value carries the number */
+.spark {
+  display: block;
+  color: var(--primary);
+}
+
+.score-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  padding: 2px var(--space-2);
+  border-radius: var(--r-pill);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 10% tint keeps badge text at AA 4.5:1 in light (and 5:1+ in dark) — a heavier
+   tint of the same hue eats the contrast the text needs. */
+.score-badge--good {
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
+}
+
+.score-badge--mid {
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning);
+}
+
+.score-badge--low {
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+}
+
+.level-cell,
+.last-cell {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
+.col-actions {
+  width: 76px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.row-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-subtle);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: dash-spin 0.8s linear infinite;
+}
+
+@keyframes dash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.row-error {
+  color: var(--danger);
+  font-size: var(--fs-xs);
+}
+
+/* ---- Footer ---- */
+
+.dash-footer {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: var(--border-width) var(--border-style) var(--border-subtle);
+  font-size: var(--fs-xs);
+}
+
+.dash-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.dash-footer a:hover {
+  color: var(--primary);
+}

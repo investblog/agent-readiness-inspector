@@ -61,6 +61,44 @@ try {
     await page.close();
   }
 
+  // ---- Dashboard scenario (M2-b): add a site, scan it, expect score + history ----
+  {
+    const page = await ctx.newPage();
+    await page.goto(`chrome-extension://${extensionId}/dashboard.html`);
+    try {
+      // two origins: exercises the batch worker pool, stagger and per-row state
+      for (const origin of ['https://spintax.net', 'https://vercel.com']) {
+        await page.fill('#add-input', origin);
+        await page.click('#add-button');
+      }
+      await page.waitForSelector('#sites-table:not([hidden])', { timeout: 10_000 });
+      const rowCount = await page.locator('#sites-body tr').count();
+      // two batch runs: the second gives history ≥ 2, which is what renders a trend
+      await page.click('#scan-all');
+      await page.waitForFunction(() => document.querySelectorAll('.score-badge').length === 2, undefined, {
+        timeout: 180_000,
+      });
+      await page.click('#scan-all');
+      await page.waitForFunction(() => document.querySelectorAll('.spark').length === 2, undefined, {
+        timeout: 180_000,
+      });
+      const scores = (await page.locator('.score-badge').allTextContents()).map(Number);
+      const sparkDots = await page.locator('.spark circle').count();
+      const batchIdle = await page.isHidden('#batch-progress');
+      const ok = rowCount === 2 && scores.length === 2 && scores.every((s) => s > 0) && sparkDots === 2 && batchIdle;
+      if (!ok) failures += 1;
+      console.log(
+        `[smoke] ${ok ? 'OK  ' : 'FAIL'} dashboard batch: rows=${rowCount} scores=${scores.join('/')} sparks=${sparkDots} idle=${batchIdle}`,
+      );
+    } catch (error) {
+      failures += 1;
+      console.error(`[smoke] FAIL dashboard: ${(error as Error).message}`);
+    }
+    await page.setViewportSize({ width: 1000, height: 700 });
+    await page.screenshot({ path: path.resolve('dev', 'smoke-dashboard.png'), fullPage: true });
+    await page.close();
+  }
+
   if (failures > 0) {
     console.error(`[smoke] ${failures} target(s) failed`);
     process.exitCode = 1;
