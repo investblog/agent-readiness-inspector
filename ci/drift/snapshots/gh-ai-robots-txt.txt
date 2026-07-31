@@ -1,4 +1,4 @@
 repo: ai-robots-txt/ai.robots.txt
-sha: 3db35be22d95e5502009abd6fa0530a457efc0fc
-date: 2026-07-30T11:15:55Z
-message: Merge pull request #241 from iamdhrv/fix/exact-spider-user-agent
+sha: 042d00a5ab67f60d5af89ceaa4f9ecdfa75d6c12
+date: 2026-07-31T02:35:15Z
+message: Merge pull request #249 from ai-robots-txt/test-ci
