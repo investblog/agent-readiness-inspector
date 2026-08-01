@@ -50,13 +50,31 @@ function showState(name: keyof typeof states): void {
 
 // ---- Target origin: explicit ?origin= (testability / deep links) or active tab ----
 
+/** The tab whose score the badge belongs to (null when there is none). */
+let currentTabId: number | null = null;
+
 async function resolveTargetOrigin(): Promise<string | null> {
   // both paths go through the same validator: an origin can be persisted as a
   // storage key and later rendered as a link by the dashboard
   const explicit = params.get('origin');
-  if (explicit) return normalizeOrigin(explicit);
-  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-  return tab?.url ? normalizeOrigin(tab.url) : null;
+  if (explicit) {
+    currentTabId = null;
+    return normalizeOrigin(explicit);
+  }
+  const tabs = await browser.tabs.query({ currentWindow: true });
+  const active = tabs.find((tab) => tab.active);
+  // In a real side panel the active tab is the page. When the panel is opened
+  // as a tab (dev, or the Firefox sidebar showing an extension page), the
+  // active "tab" is our own page — fall back to the most recently used real
+  // page in the window instead of claiming nothing is scannable.
+  const candidate =
+    active?.url && normalizeOrigin(active.url)
+      ? active
+      : [...tabs]
+          .filter((tab) => tab.url && normalizeOrigin(tab.url))
+          .sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0];
+  currentTabId = candidate?.id ?? null;
+  return candidate?.url ? normalizeOrigin(candidate.url) : null;
 }
 
 // ---- Rendering ----
@@ -203,7 +221,11 @@ async function scan(): Promise<void> {
   if (!currentOrigin) return;
   showState('scanning');
   try {
-    const response = (await browser.runtime.sendMessage({ type: 'scan', origin: currentOrigin })) as ScanResponse;
+    const response = (await browser.runtime.sendMessage({
+      type: 'scan',
+      origin: currentOrigin,
+      ...(currentTabId !== null ? { tabId: currentTabId } : {}),
+    })) as ScanResponse;
     if (!response || !('ok' in response)) throw new Error('no response from background');
     if (!response.ok) throw new Error(response.error);
     renderResults(response);
@@ -236,12 +258,64 @@ $('save-site').addEventListener('click', async () => {
   await renderSaveButton();
 });
 
+function showUnscannable(): void {
+  $('error-message').textContent = t('cannotScanPage');
+  $('retry-button').hidden = true;
+  $('target-origin').textContent = '';
+  showState('error');
+}
+
+/**
+ * Points the panel at the active tab. The side panel outlives navigation —
+ * the user switches tabs and expects the report to follow, so a changed origin
+ * rescans instead of leaving a stale verdict on screen. Scanning is deferred
+ * while the panel is hidden: no traffic for tabs the user never looked at
+ * through the panel.
+ */
+let pendingRescan = false;
+
+async function syncToActiveTab(): Promise<void> {
+  if (params.get('origin')) return; // deep-linked panel stays on its target
+  const origin = await resolveTargetOrigin();
+  if (origin === currentOrigin) return;
+
+  currentOrigin = origin;
+  await renderSaveButton(); // hides itself when there is no scannable origin
+  if (!origin) {
+    showUnscannable();
+    return;
+  }
+  $('target-origin').textContent = origin.replace(/^https?:\/\//, '');
+  $('retry-button').hidden = false;
+  if (document.visibilityState === 'visible') await scan();
+  else pendingRescan = true;
+}
+
+let syncTimer: ReturnType<typeof setTimeout> | undefined;
+function scheduleSync(): void {
+  clearTimeout(syncTimer); // debounce bursts of tab events
+  syncTimer = setTimeout(() => void syncToActiveTab(), 300);
+}
+
+browser.tabs.onActivated.addListener(scheduleSync);
+browser.tabs.onUpdated.addListener((_tabId, changeInfo) => {
+  // only navigation matters; title/favicon updates are noise
+  if (changeInfo.url) scheduleSync();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (pendingRescan) {
+    pendingRescan = false;
+    void scan();
+  } else {
+    scheduleSync();
+  }
+});
+
 async function bootstrap(): Promise<void> {
   currentOrigin = await resolveTargetOrigin();
   if (!currentOrigin) {
-    $('error-message').textContent = t('cannotScanPage');
-    $('retry-button').hidden = true;
-    showState('error');
+    showUnscannable();
     return;
   }
   $('target-origin').textContent = currentOrigin.replace(/^https?:\/\//, '');

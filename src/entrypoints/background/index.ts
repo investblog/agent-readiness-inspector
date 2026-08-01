@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
+import { clearBadge, setScoreBadge } from '@/background/badge';
 import { runWatchCycle, scheduleWatch, WATCH_ALARM } from '@/background/watch';
 import type { CheckId } from '@/checks';
 import { resolveCheckIds, runChecks, scoreResults } from '@/checks';
@@ -10,7 +11,7 @@ import type { SnapshotDiff } from '@/shared/regression';
 import { snapshotFromScan } from '@/shared/snapshots';
 import { storage } from '@/shared/storage';
 
-async function handleScan(origin: string, requestedInclude?: CheckId[]): Promise<ScanResponse> {
+async function handleScan(origin: string, requestedInclude?: CheckId[], tabId?: number): Promise<ScanResponse> {
   let parsed: URL;
   try {
     parsed = new URL(origin);
@@ -51,6 +52,10 @@ async function handleScan(origin: string, requestedInclude?: CheckId[]): Promise
       await store.appendSnapshot(parsed.origin, snapshotFromScan(scan));
     } catch (error) {
       console.warn('[agent-readiness] history write failed', error);
+    }
+    if (tabId !== undefined) {
+      const { composite, level, levelName } = scan.scorecard;
+      await setScoreBadge(browser.action, tabId, composite, `${t('extName')} — ${composite} · L${level} ${levelName}`);
     }
     return scan;
   } finally {
@@ -103,6 +108,12 @@ export default defineBackground(() => {
     )
     ?.catch((error: unknown) => console.warn('[agent-readiness] setUninstallURL failed', error));
 
+  // A score belongs to the page that produced it: drop the badge the moment
+  // the tab navigates, so the toolbar never shows a verdict for another page.
+  browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.url) void clearBadge(browser.action, tabId, t('extName'));
+  });
+
   // Watch mode (spec §7). The alarm is re-created on every SW start: Chrome can
   // drop alarms across extension updates, and create() replaces by name.
   void scheduleWatch().catch((error: unknown) => console.warn('[agent-readiness] scheduleWatch failed', error));
@@ -133,7 +144,7 @@ export default defineBackground(() => {
         .then(() => undefined);
     }
     if (!isScanRequest(message)) return undefined;
-    return handleScan(message.origin, message.include).catch(
+    return handleScan(message.origin, message.include, message.tabId).catch(
       (error: unknown): ScanResponse => ({
         ok: false,
         error: error instanceof Error ? error.message : String(error),

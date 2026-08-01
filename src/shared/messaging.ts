@@ -14,6 +14,11 @@ export interface ScanRequest {
    * reports are compared rather than showing up as "only theirs".
    */
   include?: CheckId[];
+  /**
+   * Tab this scan describes, when there is one. The background paints the
+   * score on that tab's toolbar badge; batch and watch scans omit it.
+   */
+  tabId?: number;
 }
 
 export interface ScanSuccess {

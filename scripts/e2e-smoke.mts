@@ -61,6 +61,51 @@ try {
     await page.close();
   }
 
+  // ---- Panel follows the active tab, and paints the score on the toolbar ----
+  {
+    const site = await ctx.newPage();
+    await site.goto('https://vercel.com', { waitUntil: 'domcontentloaded' });
+    const panel = await ctx.newPage();
+    // no ?origin=: this is how Chrome opens the real side panel
+    await panel.goto(`chrome-extension://${extensionId}/popup.html?sidepanel=1`);
+    try {
+      await panel.waitForSelector('#state-results:not([hidden])', { timeout: 120_000 });
+      const first = (await panel.textContent('#target-origin'))?.trim();
+
+      // the user navigates the content tab — the panel must follow it
+      await site.bringToFront();
+      await site.goto('https://spintax.net', { waitUntil: 'domcontentloaded' });
+      await panel.bringToFront();
+      await panel.waitForFunction(
+        () => document.getElementById('target-origin')?.textContent?.includes('spintax'),
+        undefined,
+        { timeout: 60_000 },
+      );
+      await panel.waitForFunction(() => Number(document.getElementById('score-value')?.textContent) > 50, undefined, {
+        timeout: 120_000,
+      });
+      const second = (await panel.textContent('#target-origin'))?.trim();
+      const score = Number(await panel.textContent('#score-value'));
+
+      const badge = await worker.evaluate(async () => {
+        const tabs = await chrome.tabs.query({ url: 'https://spintax.net/*' });
+        const id = tabs[0]?.id;
+        return id === undefined ? null : await chrome.action.getBadgeText({ tabId: id });
+      });
+
+      const ok = first === 'vercel.com' && second === 'spintax.net' && badge === String(score);
+      if (!ok) failures += 1;
+      console.log(
+        `[smoke] ${ok ? 'OK  ' : 'FAIL'} panel follows tabs: ${first} -> ${second} score=${score} badge=${badge}`,
+      );
+    } catch (error) {
+      failures += 1;
+      console.error(`[smoke] FAIL panel follows tabs: ${(error as Error).message}`);
+    }
+    await panel.close();
+    await site.close();
+  }
+
   // ---- Dashboard scenario (M2-b): add a site, scan it, expect score + history ----
   {
     const page = await ctx.newPage();
