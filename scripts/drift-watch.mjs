@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+const NEWLINE = '\n';
 const SNAP_DIR = path.join(process.cwd(), 'ci', 'drift', 'snapshots');
 const OUT_DIR = path.join(process.cwd(), 'drift-out');
 
@@ -38,7 +39,14 @@ const SOURCES = [
   { id: 'ietf-mcp-discovery-uri', type: 'datatracker', name: 'draft-serra-mcp-discovery-uri' },
   // GitHub-hosted specs / lists (latest commit is the signal)
   { id: 'gh-agent-skills-rfc', type: 'github-commit', repo: 'cloudflare/agent-skills-discovery-rfc' },
-  { id: 'gh-ai-robots-txt', type: 'github-commit', repo: 'ai-robots-txt/ai.robots.txt' },
+  // content, not commits: this repo pushes CI/readme commits constantly, and
+  // what we actually track is the set of agent names (a new bot shows up as an
+  // added line in the issue, which is the signal we can act on)
+  {
+    id: 'gh-ai-robots-txt',
+    type: 'json-keys',
+    url: 'https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json',
+  },
   { id: 'mcp-sep-2127', type: 'github-pr', repo: 'modelcontextprotocol/modelcontextprotocol', pr: 2127 },
 ];
 
@@ -105,6 +113,10 @@ async function normalize(src) {
         }),
       );
       return `pr: ${src.repo}#${src.pr}\nstate: ${pr.state}\nmerged: ${pr.merged}\ntitle: ${pr.title}\nhead: ${pr.head?.sha}`;
+    }
+    case 'json-keys': {
+      const json = JSON.parse(await fetchText(src.url));
+      return Object.keys(json).sort().join(NEWLINE);
     }
     case 'scan': {
       const body = await fetchText(src.url, {
