@@ -112,6 +112,18 @@ export async function runWatchCycle(deps: WatchDeps): Promise<{ scanned: string[
     }
     const signature = regressionSignature(diff, snapshot);
     if (site.lastAlertSignature === signature) continue; // already announced, still broken
+
+    // Inbox first, notification second: the notifications permission is
+    // optional, so the recorded alert — not the toast — is what everyone gets.
+    await store.addAlert({
+      id: `${origin}|${signature}`,
+      origin,
+      at: now(),
+      signature,
+      levelDelta: diff.levelDelta,
+      compositeDelta: diff.compositeDelta,
+      regressions: [...diff.regressions],
+    });
     try {
       await notify(origin, diff);
     } catch (error) {

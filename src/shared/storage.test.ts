@@ -3,7 +3,14 @@ import type { CheckId, CheckStatus } from '@/checks';
 import { MATRIX, resolveCheckIds } from '@/checks';
 import type { ScanSuccess } from './messaging';
 import { snapshotFromScan } from './snapshots';
-import { MAX_SNAPSHOTS_PER_SITE, SCHEMA_VERSION, type ScanSnapshot, StorageLayer } from './storage';
+import {
+  MAX_ALERTS,
+  MAX_SNAPSHOTS_PER_SITE,
+  SCHEMA_VERSION,
+  type ScanSnapshot,
+  StorageLayer,
+  type WatchAlert,
+} from './storage';
 import { FakeArea } from './test-support';
 
 const ORIGIN = 'https://example.com';
@@ -144,5 +151,84 @@ describe('snapshotFromScan', () => {
     const bytes = JSON.stringify(snapshot).length;
     // plan m2-dashboard.md: ~1KB per snapshot budgets 100 sites × 50 snapshots ≈ 5MB
     expect(bytes).toBeLessThan(1024);
+  });
+});
+
+describe('alert inbox (v3)', () => {
+  const alert = (id: string, origin = ORIGIN, at = 1): WatchAlert => ({
+    id,
+    origin,
+    at,
+    signature: 'robotsTxt|L3',
+    levelDelta: -1,
+    compositeDelta: -12,
+    regressions: ['robotsTxt' as CheckId],
+  });
+
+  it('counts only the unread ones', async () => {
+    const { store } = layer();
+    await store.addAlert(alert('a'));
+    await store.addAlert(alert('b'));
+    expect(await store.countUnreadAlerts()).toBe(2);
+    await store.markAlertsRead(['a']);
+    expect(await store.countUnreadAlerts()).toBe(1);
+  });
+
+  it('markAlertsRead reports how many it actually changed', async () => {
+    const { store } = layer();
+    await store.addAlert(alert('a'));
+    expect(await store.markAlertsRead()).toBe(1);
+    expect(await store.markAlertsRead()).toBe(0); // nothing left to mark
+  });
+
+  it('a repeat of the same id resurfaces as unread (re-occurrence, not a duplicate)', async () => {
+    const { store } = layer();
+    await store.addAlert(alert('a', ORIGIN, 1));
+    await store.markAlertsRead();
+    await store.addAlert(alert('a', ORIGIN, 2));
+    const alerts = await store.getAlerts();
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0].at).toBe(2);
+    expect(await store.countUnreadAlerts()).toBe(1);
+  });
+
+  it('keeps the newest MAX_ALERTS', async () => {
+    const { store } = layer();
+    for (let i = 0; i < MAX_ALERTS + 5; i++) await store.addAlert(alert(`a${i}`, ORIGIN, i));
+    const alerts = await store.getAlerts();
+    expect(alerts).toHaveLength(MAX_ALERTS);
+    expect(alerts[0].id).toBe('a5');
+  });
+
+  it('removing a site takes its alerts with it (no badge for a site that is gone)', async () => {
+    const { store } = layer();
+    await store.addSite(ORIGIN);
+    await store.addAlert(alert('a'));
+    await store.addAlert(alert('b', 'https://other.example'));
+    await store.removeSite(ORIGIN);
+    expect((await store.getAlerts()).map((a) => a.id)).toEqual(['b']);
+  });
+
+  it('dismiss and clear', async () => {
+    const { store } = layer();
+    await store.addAlert(alert('a'));
+    await store.addAlert(alert('b'));
+    await store.dismissAlert('a');
+    expect((await store.getAlerts()).map((x) => x.id)).toEqual(['b']);
+    await store.clearAlerts();
+    expect(await store.getAlerts()).toEqual([]);
+  });
+});
+
+describe('browsing settings (v3)', () => {
+  it('auto-scan is off by default — browsing must not generate traffic unasked', async () => {
+    const { store } = layer();
+    expect(await store.getBrowsingSettings()).toEqual({ autoScan: false, scoreBadge: true, alertBadge: true });
+  });
+
+  it('resolves defaults for a partially written block', async () => {
+    const { store } = layer();
+    await store.updateSettings({ browsing: { autoScan: true } });
+    expect(await store.getBrowsingSettings()).toEqual({ autoScan: true, scoreBadge: true, alertBadge: true });
   });
 });

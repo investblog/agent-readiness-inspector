@@ -459,6 +459,96 @@ body {
   letter-spacing: 0.03em;
 }
 
+/* ---- Alert inbox (plan m3.5) ---- */
+
+.alerts {
+  border: var(--border-width) var(--border-style) var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-soft);
+  padding: var(--space-3) var(--space-4);
+}
+
+.alerts-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.alerts-header h2 {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+.alerts-header .btn {
+  margin-left: auto;
+}
+
+.alerts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.alert-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  /* transparent, not absent: the --new state swaps the colour without the row
+     shifting by 3px */
+  border-left: 3px solid transparent;
+}
+
+.alert-row--new {
+  border-left-color: var(--primary);
+  background: var(--notice-info-bg);
+}
+
+.alert-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.alert-new {
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--primary) 14%, var(--bg));
+  color: var(--notice-info-fg);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.alert-time {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+
+.alert-text {
+  margin: 2px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-soft, var(--text));
+}
+
+.alert-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
 /* ---- 301.st promo (own UI only — never injected into pages, spec §9) ---- */
 
 .promo {

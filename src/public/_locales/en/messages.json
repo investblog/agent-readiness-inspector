@@ -486,5 +486,43 @@
 	},
 	"promoCta": {
 		"message": "Try 301.st for free"
+	},
+	"settingsBrowsing": {
+		"message": "While browsing"
+	},
+	"settingsBrowsingHint": {
+		"message": "What the extension does on the pages you open, and what the toolbar icon shows."
+	},
+	"browseAutoScan": {
+		"message": "Scan pages as I browse"
+	},
+	"browseAutoScanHint": {
+		"message": "Off by default: this sends the same requests a manual scan does, once for every site you open. History is still recorded only for saved sites."
+	},
+	"badgeScore": {
+		"message": "Show the current page's score on the icon"
+	},
+	"badgeAlerts": {
+		"message": "Show unread monitoring alerts on the icon"
+	},
+	"badgeAlertsTitle": {
+		"message": "Monitoring: $COUNT$ unread",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			}
+		}
+	},
+	"alertsHeading": {
+		"message": "Monitoring"
+	},
+	"alertsClear": {
+		"message": "Clear all"
+	},
+	"alertsNew": {
+		"message": "new"
+	},
+	"alertDismiss": {
+		"message": "Dismiss"
 	}
 }

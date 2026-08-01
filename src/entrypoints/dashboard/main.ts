@@ -25,7 +25,7 @@ import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
 import type { ScanResponse } from '@/shared/messaging';
 import { isSafeOrigin, normalizeOrigin } from '@/shared/origin';
-import type { ScanSnapshot, SiteMeta } from '@/shared/storage';
+import type { BrowsingSettings, ScanSnapshot, SiteMeta, WatchAlert } from '@/shared/storage';
 import { storage } from '@/shared/storage';
 import { initTheme, toggleTheme } from '@/shared/theme';
 
@@ -537,6 +537,7 @@ async function removeSite(origin: string): Promise<void> {
   rows.delete(origin);
   rowUi.delete(origin);
   renderTable();
+  await renderAlerts(); // storage dropped this site's alerts with it
 }
 
 async function addOpenTabs(): Promise<void> {
@@ -602,6 +603,157 @@ async function renderWatchSettings(): Promise<void> {
   // the checkbox alone would lie: notifications need the optional permission
   note.hidden = !notify || granted;
   note.textContent = t('watchPermissionMissing');
+}
+
+// ---- Alert inbox (plan m3.5) ----
+
+/**
+ * "Read" means "shown to the user": rendering the list clears the badge. The
+ * rows that were unread at that moment stay highlighted for the rest of this
+ * visit — the badge is the notification, the highlight is the information, and
+ * losing the second one the instant the first clears is what makes inboxes
+ * feel like they swallow things.
+ */
+const highlighted = new Set<string>();
+/** Ids waiting to be marked read — a background tab has not shown anything yet. */
+const pendingRead = new Set<string>();
+
+function alertText(alert: WatchAlert): string {
+  if (alert.regressions.length > 0) {
+    return t(
+      'alertChecksRegressed',
+      String(alert.regressions.length),
+      alert.regressions.map((id) => t(`check_${id}`)).join(', '),
+    );
+  }
+  return t('alertLevelDropped', String(Math.abs(alert.levelDelta)));
+}
+
+function alertRow(alert: WatchAlert): HTMLLIElement {
+  const li = document.createElement('li');
+  li.className = 'alert-row';
+  li.classList.toggle('alert-row--new', highlighted.has(alert.id));
+
+  const main = document.createElement('div');
+  main.className = 'alert-main';
+
+  const head = document.createElement('div');
+  head.className = 'alert-head';
+  const host = alert.origin.replace(/^https?:\/\//, '');
+  if (isSafeOrigin(alert.origin)) {
+    const link = document.createElement('a');
+    link.href = alert.origin;
+    link.target = '_blank';
+    link.rel = 'noreferrer noopener';
+    link.className = 'site-link';
+    link.textContent = host;
+    head.append(link);
+  } else {
+    const plain = document.createElement('span');
+    plain.className = 'site-link';
+    plain.textContent = host;
+    head.append(plain);
+  }
+  if (highlighted.has(alert.id)) {
+    const chip = document.createElement('span');
+    chip.className = 'alert-new';
+    chip.textContent = t('alertsNew');
+    head.append(chip);
+  }
+  const when = document.createElement('span');
+  when.className = 'alert-time';
+  when.textContent = new Date(alert.at).toLocaleString();
+  head.append(when);
+  main.append(head);
+
+  const text = document.createElement('p');
+  text.className = 'alert-text';
+  text.textContent = alertText(alert);
+  main.append(text);
+  li.append(main);
+
+  const actions = document.createElement('div');
+  actions.className = 'alert-actions';
+  const rescan = document.createElement('button');
+  rescan.type = 'button';
+  rescan.className = 'icon-btn';
+  rescan.title = t('rescan');
+  rescan.setAttribute('aria-label', `${t('rescan')} ${host}`);
+  rescan.append(icon('scan', 15));
+  // no disabled state here: this list is not re-rendered on batch progress, so
+  // one would go stale, and scanOne already refuses what it cannot run
+  rescan.addEventListener('click', () => void scanOne(alert.origin));
+  const dismiss = document.createElement('button');
+  dismiss.type = 'button';
+  dismiss.className = 'icon-btn';
+  dismiss.title = t('alertDismiss');
+  dismiss.setAttribute('aria-label', `${t('alertDismiss')} ${host}`);
+  dismiss.append(icon('close', 15));
+  dismiss.addEventListener('click', () => void dismissAlert(alert.id));
+  actions.append(rescan, dismiss);
+  li.append(actions);
+  return li;
+}
+
+async function renderAlerts(): Promise<void> {
+  const store = await storage();
+  const alerts = (await store.getAlerts()).sort((a, b) => b.at - a.at);
+  for (const alert of alerts) {
+    if (alert.readAt === undefined) {
+      highlighted.add(alert.id);
+      pendingRead.add(alert.id);
+    }
+  }
+  const list = $('alerts-list');
+  list.replaceChildren();
+  for (const alert of alerts) list.append(alertRow(alert));
+  $('alerts').hidden = alerts.length === 0;
+  await flushRead();
+}
+
+/**
+ * Marking read is deliberately gated on the page being in front. `hasFocus`
+ * on top of `visibilityState`: a dashboard parked on a second monitor is
+ * "visible" to the browser while nobody is looking at it, and reading an alert
+ * nobody saw is exactly the failure this gate exists to prevent.
+ */
+async function flushRead(): Promise<void> {
+  if (document.visibilityState !== 'visible' || !document.hasFocus() || pendingRead.size === 0) return;
+  const ids = [...pendingRead];
+  pendingRead.clear();
+  // no re-render: the rows already show their highlight, which outlives the
+  // read state on purpose
+  await (await storage()).markAlertsRead(ids);
+}
+
+async function dismissAlert(id: string): Promise<void> {
+  highlighted.delete(id);
+  pendingRead.delete(id);
+  await (await storage()).dismissAlert(id);
+  await renderAlerts();
+}
+
+async function clearAlerts(): Promise<void> {
+  highlighted.clear();
+  pendingRead.clear();
+  await (await storage()).clearAlerts();
+  await renderAlerts();
+}
+
+// ---- Settings: while browsing (auto-scan + badge, plan m3.5) ----
+
+async function renderBrowsingSettings(): Promise<void> {
+  const { autoScan, scoreBadge, alertBadge } = await (await storage()).getBrowsingSettings();
+  ($('browse-autoscan') as HTMLInputElement).checked = autoScan;
+  ($('badge-score') as HTMLInputElement).checked = scoreBadge;
+  ($('badge-alerts') as HTMLInputElement).checked = alertBadge;
+}
+
+/** The background watches storage, so saving is all the notification needed. */
+async function updateBrowsing(patch: Partial<BrowsingSettings>): Promise<void> {
+  const store = await storage();
+  await store.updateSettings({ browsing: { ...(await store.getBrowsingSettings()), ...patch } });
+  setToolbarNote(t('settingsSaved'));
 }
 
 // ---- Settings: optional checks ----
@@ -751,6 +903,28 @@ $('batch-cancel').addEventListener('click', () => {
   setToolbarNote(t('settingsSaved'));
 });
 
+$('alerts-clear').append(icon('close', 14), document.createTextNode(t('alertsClear')));
+$('alerts-clear').addEventListener('click', () => void clearAlerts());
+document.addEventListener('visibilitychange', () => void flushRead());
+window.addEventListener('focus', () => void flushRead()); // came back to this window
+
+($('browse-autoscan') as HTMLInputElement).addEventListener('change', (event) => {
+  void updateBrowsing({ autoScan: (event.target as HTMLInputElement).checked });
+});
+($('badge-score') as HTMLInputElement).addEventListener('change', (event) => {
+  void updateBrowsing({ scoreBadge: (event.target as HTMLInputElement).checked });
+});
+($('badge-alerts') as HTMLInputElement).addEventListener('change', (event) => {
+  void updateBrowsing({ alertBadge: (event.target as HTMLInputElement).checked });
+});
+
+// a watch cycle can land while this page is open — show it without a reload.
+// (Our own read/dismiss writes re-enter here once and then settle: everything
+// is already read, so nothing new is written.)
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && 'alerts' in changes) void renderAlerts();
+});
+
 $('cf-save').append(document.createTextNode(t('cfSave')));
 $('cf-clear').append(document.createTextNode(t('cfClear')));
 ($('cf-form') as HTMLFormElement).addEventListener('submit', (event) => {
@@ -762,7 +936,9 @@ $('cf-clear').addEventListener('click', () => void clearCfCreds());
 void (async () => {
   await loadCfCreds();
   await renderCheckToggles();
+  await renderBrowsingSettings();
   await renderWatchSettings();
   await loadState();
   renderTable();
+  await renderAlerts(); // after loadState: rows drive the per-alert rescan button
 })();

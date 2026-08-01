@@ -144,6 +144,78 @@ try {
     await page.close();
   }
 
+  // ---- Shared helpers for the watch / badge scenarios ----
+  const sw = (): typeof worker => ctx?.serviceWorkers()[0] ?? worker;
+  const poll = async <T,>(read: () => Promise<T>, done: (value: T) => boolean, ms: number): Promise<T> => {
+    const deadline = Date.now() + ms;
+    let value = await read();
+    while (!done(value) && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      value = await read();
+    }
+    return value;
+  };
+  const globalBadge = (): Promise<string> => sw().evaluate(() => chrome.action.getBadgeText({}));
+  /** Text, colour and title of one tab's badge — all three are separate overrides. */
+  const tabBadge = (pattern: string): Promise<{ text: string; color: number[]; title: string }> =>
+    sw().evaluate(async (urlPattern) => {
+      const tabs = await chrome.tabs.query({ url: urlPattern });
+      const tabId = tabs[0]?.id;
+      if (tabId === undefined) return { text: 'no-tab', color: [], title: '' };
+      return {
+        text: await chrome.action.getBadgeText({ tabId }),
+        color: (await chrome.action.getBadgeBackgroundColor({ tabId })) as unknown as number[],
+        title: await chrome.action.getTitle({ tabId }),
+      };
+    }, pattern);
+  const ALERT_RGBA = [29, 78, 216, 255]; // #1D4ED8, the alert colour in badge.ts
+
+  // ---- Auto-scan arms the icon (M3.5) — its tab stays open for the badge scenarios ----
+  const site = await ctx.newPage();
+  try {
+    // vercel.com was scanned by earlier blocks, so its cached score would paint
+    // the badge without auto-scan running at all — drop the cache first
+    const reset = async (autoScan: boolean): Promise<void> => {
+      await sw().evaluate(async (on) => {
+        await chrome.storage.session.remove('scoreCache');
+        const { settings = {} } = await chrome.storage.local.get('settings');
+        await chrome.storage.local.set({ settings: { ...settings, browsing: { autoScan: on } } });
+      }, autoScan);
+    };
+
+    // OFF by default is the feature's central privacy promise: browsing must
+    // generate no scan at all. Assert the promise, not just the stored value.
+    await reset(false);
+    await site.bringToFront();
+    await site.goto('https://vercel.com', { waitUntil: 'domcontentloaded' });
+    const quiet = await poll(
+      () => tabBadge('https://vercel.com/*').then((b) => b.text),
+      (text) => text !== '', // any paint at all fails the promise
+      20_000,
+    );
+    const cachedWhileOff = await sw().evaluate(async () => {
+      const { scoreCache = {} } = await chrome.storage.session.get('scoreCache');
+      return Object.keys(scoreCache as Record<string, unknown>).length;
+    });
+
+    await reset(true);
+    await site.reload({ waitUntil: 'domcontentloaded' });
+    const badge = await poll(
+      () => tabBadge('https://vercel.com/*').then((b) => b.text),
+      (text) => /^\d+$/.test(text),
+      120_000,
+    );
+
+    const ok = quiet === '' && cachedWhileOff === 0 && /^\d+$/.test(badge);
+    if (!ok) failures += 1;
+    console.log(
+      `[smoke] ${ok ? 'OK  ' : 'FAIL'} auto-scan: off->badge="${quiet}" cached=${cachedWhileOff}; on->badge="${badge}"`,
+    );
+  } catch (error) {
+    failures += 1;
+    console.error(`[smoke] FAIL auto-scan: ${(error as Error).message}`);
+  }
+
   // ---- Watch scenario (M3): a planted baseline must produce a regression alert ----
   {
     const page = await ctx.newPage();
@@ -159,6 +231,11 @@ try {
         const a = await chrome.alarms.get('agent-readiness:watch');
         return a ? a.periodInMinutes : null;
       });
+
+      // close the dashboard BEFORE the alert lands: an open dashboard marks
+      // alerts read on arrival (by design), which would leave the next scenario
+      // nothing unread to look at
+      await page.close();
 
       // plant a perfect past so the next real scan is unambiguously a regression
       await worker.evaluate(async (target) => {
@@ -178,7 +255,7 @@ try {
       let signature: string | undefined;
       const deadline = Date.now() + 120_000;
       while (Date.now() < deadline && !signature) {
-        await page.waitForTimeout(3000);
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // the page is gone; don't wait through it
         signature = await worker.evaluate(async (target) => {
           const { sites } = await chrome.storage.local.get('sites');
           return sites?.[target as string]?.lastAlertSignature || undefined;
@@ -191,9 +268,89 @@ try {
     } catch (error) {
       failures += 1;
       console.error(`[smoke] FAIL watch: ${(error as Error).message}`);
+      await page.close();
     }
+  }
+
+  // ---- Alert badge: precedence over a painted score, style, read-marking (M3.5) ----
+  {
+    // the watch scenario above left a REAL alert in the inbox, and the vercel
+    // tab is showing a real auto-scan score — exactly the collision the
+    // precedence rule exists for
+    const alerted = await poll(globalBadge, (text) => /^!\d/.test(text), 60_000);
+    const onScored = await poll(
+      () => tabBadge('https://vercel.com/*'),
+      (b) => /^!\d/.test(b.text),
+      30_000,
+    );
+    // all three per-tab overrides must belong to the alert, not to the score.
+    // The expected tooltip is asked of the extension itself — hardcoding English
+    // would fail the moment the browser runs in another UI locale.
+    const unread = alerted.replace('!', ''); // the count the badge is actually claiming
+    const expectedTitle = await sw().evaluate((count) => chrome.i18n.getMessage('badgeAlertsTitle', [count]), unread);
+    const styled =
+      /^!\d/.test(onScored.text) &&
+      JSON.stringify(onScored.color) === JSON.stringify(ALERT_RGBA) &&
+      onScored.title === expectedTitle;
+
+    const page = await ctx.newPage();
+    await page.goto(`chrome-extension://${extensionId}/dashboard.html`);
+    try {
+      await page.bringToFront(); // reading is gated on focus, not just visibility
+      // opening the inbox is what marks it read: the badge clears...
+      await page.waitForSelector('#alerts:not([hidden])', { timeout: 15_000 });
+      const rows = await page.locator('.alert-row').count();
+      const highlighted = await page.locator('.alert-row--new').count();
+      const cleared = await poll(globalBadge, (text) => text === '', 30_000);
+
+      // ...while the rows stay marked as new for this visit
+      const stillHighlighted = await page.locator('.alert-row--new').count();
+      // ...and the browsing tab gets its score back
+      const restored = await poll(
+        () => tabBadge('https://vercel.com/*'),
+        (b) => /^\d+$/.test(b.text),
+        30_000,
+      );
+
+      const ok =
+        /^!\d/.test(alerted) &&
+        styled &&
+        rows > 0 &&
+        highlighted > 0 &&
+        cleared === '' &&
+        stillHighlighted > 0 &&
+        /^\d+$/.test(restored.text);
+      if (!ok) failures += 1;
+      console.log(
+        `[smoke] ${ok ? 'OK  ' : 'FAIL'} alert badge: global="${alerted}" on-scored-tab="${onScored.text}" styled=${styled} -> cleared="${cleared}" score-back="${restored.text}" rows=${rows} new=${highlighted}/${stillHighlighted}`,
+      );
+    } catch (error) {
+      failures += 1;
+      console.error(`[smoke] FAIL alert badge: ${(error as Error).message}`);
+    }
+    await page.screenshot({ path: path.resolve('dev', 'smoke-alerts.png'), fullPage: true });
     await page.close();
   }
+  try {
+    await sw().evaluate(async () => {
+      const { settings = {} } = await chrome.storage.local.get('settings');
+      await chrome.storage.local.set({
+        settings: { ...settings, browsing: { autoScan: true, scoreBadge: false } },
+      });
+    });
+    const afterOff = await poll(
+      () => tabBadge('https://vercel.com/*').then((b) => b.text),
+      (t) => t === '',
+      30_000,
+    );
+    const ok = afterOff === '';
+    if (!ok) failures += 1;
+    console.log(`[smoke] ${ok ? 'OK  ' : 'FAIL'} score badge off clears painted tabs: "${afterOff}"`);
+  } catch (error) {
+    failures += 1;
+    console.error(`[smoke] FAIL score badge off: ${(error as Error).message}`);
+  }
+  await site.close();
 
   if (failures > 0) {
     console.error(`[smoke] ${failures} target(s) failed`);

@@ -38,6 +38,17 @@
         <button id="batch-cancel" type="button" class="btn" hidden></button>
       </section>
 
+      <!-- Alert inbox (plan m3.5): the surface everyone gets, including users who
+           declined the optional notifications permission. Seeing it marks the
+           listed alerts read — the badge clears, the rows stay highlighted. -->
+      <section id="alerts" class="alerts" hidden aria-labelledby="alerts-heading">
+        <div class="alerts-header">
+          <h2 id="alerts-heading" data-i18n="alertsHeading">Monitoring</h2>
+          <button id="alerts-clear" type="button" class="btn btn--small"></button>
+        </div>
+        <ul id="alerts-list" class="alerts-list"></ul>
+      </section>
+
       <section id="empty-state" class="dash-empty" hidden>
         <p data-i18n="emptyDashboard">
           No saved sites yet. Save the current site from the panel, add one above, or pull in your open tabs.
@@ -67,6 +78,31 @@
             Off-by-default checks mirror Cloudflare's tool. Turning one on affects every scan.
           </p>
           <div id="check-toggles" class="check-toggles"></div>
+        </section>
+
+        <section class="settings-block">
+          <h2 data-i18n="settingsBrowsing">While browsing</h2>
+          <p class="settings-hint" data-i18n="settingsBrowsingHint">
+            What the extension does on the pages you open, and what the toolbar icon shows.
+          </p>
+          <div class="watch-settings">
+            <label class="toggle">
+              <input id="browse-autoscan" type="checkbox" />
+              <span data-i18n="browseAutoScan">Scan pages as I browse</span>
+            </label>
+            <p class="settings-hint" data-i18n="browseAutoScanHint">
+              Off by default: this sends the same requests a manual scan does, once for every site you open.
+              History is still recorded only for saved sites.
+            </p>
+            <label class="toggle">
+              <input id="badge-score" type="checkbox" />
+              <span data-i18n="badgeScore">Show the current page's score on the icon</span>
+            </label>
+            <label class="toggle">
+              <input id="badge-alerts" type="checkbox" />
+              <span data-i18n="badgeAlerts">Show unread monitoring alerts on the icon</span>
+            </label>
+          </div>
         </section>
 
         <section class="settings-block">

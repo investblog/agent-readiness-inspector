@@ -232,3 +232,45 @@ describe('scheduleWatch', () => {
     expect(calls).toEqual([`create:${WATCH_ALARM}:60`]);
   });
 });
+
+describe('alert inbox', () => {
+  it('records the alert, so it survives a declined notifications permission', async () => {
+    const h = await harness([SITE]);
+    await h.run({ [SITE]: snap(80, { robotsTxt: 'pass' }) });
+    await h.run({ [SITE]: snap(40, { robotsTxt: 'fail' }) });
+    const alerts = await h.store.getAlerts();
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]).toMatchObject({ origin: SITE, regressions: ['robotsTxt'] });
+    expect(alerts[0].readAt).toBeUndefined();
+    expect(await h.store.countUnreadAlerts()).toBe(1);
+  });
+
+  it('records it even when delivering the notification fails', async () => {
+    const store = new StorageLayer(new FakeArea());
+    await store.migrate();
+    await store.addSite(SITE);
+    await store.setWatch(SITE, true);
+    const run = (snapshot: ScanSnapshot): Promise<unknown> =>
+      runWatchCycle({
+        store,
+        scanner: {
+          async scan(origin) {
+            await store.appendSnapshot(origin, snapshot);
+            return snapshot;
+          },
+        },
+        notify: () => Promise.reject(new Error('notifications blocked')),
+      });
+    await run(snap(80, { robotsTxt: 'pass' }));
+    await run(snap(40, { robotsTxt: 'fail' }));
+    expect(await store.countUnreadAlerts()).toBe(1);
+  });
+
+  it('does not re-record an unresolved regression on every cycle', async () => {
+    const h = await harness([SITE]);
+    await h.run({ [SITE]: snap(80, { robotsTxt: 'pass' }) });
+    await h.run({ [SITE]: snap(40, { robotsTxt: 'fail' }) });
+    await h.run({ [SITE]: snap(40, { robotsTxt: 'fail' }) });
+    expect(await h.store.getAlerts()).toHaveLength(1);
+  });
+});

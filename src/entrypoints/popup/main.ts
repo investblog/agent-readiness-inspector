@@ -258,6 +258,20 @@ $('save-site').addEventListener('click', async () => {
   await renderSaveButton();
 });
 
+// ---- Unread monitoring alerts (the panel's half of the badge, plan m3.5) ----
+
+async function renderAlertIndicator(): Promise<void> {
+  const count = await (await storage()).countUnreadAlerts();
+  const btn = $('open-dashboard');
+  btn.classList.toggle('icon-btn--dot', count > 0);
+  // the dot is not self-explanatory: the title says what it counts
+  btn.title = count > 0 ? t('badgeAlertsTitle', String(count)) : t('openDashboard');
+}
+
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && 'alerts' in changes) void renderAlertIndicator();
+});
+
 function showUnscannable(): void {
   $('error-message').textContent = t('cannotScanPage');
   $('retry-button').hidden = true;
@@ -332,6 +346,7 @@ if (store) {
   rate.hidden = false;
 }
 
+void renderAlertIndicator();
 $('open-dashboard').append(icon('dashboard', 16));
 $('open-dashboard').addEventListener('click', () => void browser.runtime.openOptionsPage());
 $('theme-toggle').append(icon('theme', 16));

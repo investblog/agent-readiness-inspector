@@ -486,5 +486,43 @@
 	},
 	"promoCta": {
 		"message": "Попробовать 301.st бесплатно"
+	},
+	"settingsBrowsing": {
+		"message": "При браузинге"
+	},
+	"settingsBrowsingHint": {
+		"message": "Что расширение делает на открываемых страницах и что показывает иконка."
+	},
+	"browseAutoScan": {
+		"message": "Сканировать страницы при браузинге"
+	},
+	"browseAutoScanHint": {
+		"message": "По умолчанию выключено: это те же запросы, что и при ручном скане, по одному на каждый открытый сайт. История по-прежнему пишется только для сохранённых сайтов."
+	},
+	"badgeScore": {
+		"message": "Показывать скор страницы на иконке"
+	},
+	"badgeAlerts": {
+		"message": "Показывать непрочитанные сообщения мониторинга на иконке"
+	},
+	"badgeAlertsTitle": {
+		"message": "Мониторинг: непрочитанных — $COUNT$",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			}
+		}
+	},
+	"alertsHeading": {
+		"message": "Мониторинг"
+	},
+	"alertsClear": {
+		"message": "Очистить"
+	},
+	"alertsNew": {
+		"message": "новое"
+	},
+	"alertDismiss": {
+		"message": "Убрать"
 	}
 }

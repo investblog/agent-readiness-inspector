@@ -103,6 +103,24 @@ body.sidepanel {
   color: var(--primary);
 }
 
+/* Unread monitoring alerts: the toolbar badge's counterpart inside the panel.
+   Never the only signal — the button's title says what the dot counts. */
+.icon-btn--dot {
+  position: relative;
+}
+
+.icon-btn--dot::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
 /* ---- States ---- */
 
 .panel-state {

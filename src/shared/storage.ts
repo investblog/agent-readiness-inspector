@@ -7,11 +7,14 @@
 
 import type { CheckId, CheckStatus } from '@/checks';
 
-/** v1: sites/history/settings. v2: + watch fields (M3). */
-export const SCHEMA_VERSION = 2;
+/** v1: sites/history/settings. v2: + watch fields (M3). v3: + alert inbox and
+ * browsing/badge settings (M3.5). Every bump so far added OPTIONAL keys only. */
+export const SCHEMA_VERSION = 3;
 /** FIFO retention per site — keeps ~100 sites × 50 snapshots well under the
  * ~10MB storage.local quota without the unlimitedStorage permission (spec §10). */
 export const MAX_SNAPSHOTS_PER_SITE = 50;
+/** FIFO retention for the alert inbox — an inbox, not an audit log. */
+export const MAX_ALERTS = 50;
 
 export interface SiteMeta {
   addedAt: number;
@@ -41,6 +44,42 @@ export interface WatchSettings {
 
 export const DEFAULT_WATCH: WatchSettings = { intervalHours: 24, notify: true };
 
+/**
+ * v3: what the extension does while the user simply browses (M3.5).
+ *
+ * `autoScan` is OFF by default on purpose: it sends the same requests a manual
+ * scan does, once per site the user opens — exactly the silent accumulation the
+ * project's privacy rule forbids doing without an explicit choice.
+ */
+export interface BrowsingSettings {
+  /** Scan the active tab on navigation so the icon shows a score unprompted. */
+  autoScan: boolean;
+  /** Paint the current tab's score on the toolbar icon. */
+  scoreBadge: boolean;
+  /** Paint the unread watch-alert count on the toolbar icon. */
+  alertBadge: boolean;
+}
+
+export const DEFAULT_BROWSING: BrowsingSettings = { autoScan: false, scoreBadge: true, alertBadge: true };
+
+/**
+ * One recorded regression (v3). Written by the watch cycle regardless of the
+ * notifications permission — the inbox is the surface for everyone who declined
+ * it, so it must not depend on it.
+ */
+export interface WatchAlert {
+  /** `${origin}|${signature}` — the same identity the watch cycle deduplicates on. */
+  id: string;
+  origin: string;
+  at: number;
+  signature: string;
+  levelDelta: number;
+  compositeDelta: number;
+  regressions: CheckId[];
+  /** Unset = unread; the badge counts these. */
+  readAt?: number;
+}
+
 export interface Settings {
   /** Per-check enable/disable on top of defaultEnabled (llmsTxt/a2a toggles). */
   checkOverrides?: Partial<Record<CheckId, boolean>>;
@@ -48,6 +87,8 @@ export interface Settings {
   cfToken?: string;
   /** v2 (M3). */
   watch?: WatchSettings;
+  /** v3 (M3.5). */
+  browsing?: Partial<BrowsingSettings>;
 }
 
 /** Cursor state so a watch cycle can span several alarm firings (SW 5-min cap). */
@@ -67,6 +108,7 @@ const KEY_VERSION = 'schemaVersion';
 const KEY_SITES = 'sites';
 const KEY_SETTINGS = 'settings';
 const KEY_WATCH_STATE = 'watchState';
+const KEY_ALERTS = 'alerts';
 const historyKey = (origin: string): string => `history:${origin}`;
 
 export class StorageLayer {
@@ -87,9 +129,10 @@ export class StorageLayer {
 
   /**
    * Idempotent, stepwise: each version bump only ADDS what the new one needs.
-   * v2 introduced only OPTIONAL fields, so there is nothing to rewrite — the
-   * defaults are resolved on read (`getWatchSettings`), which also keeps a
-   * fresh install and an upgraded store the same shape.
+   * v2 and v3 introduced only OPTIONAL fields, so there is nothing to rewrite —
+   * the defaults are resolved on read (`getWatchSettings`, `getBrowsingSettings`),
+   * which also keeps a fresh install and an upgraded store the same shape. An
+   * upgraded store simply has no alert inbox until the watch cycle writes one.
    */
   async migrate(): Promise<void> {
     const { [KEY_VERSION]: stored, [KEY_SITES]: sites } = await this.area.get([KEY_VERSION, KEY_SITES]);
@@ -106,7 +149,7 @@ export class StorageLayer {
       await this.area.set({ [KEY_VERSION]: SCHEMA_VERSION, [KEY_SITES]: {} });
       return;
     }
-    // v1 → v2: optional fields only; existing sites/history/settings stay as they are
+    // v1 → v2 → v3: optional fields only; existing data stays as it is
     await this.area.set({ [KEY_VERSION]: SCHEMA_VERSION });
   }
 
@@ -128,7 +171,7 @@ export class StorageLayer {
     });
   }
 
-  /** Removes the site AND its history — no orphaned history keys. */
+  /** Removes the site AND everything keyed to it — history and alerts alike. */
   removeSite(origin: string): Promise<void> {
     return this.enqueue(async () => {
       const sites = await this.getSites();
@@ -136,6 +179,11 @@ export class StorageLayer {
       await this.area.set({ [KEY_SITES]: sites });
       // remove history unconditionally: also sweeps a hypothetical orphan
       await this.area.remove(historyKey(origin));
+      // alerts about a site the user deleted are noise, and their unread count
+      // would keep the badge lit for something that no longer exists
+      const alerts = await this.getAlerts();
+      const kept = alerts.filter((alert) => alert.origin !== origin);
+      if (kept.length !== alerts.length) await this.area.set({ [KEY_ALERTS]: kept });
     });
   }
 
@@ -175,6 +223,70 @@ export class StorageLayer {
   async getWatchSettings(): Promise<WatchSettings> {
     const { watch } = await this.getSettings();
     return { ...DEFAULT_WATCH, ...watch };
+  }
+
+  /** Browsing/badge settings with defaults applied (same pattern as watch). */
+  async getBrowsingSettings(): Promise<BrowsingSettings> {
+    const { browsing } = await this.getSettings();
+    return { ...DEFAULT_BROWSING, ...browsing };
+  }
+
+  // ---- Alert inbox (v3) ----
+
+  async getAlerts(): Promise<WatchAlert[]> {
+    const { [KEY_ALERTS]: alerts } = await this.area.get(KEY_ALERTS);
+    return (alerts as WatchAlert[] | undefined) ?? [];
+  }
+
+  async countUnreadAlerts(): Promise<number> {
+    return (await this.getAlerts()).filter((alert) => alert.readAt === undefined).length;
+  }
+
+  /**
+   * Records a regression. An id that is already in the inbox is REPLACED by the
+   * new (unread) entry rather than skipped: the watch cycle only re-announces a
+   * signature after a recovery, so a repeat is a genuine re-occurrence and has
+   * to surface again even if the earlier one was read.
+   */
+  addAlert(alert: WatchAlert): Promise<void> {
+    return this.enqueue(async () => {
+      const alerts = (await this.getAlerts()).filter((existing) => existing.id !== alert.id);
+      alerts.push(alert);
+      await this.area.set({ [KEY_ALERTS]: alerts.slice(-MAX_ALERTS) });
+    });
+  }
+
+  /**
+   * Marks alerts read ("read" = shown to the user, see plan m3.5). Returns how
+   * many were still unread and got marked, so a caller can skip repainting the
+   * badge when nothing changed.
+   */
+  markAlertsRead(ids?: string[], at: number = Date.now()): Promise<number> {
+    return this.enqueue(async () => {
+      const alerts = await this.getAlerts();
+      const target = ids ? new Set(ids) : null;
+      let marked = 0;
+      for (const alert of alerts) {
+        if (alert.readAt !== undefined) continue;
+        if (target && !target.has(alert.id)) continue;
+        alert.readAt = at;
+        marked += 1;
+      }
+      if (marked > 0) await this.area.set({ [KEY_ALERTS]: alerts });
+      return marked;
+    });
+  }
+
+  dismissAlert(id: string): Promise<void> {
+    return this.enqueue(async () => {
+      const alerts = await this.getAlerts();
+      const kept = alerts.filter((alert) => alert.id !== id);
+      if (kept.length !== alerts.length) await this.area.set({ [KEY_ALERTS]: kept });
+    });
+  }
+
+  clearAlerts(): Promise<void> {
+    return this.enqueue(() => this.area.remove(KEY_ALERTS));
   }
 
   /** Sites flagged for scheduled rescans (spec §7). */
