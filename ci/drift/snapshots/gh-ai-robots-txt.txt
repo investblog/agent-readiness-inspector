@@ -1,4 +1,4 @@
 repo: ai-robots-txt/ai.robots.txt
-sha: 042d00a5ab67f60d5af89ceaa4f9ecdfa75d6c12
-date: 2026-07-31T02:35:15Z
-message: Merge pull request #249 from ai-robots-txt/test-ci
+sha: 24c010e6681f3b68328dfc90dc9f03318f788b50
+date: 2026-07-31T15:01:58Z
+message: Merge pull request #251 from glyn/delete-IbouBot
