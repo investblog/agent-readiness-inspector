@@ -9,11 +9,11 @@ the revised spec). This file is the index.
       soft-404 exemplar 0/L0) — DONE 2026-07-30
 - [ ] M1.5 — store beta: own icons, privacy policy, listing, Chrome + AMO submit
       - [x] Privacy policy drafted: docs/privacy-policy.md (needs a public URL)
-      - [x] Icon candidates rendered at 16/32/48/128 on both themes:
-        `npx tsx scripts/make-icon-candidates.mts` → dev/icons/contact-sheet.png
-        (recommendation: agentEye — holds up at 16px and matches the "see what
-        agents see" positioning; runner-up: level)
-      - [ ] PICK an icon, then wire the winner's SVG into src/public/icons/*.png
+      - [x] Icon DECIDED 2026-08-01: the 301.st robot mascot. Source lives at
+        src/assets/brand-icon.svg; `npm run build:brand-icons` regenerates the
+        packaged PNGs. Web surfaces render the SVG so its currentColor eyes
+        follow the theme; the PNGs use the brand colour (the only one legible
+        on light, Chrome-grey and dark toolbars alike).
       - [ ] Firefox UX debt: host permissions are opt-in there → tab.url is
         undefined until granted; add permissions.request() flow + FF-specific
         error copy before AMO submit (M1-b review)
@@ -22,8 +22,8 @@ the revised spec). This file is the index.
       - [ ] Store links: fill store-links.ts URLs after publication; decide
         whether Edge gets its own build (BROWSER===chrome would show the
         Chrome store link to Edge users otherwise)
-      - [ ] Store banner (RI has assets/banner-1400x560.png as the format
-        reference) — make ours together with own icons
+      - [ ] Store banner 1400×560 (RI's assets/banner-1400x560.png is the
+        format reference) — build it from the mascot
 - [x] M2 — dashboard: saved sites, batch, history, light CF Connect + external
       scan diff — DONE 2026-07-30 (plan: .agents/plans/done/m2-dashboard.md)
       - [ ] Verify the external scan live: needs a Cloudflare token with

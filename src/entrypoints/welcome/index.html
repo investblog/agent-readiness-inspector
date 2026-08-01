@@ -8,7 +8,9 @@
   <body>
     <main class="welcome">
       <header class="welcome__header">
-        <img src="/icons/48.png" alt="" width="40" height="40" class="welcome__icon" />
+        <!-- SVG, not the PNG: the mascot's eyes are currentColor, so on the web
+             surfaces they follow the theme (the packaged PNGs can't) -->
+        <span id="brand-mascot" class="welcome__icon" aria-hidden="true"></span>
         <h1 class="welcome__title" data-i18n="welcomeHeading">Agent Readiness Inspector</h1>
       </header>
 

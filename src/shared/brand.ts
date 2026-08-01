@@ -1,4 +1,20 @@
-// 301.st brand bits shared by surfaces (RI pattern).
+// Brand bits shared by surfaces (RI pattern).
+
+import mascotMarkup from '@/assets/brand-icon.svg?raw';
+
+/**
+ * The product mascot. Its eyes are `currentColor`, so on web surfaces they
+ * follow the theme — set a size and let CSS `color` do the rest.
+ */
+export function mascot(size = 40): SVGElement {
+  const holder = document.createElement('div');
+  holder.innerHTML = mascotMarkup;
+  const svg = holder.firstElementChild as SVGElement;
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(size));
+  svg.setAttribute('aria-hidden', 'true');
+  return svg;
+}
 
 /** 301.st brand logo — filled SVG (ported from redirect-inspector). */
 export function svg301Logo(size = 16): SVGSVGElement {

@@ -40,6 +40,8 @@ body {
 }
 
 .welcome__icon {
+  display: inline-flex;
+  color: var(--text-main, currentColor); /* mascot eyes follow the theme */
   flex-shrink: 0;
 }
 

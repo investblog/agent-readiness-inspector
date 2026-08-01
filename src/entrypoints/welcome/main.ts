@@ -1,7 +1,7 @@
 import '@/assets/css/theme.css';
 import '@/assets/css/welcome.css';
 import { browser } from 'wxt/browser';
-import { svg301Logo } from '@/shared/brand';
+import { mascot, svg301Logo } from '@/shared/brand';
 import { hydrate, t } from '@/shared/i18n';
 import { injectSprite } from '@/shared/icons';
 import { initTheme } from '@/shared/theme';
@@ -23,6 +23,7 @@ for (const el of document.querySelectorAll<HTMLElement>('[data-i18n-title]')) {
 const versionEl = document.getElementById('version');
 if (versionEl) versionEl.textContent = `v${browser.runtime.getManifest().version}`;
 
+document.getElementById('brand-mascot')?.append(mascot(44));
 document.getElementById('brand-logo')?.append(svg301Logo(14));
 
 // CTA: open the living reference — scanning it is the fastest "aha" (spec §9)
