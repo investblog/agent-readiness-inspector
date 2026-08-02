@@ -57,10 +57,18 @@ jobs:
           for file in "${files[@]}"; do
             test -s "$file"
           done
-          sha256sum "${files[@]}" > dist/SHA256SUMS.txt
+          (
+            cd dist
+            sha256sum \
+              "agent-readiness-inspector-${version}-chrome.zip" \
+              "agent-readiness-inspector-${version}-edge.zip" \
+              "agent-readiness-inspector-${version}-firefox.zip" \
+              "agent-readiness-inspector-${version}-sources.zip" \
+              > SHA256SUMS.txt
+          )
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
           name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
