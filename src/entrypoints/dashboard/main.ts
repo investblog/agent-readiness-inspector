@@ -415,6 +415,11 @@ let externalQueue: Promise<unknown> = Promise.resolve();
 async function externalScan(origin: string): Promise<void> {
   const state = ui(origin);
   if (!rows.has(origin) || !cfCreds || state.externalScanning) return;
+  if (!(await ensureCfDataPermission())) {
+    state.externalError = t('cfDataPermissionDenied');
+    renderTable();
+    return;
+  }
   state.externalScanning = true;
   state.externalError = undefined;
   state.diff = undefined;
@@ -797,6 +802,26 @@ function setCfStatus(message: string, kind: 'ok' | 'error' | 'info' = 'info'): v
   el.hidden = false;
 }
 
+type FirefoxDataCollectionRequest = { data_collection: ('authenticationInfo' | 'browsingActivity')[] };
+
+/** Firefox 140+ requires explicit built-in consent for the optional CF transfer. */
+async function ensureCfDataPermission(): Promise<boolean> {
+  if (import.meta.env.BROWSER !== 'firefox') return true;
+  const permissions = browser.permissions as unknown as {
+    contains(request: FirefoxDataCollectionRequest): Promise<boolean>;
+    request(request: FirefoxDataCollectionRequest): Promise<boolean>;
+  };
+  const request: FirefoxDataCollectionRequest = {
+    data_collection: ['authenticationInfo', 'browsingActivity'],
+  };
+  if (await permissions.contains(request)) return true;
+  try {
+    return await permissions.request(request);
+  } catch {
+    return false;
+  }
+}
+
 async function loadCfCreds(): Promise<void> {
   const { cfAccountId, cfToken } = await (await storage()).getSettings();
   cfCreds = cfAccountId && cfToken ? { accountId: cfAccountId, token: cfToken } : null;
@@ -826,6 +851,7 @@ async function saveCfCreds(): Promise<void> {
   const token = tokenInput.value.trim() || stored.cfToken || '';
   if (!isValidAccountId(accountId)) return setCfStatus(t('cfInvalidAccount'), 'error');
   if (!isValidToken(token)) return setCfStatus(t('cfInvalidToken'), 'error');
+  if (!(await ensureCfDataPermission())) return setCfStatus(t('cfDataPermissionDenied'), 'error');
 
   setCfStatus(t('cfVerifying'));
   try {
@@ -855,6 +881,27 @@ $('theme-toggle').append(icon('theme', 16));
 $('theme-toggle').addEventListener('click', toggleTheme);
 $('footer-brand').append(svg301Logo(14));
 $('promo-logo').append(svg301Logo(18));
+
+/**
+ * The promo folds away and stays folded. It is our own channel, so it should be
+ * askable-for, not unavoidable: seen once, folded into a line, done. Revealed
+ * only after the stored state is read — otherwise it would render open and snap
+ * shut a moment later, which reads as a glitch.
+ */
+async function renderPromo(): Promise<void> {
+  const promo = $('promo') as HTMLDetailsElement;
+  const chevron = icon('chevron-down', 14);
+  chevron.classList.add('promo__chevron');
+  promo.querySelector('summary')?.append(chevron); // last child: margin-left:auto parks it right
+  const { promoCollapsed } = await (await storage()).getSettings();
+  promo.open = promoCollapsed !== true;
+  promo.hidden = false;
+  promo.addEventListener('toggle', () => {
+    void (async () => {
+      await (await storage()).updateSettings({ promoCollapsed: !promo.open });
+    })().catch((error: unknown) => console.warn('[agent-readiness] promo state save failed', error));
+  });
+}
 
 $('add-button').append(icon('add', 14), document.createTextNode(t('addButton')));
 $('add-tabs').append(icon('tabs', 14), document.createTextNode(t('addOpenTabs')));
@@ -934,6 +981,7 @@ $('cf-clear').append(document.createTextNode(t('cfClear')));
 $('cf-clear').addEventListener('click', () => void clearCfCreds());
 
 void (async () => {
+  await renderPromo();
   await loadCfCreds();
   await renderCheckToggles();
   await renderBrowsingSettings();

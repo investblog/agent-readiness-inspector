@@ -1,87 +1,136 @@
-# Privacy Policy — Agent Readiness Inspector
+---
+title: Privacy Policy - Agent Readiness Inspector
+permalink: /privacy/
+---
 
-_Draft for M1.5. Publish at a stable URL (301.st page or GitHub Pages) and link
-it from both store listings. Last updated: 2026-07-31._
+# Privacy Policy - Agent Readiness Inspector
 
-**Short version: the extension does not collect, transmit or sell your data.
-Everything it produces stays in your browser.**
+Last updated: August 2, 2026
 
-## What the extension does
+Agent Readiness Inspector is a browser extension for Microsoft Edge, Google
+Chrome, and Mozilla Firefox. It audits websites against open standards used by
+AI agents.
 
-Agent Readiness Inspector audits websites against open, published standards for
-AI agents (robots.txt, sitemaps, Link headers, markdown content negotiation,
-Content Signals, MCP server cards, API catalogs, OAuth discovery and similar).
-The audit is a set of ordinary HTTP requests to the site you are auditing,
-performed by the extension itself.
+**The developer, 301.st, does not collect, receive, sell, or use your browsing
+data. The extension processes audit data in your browser. The only optional
+third-party transfer is a Cloudflare URL Scanner request that you explicitly
+enable and start.**
 
-## What we collect
+## Data the extension handles
 
-**Nothing.** There is no analytics, no telemetry, no crash reporting, no
-identifiers, no ad or tracking code, and no server operated by us that receives
-your data. We cannot see which sites you scan.
+To perform its user-facing audit, the extension handles:
 
-## What is stored, and where
+- the URL and origin of a site you choose to scan;
+- HTTP response status, headers, and up to 512 KB of response text from the
+  audited site;
+- scan verdicts, scores, and timestamps;
+- sites you save, monitoring alerts, and extension settings;
+- a Cloudflare Account ID and API token, only if you connect Cloudflare.
 
-All of it is stored locally in your browser (`chrome.storage.local`) and never
-leaves your device except as described in "Network requests" below:
+The extension does not include analytics, advertising, telemetry, crash
+reporting, tracking identifiers, or remotely hosted code.
 
-| Data | Why | Retention |
+## Local storage and retention
+
+Data is stored only in the browser profile:
+
+| Data | Purpose | Retention |
 |---|---|---|
-| Sites you explicitly save | so the dashboard can list and rescan them | until you remove the site |
-| Scan history for saved sites (score, level, per-check pass/fail) | to show trends and detect regressions | last 50 scans per site, oldest dropped |
-| Your settings (optional checks, watch interval, notification preference) | to keep your choices | until changed |
-| A Cloudflare API token, only if you add one | to run the optional external scan | until you disconnect it |
+| Saved site origins | Dashboard, batch scans, and monitoring | Until you remove the site |
+| Scan history for saved sites | Trends and regression detection | Latest 50 scans per site |
+| Monitoring alerts | Local alert inbox | Latest 50 alerts |
+| Settings | Your selected checks and preferences | Until changed or the extension is removed |
+| Cloudflare Account ID and API token | Optional external scan | Until you disconnect Cloudflare or remove the extension |
+| Session score cache | Avoid repeated scans while browsing | Up to 100 origins; entries expire after 10 minutes and the cache ends with the browser session |
 
-Scanning a page from the panel does **not** record history: history is written
-only for sites you deliberately saved. Removing a site deletes its history with
-it. Uninstalling the extension removes everything.
+A manual scan of an unsaved site does not create persistent scan history.
+Removing a saved site removes its history and related alerts. Uninstalling the
+extension removes its local data. Cloudflare credentials are stored in the
+browser's local extension storage and are not separately encrypted by the
+extension.
 
 ## Network requests
 
-The extension makes requests only to:
+### The site being audited
 
-1. **The site being audited** — the audit itself. Requests for public machine
-   files (`/robots.txt`, `/.well-known/*`, sitemaps) are sent **without**
-   cookies. The page itself may be re-fetched **with** your cookies so the audit
-   reflects what you actually see, including pages behind a login; that content
-   is used for the verdict and is not stored beyond the scan.
-2. **api.cloudflare.com** — only if you connect a Cloudflare token and press
-   "external scan". This asks Cloudflare's URL Scanner to audit the same site
-   from outside so the two views can be compared. Cloudflare's handling of that
-   request is governed by their own privacy policy.
+The audit consists of HTTP requests to the site you selected. Public machine
+files such as `robots.txt`, sitemaps, and `/.well-known/` resources are fetched
+without cookies. The site's root page and its markdown variants may be fetched
+with the current browser session so the audit can reflect authenticated pages.
+Response data is evaluated locally and is not sent to 301.st.
 
-No other destination is contacted. There is no "phone home" on install, update
-or scan.
+Requests may also occur later when you explicitly put a saved site on watch,
+or while browsing if you enable the off-by-default auto-scan setting. A site
+receives normal network information such as your IP address and request
+headers. If the site redirects a request, the browser follows that redirect.
+The destination site's own privacy policy applies.
 
-## Permissions, and why each is needed
+### Cloudflare URL Scanner (optional)
 
-- **Host access to websites** — the audit is HTTP requests to the site you
-  choose; without it the extension cannot read `robots.txt` or a site's headers.
-  It is never used to inject anything into pages or to read page content beyond
-  the audited responses.
-- **storage** — keeps saved sites, history and settings on your device.
-- **alarms** — schedules rescans for sites you put on watch.
-- **notifications** _(optional, asked only when you enable watch alerts)_ —
-  shows a message when a previously passing check starts failing. Declining it
-  leaves watch mode working silently.
+Cloudflare Connect is off by default. If you enter credentials and approve the
+feature, the extension sends your Cloudflare API token to
+`api.cloudflare.com` to verify it. When you press "External scan," it sends the
+target URL and Account ID, authenticated by that token, to Cloudflare's URL
+Scanner and polls Cloudflare for the result. Cloudflare therefore receives the
+target URL, Account ID, API token, your IP address, and ordinary request
+metadata. Cloudflare's privacy policy governs its processing.
 
-## Your data, your control
+In Firefox 140 and later, the extension also requests Firefox's optional
+`authenticationInfo` and `browsingActivity` data permissions before making
+these Cloudflare requests. Declining leaves all local auditing available.
 
-Saved sites and their history can be deleted individually from the dashboard,
-and everything disappears when the extension is uninstalled. There is nothing
-for us to delete on request, because we never receive anything.
+### Links opened by you
+
+The extension contains links to standards documentation, GitHub, and 301.st.
+They open only when you select them. The destination's privacy policy applies.
+
+The extension sends no analytics and makes no install or update tracking request
+to 301.st. When you uninstall the extension, the browser opens the visible
+`301.st/contact` feedback page with campaign parameters identifying the extension
+and the uninstall action. No scan results, saved sites, settings, or unique user
+identifier are included in that URL. The destination receives the ordinary
+request information described above under "Links and third-party destinations."
+
+## Permissions
+
+- **Access to websites (`<all_urls>`)**: required to audit whichever HTTP or
+  HTTPS site you choose, read its response headers, and fetch its machine files.
+  The extension does not inject promotional content into pages.
+- **Storage**: keeps settings, saved sites, local history, alerts, credentials,
+  and the short-lived session score cache.
+- **Alarms**: schedules rescans only for sites you put on watch.
+- **Side panel** (Edge and Chrome): displays the audit next to the current tab.
+- **Notifications** (optional): shows a browser notification for a detected
+  regression. Monitoring still works through the local inbox if declined.
+
+## Sharing, sale, and human access
+
+301.st has no server receiving extension audit data and cannot access data in
+your browser profile. We do not sell user data or use it for advertising,
+creditworthiness, or any purpose unrelated to the extension's single purpose.
+No person at 301.st can read your scan data or Cloudflare credentials.
+
+The extension's use of information received from browser APIs complies with
+the Chrome Web Store User Data Policy, including its Limited Use requirements.
+
+## Your controls
+
+You can remove a saved site and its history, clear monitoring alerts, disable
+watch or auto-scan, disconnect Cloudflare, revoke optional permissions in the
+browser, or uninstall the extension to remove all extension data.
 
 ## Children
 
-The extension is a developer/webmaster tool and is not directed at children.
+The extension is a developer and webmaster tool and is not directed at
+children.
 
 ## Changes
 
-Material changes to this policy will be reflected here with a new "last updated"
-date, and — where the change affects what leaves your browser — called out in
-the extension's release notes.
+Material changes will appear on this page with a new date. Changes that affect
+data leaving the browser will also be disclosed in the extension UI or release
+notes as required.
 
 ## Contact
 
-Questions: [301.st/contact](https://301.st/contact) ·
+Questions: [301.st/contact](https://301.st/contact)
 Issues: [github.com/investblog/agent-readiness-inspector/issues](https://github.com/investblog/agent-readiness-inspector/issues)

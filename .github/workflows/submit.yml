@@ -1,0 +1,46 @@
+name: Submit to stores
+
+# This is a thin caller of the shared investblog WXT submission workflow.
+# v0.1.0 is deliberately excluded: its GitHub-built packages are submitted
+# manually to establish the store listings and obtain their extension IDs.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to submit (for example v0.1.1)'
+        required: true
+      stores:
+        description: 'Which stores to submit'
+        type: choice
+        options:
+          - chrome
+          - firefox
+          - edge
+          - chrome-edge
+          - all
+        default: chrome
+      dry_run:
+        description: 'Validate credentials only, publish nothing'
+        type: boolean
+        default: true
+
+concurrency:
+  group: submit-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.tag != 'v0.1.0') ||
+      (github.event_name == 'push' && github.ref_name != 'v0.1.0')
+    uses: investblog/geo-tier-builder/.github/workflows/store-submit.yml@main
+    secrets: inherit
+    with:
+      ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+      chrome: ${{ github.event_name == 'push' || inputs.stores == 'chrome' || inputs.stores == 'chrome-edge' || inputs.stores == 'all' }}
+      firefox: ${{ inputs.stores == 'firefox' || inputs.stores == 'all' }}
+      edge: ${{ github.event_name == 'push' || inputs.stores == 'edge' || inputs.stores == 'chrome-edge' || inputs.stores == 'all' }}

@@ -1,0 +1,102 @@
+name: Cut release
+
+# Release tags are created only here, after the complete Linux quality gate.
+# v0.1.0 is built and released by GitHub, but submitted to stores manually.
+# Later releases submit Chrome and Edge automatically by default.
+on:
+  workflow_dispatch:
+    inputs:
+      submit:
+        description: 'Auto-submit after tagging (ignored for v0.1.0; Firefox stays manual)'
+        type: choice
+        options:
+          - chrome-edge
+          - none
+          - chrome
+          - edge
+          - firefox
+          - all
+        default: chrome-edge
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: cut-release
+  cancel-in-progress: false
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare WXT types
+        run: npx wxt prepare
+
+      - name: Full quality gate (Linux)
+        run: npm run check
+
+      - name: Build all targets (Linux)
+        run: npm run zip:all
+
+      - name: Resolve version and verify consistency
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest_version=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" wxt.config.ts)
+          package_version=$(node -p "require('./package.json').version")
+          if [ -z "$manifest_version" ]; then
+            echo "::error::Could not parse manifest.version from wxt.config.ts"
+            exit 1
+          fi
+          if [ "$manifest_version" != "$package_version" ]; then
+            echo "::error::Version mismatch: wxt.config.ts=$manifest_version package.json=$package_version"
+            exit 1
+          fi
+          tag="v$manifest_version"
+          git fetch --tags --quiet
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::error::Tag $tag already exists; bump the version first"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.ver.outputs.tag }}" -m "Release ${{ steps.ver.outputs.tag }}; cut by CI after Linux quality gate"
+          git push origin "refs/tags/${{ steps.ver.outputs.tag }}"
+
+      - name: Dispatch Release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run release.yml -f tag="${{ steps.ver.outputs.tag }}"
+
+      - name: Keep first store submission manual
+        if: steps.ver.outputs.tag == 'v0.1.0'
+        run: echo "::notice::v0.1.0 packages will be attached to the GitHub Release for manual store submission"
+
+      - name: Dispatch Submit workflow
+        if: inputs.submit != 'none' && steps.ver.outputs.tag != 'v0.1.0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run submit.yml \
+            -f tag="${{ steps.ver.outputs.tag }}" \
+            -f stores="${{ inputs.submit }}" \
+            -f dry_run=false

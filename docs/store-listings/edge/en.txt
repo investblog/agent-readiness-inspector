@@ -1,0 +1,34 @@
+TITLE
+Agent Readiness Inspector
+
+SHORT DESCRIPTION
+Audit sites for AI-agent readiness: robots.txt, llms.txt, Markdown negotiation, MCP, Content Signals. Local, no analytics.
+
+DESCRIPTION
+Audit the current site for AI-agent readiness without leaving Microsoft Edge.
+
+Agent Readiness Inspector runs 22 standards-based checks in the Edge side panel. It shows what AI agents can discover, read, and use: robots.txt and AI crawler rules, sitemaps, llms.txt, markdown negotiation, Content Signals, Link headers, Agent Skills, API Catalogs, MCP Server Cards, OAuth discovery, Web Bot Auth, WebMCP, and emerging commerce protocols.
+
+KEY FEATURES
+
+- Readiness score and level with raw evidence for every verdict
+- Prioritized, copy-ready fix prompts
+- Side panel beside the page being audited
+- Saved sites, batch rescans, and local score history
+- Scheduled monitoring and a local regression inbox
+- Optional notifications when a previously passing check fails
+- Optional score badge and off-by-default auto-scan mode
+
+The audit runs inside Edge, so it can inspect staging sites and many authenticated pages that an outside scanner cannot reach. Browser cookie protections may limit session access on some sites.
+
+OPTIONAL CLOUDFLARE COMPARISON
+
+Users may connect their own Cloudflare URL Scanner token and explicitly run an outside scan for comparison. The feature is off by default, its data transfer is disclosed in the interface, and the stored credentials can be removed at any time.
+
+PRIVACY AND DATA USE
+
+Website URLs and response content are handled only to provide the audit. Results, saved sites, history, settings, and alerts remain in local Edge extension storage. 301.st receives no scan or browsing data. The extension contains no analytics, telemetry, advertising, or remotely hosted code.
+
+The extension requires access to websites because its single purpose is to audit any HTTP or HTTPS site the user chooses. It reads the selected site's headers and machine-readable resources and does not inject content into visited pages.
+
+Agent Readiness Inspector is an independent implementation of open web standards. It is not affiliated with or endorsed by Cloudflare.

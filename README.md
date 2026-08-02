@@ -1,71 +1,115 @@
+![Agent Readiness Inspector](store-assets/promo-marquee-1400x560.png)
+
 # Agent Readiness Inspector
 
-Browser extension by [301.st](https://301.st) that checks any site for AI-agent
-readiness — the open standards (RFC 9309, RFC 8288, RFC 9727, RFC 8414/9728,
-Content Signals, MCP, Agent Skills, llms.txt, …) behind Cloudflare's Agent
-Readiness score — **right in your browser, on the current tab**, including pages
-behind login that external scanners can't reach.
+Browser extension by [301.st](https://301.st) that audits websites for
+AI-agent readiness. It runs 22 standards-based checks in the browser and shows
+the score, evidence, and copy-ready fix prompts beside the current tab.
 
-Status: **M2 complete** — working extension (engine, panel, dashboard), not yet
-published. Spec: [`docs/spec.md`](docs/spec.md) · roadmap:
-[`docs/ROADMAP.md`](docs/ROADMAP.md) · backlog: [`docs/TODO.md`](docs/TODO.md) ·
-positioning: [`docs/branding.md`](docs/branding.md).
+Chrome and Edge use a native side panel. Firefox provides the same interface as
+a popup and sidebar. Because the audit runs in the browser, it can inspect
+staging sites and many authenticated pages that external scanners cannot reach;
+browser cookie protections may still limit session access on some sites.
 
-## What it does today
+Status: **v0.1.0 release candidate**. The first store submissions are being
+prepared from Linux-built GitHub Release packages.
 
-- **22 checks** mirroring the live isitagentready matrix (ids and categories
-  included), each with a raw-evidence verdict and a copy-paste fix prompt.
-- **Side panel** (Chrome/Edge) or popup (Firefox): one-click scan of the current
-  tab → composite score, level 0–5, per-category breakdown, evidence checklist.
-- **Dashboard**: saved sites, batch scans, score history with sparklines,
-  optional-check settings, and an inside-vs-outside diff against Cloudflare's
-  official URL Scanner (needs your own CF token, off by default).
-- **Calibrated**: `npm run calibrate` diffs our verdicts against the live tool —
-  currently **0 unexplained divergences**, levels match on all reference sites.
-  The four deliberate differences live in `src/shared/diff.ts`
-  (`EXPECTED_DIVERGENCES`, shared with the in-product diff); `scripts/calibrate.mts`
-  carries their long-form reasoning for the CI report.
+## Features
 
-## Stack
+- **22 readiness checks** - robots.txt and AI crawler rules, sitemaps, Link
+  headers, llms.txt, Markdown negotiation, Content Signals, Agent Skills, API
+  Catalogs, MCP Server Cards, OAuth discovery, Web Bot Auth, WebMCP, and
+  emerging agentic commerce protocols.
+- **Evidence and fixes** - every result includes the observed response and a
+  copy-ready prompt for addressing failures.
+- **Saved-site dashboard** - batch rescans, score history, sparklines, and
+  optional-check settings.
+- **Monitoring** - scheduled rescans, regression detection, a local alert
+  inbox, and optional browser notifications.
+- **Browsing controls** - optional automatic scans plus score and unread-alert
+  badges on the toolbar icon.
+- **Cloudflare comparison** - an optional outside scan using your own
+  Cloudflare URL Scanner credentials, disabled by default.
+- **Dark and light themes** with English and Russian UI.
+- **Local-first storage** - scan results, saved sites, history, settings, and
+  alerts stay in browser storage.
 
-WXT + TypeScript + Vanilla DOM, Manifest V3. Biome for lint/format, Vitest for
-tests. Same conventions as the rest of the 301.st extension portfolio
-(redirect-inspector).
+Agent Readiness Inspector is an independent implementation of open web
+standards. It is not affiliated with or endorsed by Cloudflare.
+
+## Install
+
+The first signed store releases are in preparation. Release packages are built
+on GitHub Actions for Chrome, Firefox, and Edge; do not use a local development
+archive as a store submission package.
+
+For development, load the unpacked target from `dist/` after running the
+corresponding build command.
 
 ## Development
 
 ```bash
-npm install
-npm run dev          # WXT dev mode (Chrome)
-npm run check        # tsc (app + scripts) + biome + vitest — the full gate
-npm run build        # production build to dist/
-npm run build:icons  # regenerate the MDI sprite from scripts/build-icons.mjs
+npm ci
+npm run dev            # Chrome MV3 development mode
+npm run dev:firefox    # Firefox MV2 development mode
+npm run check          # TypeScript + Biome + Vitest
+npm run zip:all        # Chrome, Firefox, Edge, and Firefox source ZIPs
 ```
 
-Verification beyond unit tests:
+Additional verification:
 
 ```bash
-npx tsx scripts/e2e-smoke.mts        # loads the built extension in Chromium,
-                                     # scans live reference sites, screenshots
-npm run calibrate                    # our engine vs the live Cloudflare tool
-node scripts/capture-fixtures.mjs    # refresh the committed response fixtures
+npx tsx scripts/e2e-smoke.mts  # live Chromium extension smoke test
+npm run calibrate              # compare against the live reference scanner
+node scripts/capture-fixtures.mjs
 ```
 
-## Layout
+## Architecture
 
-- `src/checks/` — the pure check-engine: no DOM, no `chrome.*`, no fetch. The
-  matrix is versioned **data** (`config.ts`), pinned to a drift snapshot by test.
-- `src/probe/` — service-worker probe layer (credentials policy, timeouts, pool).
-- `src/shared/` — storage, messaging, CF client, diff, i18n, theme, icons.
-- `src/entrypoints/` — background, panel (popup/side panel), dashboard, welcome.
-- `ci/drift/snapshots/` — normalized snapshots of upstream sources; a scheduled
-  workflow diffs them and files an issue when a standard or the CF tool moves.
+- `src/checks/` - pure TypeScript check engine with no DOM, browser API, or
+  network access.
+- `src/probe/` - service-worker probe layer for target requests, timeouts, and
+  credential policy.
+- `src/shared/` - storage, messaging, scoring, regression detection, i18n,
+  theme, and icons.
+- `src/entrypoints/` - background worker, popup/side panel, dashboard, and
+  welcome screen.
+- `ci/drift/snapshots/` - pinned upstream snapshots monitored by the scheduled
+  drift workflow.
+
+The production targets are Chrome MV3, Edge MV3, and Firefox MV2. The extension
+uses WXT, strict TypeScript, Vanilla DOM, Biome, and Vitest, with no runtime npm
+dependencies.
 
 ## Privacy
 
-Client-side, zero-telemetry: probes go only to the site being scanned, results
-are stored locally, and scan history is recorded **only for sites you explicitly
-save** (enforced at the single write point, not just promised in prose). The one
-outbound exception shipped today is the Cloudflare URL Scanner call — opt-in,
-with your own token kept locally. Anything added later (e.g. the planned 301.st
-news panel) stays opt-in by the same rule.
+The extension has no analytics and sends no scan or browsing data to 301.st.
+Manual scans contact only the selected site. Saved data remains in local browser
+storage. The optional Cloudflare comparison sends the selected URL and locally
+stored credentials to Cloudflare only after the user enables it.
+
+User-selected links open their destination normally. After uninstall, the
+browser opens a visible 301.st feedback page without scan results, settings, or
+a unique user identifier in the URL. See the full
+[privacy policy](docs/privacy-policy.md).
+
+## Releasing
+
+Release tags are created only by the `Cut release` GitHub Actions workflow after
+the complete quality gate and all packages succeed on Linux. The workflow then
+dispatches `Release`, which rebuilds the packages and attaches them to a GitHub
+Release.
+
+The first release, `v0.1.0`, is submitted to all stores manually using those
+GitHub-built packages. For later versions, Chrome and Edge are submitted
+automatically by the shared investblog workflow; Firefox submission remains a
+manual workflow action because AMO reserves uploaded version numbers.
+
+See [store submission guidance](docs/store-listings/submission-guide.md) for the
+package map, listing copy, assets, privacy declarations, and required secrets.
+
+## Related
+
+- [Redirect Inspector](https://github.com/investblog/redirect-inspector) -
+  real-time redirect analysis in the browser.
+- [301.st](https://301.st) - domain operations, redirects, and traffic routing.

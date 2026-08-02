@@ -1,0 +1,37 @@
+TITLE
+Agent Readiness Inspector
+
+SHORT DESCRIPTION
+Audit sites for AI-agent readiness: robots.txt, llms.txt, Markdown negotiation, MCP, Content Signals. Local, no analytics.
+
+DETAILED DESCRIPTION
+See what AI agents can actually discover, read, and use on the current site.
+
+Agent Readiness Inspector runs 22 standards-based checks directly in your browser. It covers robots.txt and AI crawler rules, sitemaps, llms.txt, markdown negotiation, Content Signals, Link headers, Agent Skills, API Catalogs, MCP Server Cards, OAuth discovery, Web Bot Auth, WebMCP, and emerging commerce protocols.
+
+WHAT YOU GET
+
+- A comparable score and readiness level
+- Raw evidence for every verdict
+- Prioritized, copy-ready fix prompts
+- A side panel that stays beside the current tab
+- Saved sites, batch rescans, and score history
+- Scheduled monitoring with a local alert inbox
+- Optional browser notifications when a check regresses
+- An optional score badge and auto-scan mode, both controlled in settings
+
+Because the audit runs inside the browser, it can inspect staging sites and many authenticated pages that an external scanner cannot reach. Browser cookie protections may limit session access on some sites.
+
+OPTIONAL CLOUDFLARE COMPARISON
+
+Connect your own Cloudflare URL Scanner token to compare the in-browser result with an outside scan. This feature is off by default, clearly disclosed, and can be disconnected at any time.
+
+PRIVACY
+
+The extension handles site URLs and response content only to produce the audit. Results, saved sites, history, settings, and alerts stay in local browser storage. 301.st receives no scan or browsing data. There is no analytics, telemetry, advertising, or remote code.
+
+WHY SITE ACCESS IS REQUIRED
+
+The extension can audit any site you choose, so it needs host access to fetch that site's headers, robots.txt, sitemap, and well-known resources. It does not inject content into the pages you visit.
+
+Agent Readiness Inspector is an independent implementation of open web standards. It is not affiliated with or endorsed by Cloudflare.

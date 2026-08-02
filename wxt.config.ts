@@ -3,6 +3,10 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   srcDir: 'src',
   outDir: 'dist',
+  zip: {
+    // AMO needs reproducible source, not screenshots, research, or release art.
+    excludeSources: ['temp/**', 'dev/**', 'store-assets/**', 'docs/**', 'ci/**', 'drift-out/**'],
+  },
 
   manifest: ({ browser }) => ({
     name: '__MSG_extName__',
@@ -61,6 +65,7 @@ export default defineConfig({
           strict_min_version: '140.0',
           data_collection_permissions: {
             required: ['none'],
+            optional: ['authenticationInfo', 'browsingActivity'],
           },
         },
         gecko_android: {

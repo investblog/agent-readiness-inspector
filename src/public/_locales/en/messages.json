@@ -3,7 +3,7 @@
 		"message": "Agent Readiness Inspector"
 	},
 	"extDescription": {
-		"message": "Check any site for AI-agent readiness: robots.txt, llms.txt, markdown negotiation, MCP, Content Signals. Local checks, zero tracking."
+		"message": "Audit sites for AI-agent readiness: robots.txt, llms.txt, Markdown negotiation, MCP, Content Signals. Local, no analytics."
 	},
 	"popupTitle": {
 		"message": "Agent Readiness Inspector"
@@ -330,6 +330,9 @@
 	},
 	"cfInvalidToken": {
 		"message": "API token looks too short."
+	},
+	"cfDataPermissionDenied": {
+		"message": "Cloudflare Connect needs permission to send the target URL and your API token to Cloudflare."
 	},
 	"externalScanAction": {
 		"message": "External scan (Cloudflare URL Scanner)"

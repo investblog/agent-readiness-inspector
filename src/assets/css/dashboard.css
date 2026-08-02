@@ -555,21 +555,48 @@ body {
   border: var(--border-width) var(--border-style) var(--border-subtle);
   border-radius: var(--radius-lg);
   background: var(--bg-soft);
-  padding: var(--space-4);
+  overflow: clip; /* the summary's fill must stay inside the rounded corners */
 }
 
-.promo__title {
+.promo__summary {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin: 0 0 var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
   font-size: var(--fs-md);
   font-weight: var(--fw-semibold);
 }
 
-.promo__title span {
+.promo__summary::-webkit-details-marker {
+  display: none;
+}
+
+.promo__summary span {
   display: inline-flex;
   align-items: center;
+}
+
+/* Folded away = deliberately quiet: a muted line, not a pitch. The chevron is
+   the mark that something is folded here rather than gone. */
+.promo:not([open]) .promo__summary {
+  color: var(--muted);
+  font-weight: var(--fw-medium);
+}
+
+.promo__chevron {
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform var(--transition-fast);
+}
+
+.promo[open] .promo__chevron {
+  transform: rotate(180deg);
+}
+
+.promo__body {
+  padding: 0 var(--space-4) var(--space-4);
 }
 
 .promo__text {

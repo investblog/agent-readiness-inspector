@@ -89,6 +89,8 @@ export interface Settings {
   watch?: WatchSettings;
   /** v3 (M3.5). */
   browsing?: Partial<BrowsingSettings>;
+  /** The 301.st block was folded away; unset means "never folded". */
+  promoCollapsed?: boolean;
 }
 
 /** Cursor state so a watch cycle can span several alarm firings (SW 5-min cap). */

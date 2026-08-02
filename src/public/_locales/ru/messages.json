@@ -3,7 +3,7 @@
 		"message": "Agent Readiness Inspector"
 	},
 	"extDescription": {
-		"message": "Проверка сайта на готовность к ИИ-агентам: robots.txt, llms.txt, markdown-негошиэйшн, MCP, Content Signals. Всё локально, без трекинга."
+		"message": "Проверка сайтов на готовность к ИИ-агентам: robots.txt, llms.txt, Markdown, MCP, Content Signals. Локально, без аналитики."
 	},
 	"popupTitle": {
 		"message": "Agent Readiness Inspector"
@@ -330,6 +330,9 @@
 	},
 	"cfInvalidToken": {
 		"message": "API-токен выглядит слишком коротким."
+	},
+	"cfDataPermissionDenied": {
+		"message": "Для подключения Cloudflare нужно разрешить отправку URL проверяемого сайта и API-токена в Cloudflare."
 	},
 	"externalScanAction": {
 		"message": "Внешний скан (Cloudflare URL Scanner)"

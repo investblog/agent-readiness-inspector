@@ -157,22 +157,32 @@
       </details>
 
       <!-- 301.st promo — the service behind the extension (RI pattern: inside
-           our own UI only, never injected into pages; spec §9) -->
-      <aside class="promo">
-        <h2 class="promo__title"><span id="promo-logo"></span><span data-i18n="promoTitle">301.st</span></h2>
-        <p class="promo__text" data-i18n="promoText">
-          301.st — the service behind this extension — runs redirects and edge rules on Cloudflare at scale.
-        </p>
-        <a
-          id="promo-cta"
-          class="btn btn--primary"
-          href="https://301.st/?utm_source=agent-readiness-inspector&amp;utm_medium=extension&amp;utm_campaign=dashboard_promo"
-          target="_blank"
-          rel="noreferrer noopener"
-          data-i18n="promoCta"
-          >Try 301.st for free</a
-        >
-      </aside>
+           our own UI only, never injected into pages; spec §9).
+           Foldable, and it remembers: read once, fold it into a line, and it
+           stops taking the room. A native <details> like Settings above and
+           like 301-ui's own collapsibles — no bespoke collapse component.
+           Hidden until the stored state is read, so it never unfolds and then
+           snaps shut in the user's face. -->
+      <details id="promo" class="promo" hidden>
+        <summary class="promo__summary">
+          <span id="promo-logo"></span>
+          <span class="promo__name" data-i18n="promoTitle">301.st</span>
+        </summary>
+        <div class="promo__body">
+          <p class="promo__text" data-i18n="promoText">
+            301.st — the service behind this extension — runs redirects and edge rules on Cloudflare at scale.
+          </p>
+          <a
+            id="promo-cta"
+            class="btn btn--primary"
+            href="https://301.st/?utm_source=agent-readiness-inspector&amp;utm_medium=extension&amp;utm_campaign=dashboard_promo"
+            target="_blank"
+            rel="noreferrer noopener"
+            data-i18n="promoCta"
+            >Try 301.st for free</a
+          >
+        </div>
+      </details>
 
       <footer class="dash-footer">
         <a

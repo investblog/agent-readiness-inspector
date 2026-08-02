@@ -1,0 +1,5 @@
+title: Agent Readiness Inspector
+description: Privacy and support information for the browser extension by 301.st.
+theme: jekyll-theme-minimal
+exclude:
+  - store-listings

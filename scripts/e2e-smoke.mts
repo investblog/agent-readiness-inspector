@@ -11,6 +11,8 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 
 const EXT_DIR = path.resolve('dist/chrome-mv3');
+const CHROMIUM_PATH = process.env.ARI_CHROMIUM_PATH;
+const BROWSER_LOCALE = process.env.ARI_BROWSER_LOCALE;
 if (!fs.existsSync(path.join(EXT_DIR, 'manifest.json'))) {
   console.error('[smoke] dist/chrome-mv3 missing — run `npm run build` first');
   process.exit(1);
@@ -28,7 +30,13 @@ try {
   // headed — extensions don't load in the classic headless shell
   ctx = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
-    args: [`--disable-extensions-except=${EXT_DIR}`, `--load-extension=${EXT_DIR}`],
+    ...(CHROMIUM_PATH && { executablePath: CHROMIUM_PATH }),
+    ...(BROWSER_LOCALE && { locale: BROWSER_LOCALE }),
+    args: [
+      `--disable-extensions-except=${EXT_DIR}`,
+      `--load-extension=${EXT_DIR}`,
+      ...(BROWSER_LOCALE ? [`--lang=${BROWSER_LOCALE}`] : []),
+    ],
   });
   let [worker] = ctx.serviceWorkers();
   worker ??= await ctx.waitForEvent('serviceworker', { timeout: 15_000 });
@@ -141,6 +149,34 @@ try {
     }
     await page.setViewportSize({ width: 1000, height: 700 });
     await page.screenshot({ path: path.resolve('dev', 'smoke-dashboard.png'), fullPage: true });
+    await page.close();
+  }
+
+  // ---- The 301.st block folds into a line and stays folded ----
+  {
+    const page = await ctx.newPage();
+    await page.goto(`chrome-extension://${extensionId}/dashboard.html`);
+    try {
+      await page.waitForSelector('#promo:not([hidden])', { timeout: 10_000 });
+      const open = await page.locator('#promo').evaluate((el) => (el as HTMLDetailsElement).open);
+      const tall = await page.locator('#promo').evaluate((el) => el.getBoundingClientRect().height);
+      await page.click('.promo__summary');
+      const short = await page.locator('#promo').evaluate((el) => el.getBoundingClientRect().height);
+      // reload is the point: a fold the page forgets is not a fold
+      await page.reload();
+      await page.waitForSelector('#promo:not([hidden])', { timeout: 10_000 });
+      const stillFolded = await page.locator('#promo').evaluate((el) => !(el as HTMLDetailsElement).open);
+      const ctaHidden = await page.isHidden('#promo-cta');
+
+      const ok = open && short < tall / 2 && stillFolded && ctaHidden;
+      if (!ok) failures += 1;
+      console.log(
+        `[smoke] ${ok ? 'OK  ' : 'FAIL'} promo folds: ${Math.round(tall)}px -> ${Math.round(short)}px, stays folded=${stillFolded}`,
+      );
+    } catch (error) {
+      failures += 1;
+      console.error(`[smoke] FAIL promo: ${(error as Error).message}`);
+    }
     await page.close();
   }
 

@@ -1,0 +1,75 @@
+name: Release
+
+# cut-release.yml dispatches this workflow because tags pushed with
+# GITHUB_TOKEN do not recursively trigger other workflows.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build and release (for example v0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare WXT types
+        run: npx wxt prepare
+
+      - name: Full quality gate (Linux)
+        run: npm run check
+
+      - name: Build and zip all targets
+        run: npm run zip:all
+
+      - name: Verify release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./package.json').version")
+          files=(
+            "dist/agent-readiness-inspector-${version}-chrome.zip"
+            "dist/agent-readiness-inspector-${version}-edge.zip"
+            "dist/agent-readiness-inspector-${version}-firefox.zip"
+            "dist/agent-readiness-inspector-${version}-sources.zip"
+          )
+          for file in "${files[@]}"; do
+            test -s "$file"
+          done
+          sha256sum "${files[@]}" > dist/SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/*-chrome.zip
+            dist/*-firefox.zip
+            dist/*-edge.zip
+            dist/*-sources.zip
+            dist/SHA256SUMS.txt

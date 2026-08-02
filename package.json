@@ -1,7 +1,7 @@
 {
   "name": "agent-readiness-inspector",
   "version": "0.1.0",
-  "description": "Audit any site for AI-agent readiness — right in your browser, including pages behind login.",
+  "description": "Browser extension that audits websites for AI-agent readiness with 22 local checks.",
   "type": "module",
   "scripts": {
     "build:icons": "node scripts/build-icons.mjs",
