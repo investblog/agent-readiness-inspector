@@ -882,6 +882,14 @@ $('theme-toggle').addEventListener('click', toggleTheme);
 $('footer-brand').append(svg301Logo(14));
 $('promo-logo').append(svg301Logo(18));
 
+/** Every foldable block wears the same sprite chevron — the native marker next
+ * to an SVG one read as two different controls. */
+function addSummaryChevron(details: HTMLDetailsElement): void {
+  const chevron = icon('chevron-down', 14);
+  chevron.classList.add('summary-chevron');
+  details.querySelector('summary')?.append(chevron); // last child: margin-left:auto parks it right
+}
+
 /**
  * The promo folds away and stays folded. It is our own channel, so it should be
  * askable-for, not unavoidable: seen once, folded into a line, done. Revealed
@@ -890,9 +898,7 @@ $('promo-logo').append(svg301Logo(18));
  */
 async function renderPromo(): Promise<void> {
   const promo = $('promo') as HTMLDetailsElement;
-  const chevron = icon('chevron-down', 14);
-  chevron.classList.add('promo__chevron');
-  promo.querySelector('summary')?.append(chevron); // last child: margin-left:auto parks it right
+  addSummaryChevron(promo);
   const { promoCollapsed } = await (await storage()).getSettings();
   promo.open = promoCollapsed !== true;
   promo.hidden = false;
@@ -903,6 +909,7 @@ async function renderPromo(): Promise<void> {
   });
 }
 
+addSummaryChevron($('settings') as HTMLDetailsElement);
 $('add-button').append(icon('add', 14), document.createTextNode(t('addButton')));
 $('add-tabs').append(icon('tabs', 14), document.createTextNode(t('addOpenTabs')));
 $('scan-all').append(icon('scan', 14), document.createTextNode(t('scanAll')));

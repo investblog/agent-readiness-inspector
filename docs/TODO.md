@@ -36,6 +36,18 @@ the revised spec). This file is the index.
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
 - [x] M3 — watch: alarms + diff + regression notifications — DONE 2026-07-31
       (plan: .agents/plans/done/m3-watch.md)
+- [x] M3.5 — icon as a surface: score of the current tab while browsing (opt-in
+      auto-scan) + unread monitoring count, precedence alert > score — DONE
+      2026-08-02 (plan: .agents/plans/done/m3.5-ambient-badge.md)
+      - [ ] The score on the icon appears only after something scans that tab,
+        and with auto-scan off (the default) the side panel is the only thing
+        that does — dashboard scans carry no tabId, so they paint nothing.
+        Reported as "the counter only works with the side panel open".
+        Candidate fixes: seed the badge from stored history for saved sites (no
+        traffic), repaint on tab activation from that seed, and surface the
+        auto-scan switch during onboarding. The unread-alert count does NOT
+        have this problem — it is painted from storage by the background and is
+        covered by the live smoke with no panel open.
 - [ ] M4 — fix-apply + full CF Connect wizard (spec §8.1)
 - [ ] M5 — 301.st layer: news panel, cross-promo, spintax.net as living reference
 

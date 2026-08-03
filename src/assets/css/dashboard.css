@@ -310,7 +310,31 @@ body {
   padding: var(--space-3) var(--space-4);
 }
 
+/* One chevron idiom for every foldable block on this page. The native marker
+   and an SVG chevron sat one above the other and read as two different
+   controls; the sprite icon is the one that themes with currentColor. */
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary-chevron {
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform var(--transition-fast);
+}
+
+details[open] > summary .summary-chevron {
+  transform: rotate(180deg);
+}
+
 .settings > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   cursor: pointer;
   font-weight: var(--fw-semibold);
 }
@@ -564,13 +588,8 @@ body {
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  list-style: none;
   font-size: var(--fs-md);
   font-weight: var(--fw-semibold);
-}
-
-.promo__summary::-webkit-details-marker {
-  display: none;
 }
 
 .promo__summary span {
@@ -583,16 +602,6 @@ body {
 .promo:not([open]) .promo__summary {
   color: var(--muted);
   font-weight: var(--fw-medium);
-}
-
-.promo__chevron {
-  margin-left: auto;
-  color: var(--muted);
-  transition: transform var(--transition-fast);
-}
-
-.promo[open] .promo__chevron {
-  transform: rotate(180deg);
 }
 
 .promo__body {
