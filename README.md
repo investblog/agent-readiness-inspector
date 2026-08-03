@@ -11,8 +11,9 @@ a popup and sidebar. Because the audit runs in the browser, it can inspect
 staging sites and many authenticated pages that external scanners cannot reach;
 browser cookie protections may still limit session access on some sites.
 
-Status: **v0.1.0 release candidate**. The first store submissions are being
-prepared from Linux-built GitHub Release packages.
+Status: **v0.1.0 is under review** in the Chrome Web Store, Firefox Add-ons,
+and Microsoft Edge Add-ons. All three submissions use the Linux-built packages
+from [GitHub Release v0.1.0](https://github.com/investblog/agent-readiness-inspector/releases/tag/v0.1.0).
 
 ## Features
 
@@ -39,9 +40,10 @@ standards. It is not affiliated with or endorsed by Cloudflare.
 
 ## Install
 
-The first signed store releases are in preparation. Release packages are built
-on GitHub Actions for Chrome, Firefox, and Edge; do not use a local development
-archive as a store submission package.
+The first signed store releases are awaiting store review and do not have
+public listing URLs yet. Release packages are built on GitHub Actions for
+Chrome, Firefox, and Edge; do not use a local development archive as a store
+submission package.
 
 For development, load the unpacked target from `dist/` after running the
 corresponding build command.

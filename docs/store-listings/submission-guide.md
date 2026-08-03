@@ -9,6 +9,10 @@ Pages deploy:
 
 `https://github.com/investblog/agent-readiness-inspector/blob/main/docs/privacy-policy.md`
 
+**Текущий статус:** `v0.1.0` подан вручную во все три стора из GitHub Release;
+Chrome, Firefox AMO и Edge находятся на ревью. Повторно пакет с тем же номером
+версии не загружать. Публичные URL листингов добавить после решений сторов.
+
 ## Что загружать
 
 | Стор | Пакет | Текст |
