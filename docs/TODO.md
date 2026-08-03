@@ -27,6 +27,20 @@ the revised spec). This file is the index.
       - [ ] Store links: fill store-links.ts URLs after publication; decide
         whether Edge gets its own build (BROWSER===chrome would show the
         Chrome store link to Edge users otherwise)
+        - [ ] Do it per store the moment that store approves, not in one batch
+          after all three: the review link is what collects ratings, and the
+          first days after publication are when the traffic is there.
+          getStoreInfo() returns null while the URL is empty, so the footer
+          link simply stays hidden until then — no release is blocked by a
+          store that is still in review.
+      - [ ] Footer GitHub link has no icon while everything beside it does
+        (301.st carries its logo): add `github` to the sprite manifest in
+        scripts/build-icons.mjs, rebuild with `npm run build:icons`, and render
+        it via icon('github', …) in the popup and welcome footers
+        (src/entrypoints/popup/index.html, src/entrypoints/welcome/index.html —
+        both are plain-text "GitHub" today). Same pass should decide whether
+        the rate link gets a store glyph and whether the dashboard footer,
+        which has no GitHub link at all, should get one.
       - [x] Store banner 1400×560 built from the mascot:
         store-assets/promo-marquee-1400x560.png
 - [x] M2 — dashboard: saved sites, batch, history, light CF Connect + external
