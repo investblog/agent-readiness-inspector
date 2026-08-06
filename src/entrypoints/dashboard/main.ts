@@ -11,16 +11,6 @@ import { browser } from 'wxt/browser';
 import type { CheckId, CheckResult } from '@/checks';
 import { MATRIX } from '@/checks';
 import { svg301Logo } from '@/shared/brand';
-import {
-  CfApiError,
-  type CfCredentials,
-  isValidAccountId,
-  isValidToken,
-  parseCurlCredentials,
-  runExternalScan,
-  verifyToken,
-} from '@/shared/cf-api';
-import { type DiffRow, diffScans } from '@/shared/diff';
 import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
 import type { ScanResponse } from '@/shared/messaging';
@@ -108,17 +98,12 @@ interface RowState {
 }
 
 /**
- * Transient per-row UI state. Kept in its OWN map on purpose: it used to live
- * on RowState, and a storage refresh silently wiped it (the external diff was
- * discarded microseconds after being computed). Storage refreshes may not
- * touch this map, so no future field can be forgotten again.
+ * Transient per-row UI state, in its OWN map rather than on RowState: a storage
+ * refresh must not wipe what the page is doing right now.
  */
 interface RowUi {
   scanning?: boolean;
   error?: string;
-  diff?: { rows: DiffRow[]; level: number; levelName: string; divergences: number };
-  externalScanning?: boolean;
-  externalError?: string;
 }
 
 const rows = new Map<string, RowState>();
@@ -242,100 +227,9 @@ function renderRow(origin: string, state: RowState, uiState: RowUi): HTMLTableRo
   watchBtn.disabled = batchRunning;
   watchBtn.addEventListener('click', () => void toggleWatch(origin, !watched));
 
-  const external = document.createElement('button');
-  external.type = 'button';
-  external.className = 'icon-btn';
-  external.title = t('externalScanAction');
-  external.setAttribute('aria-label', `${t('externalScanAction')} ${label}`);
-  external.append(icon('external', 15));
-  external.disabled = Boolean(uiState.externalScanning) || batchRunning || !cfCreds;
-  external.hidden = !cfCreds; // only meaningful once a token is connected
-  external.addEventListener('click', () => void externalScan(origin));
-  actions.append(rescan, watchBtn, external, remove);
+  actions.append(rescan, watchBtn, remove);
   tr.append(actions);
 
-  return tr;
-}
-
-// ---- External scan diff row (spec §5: inside vs outside) ----
-
-const DIFF_KIND_ICON = { match: 'pass', expected: 'na', divergent: 'warn', onlyOurs: 'na', onlyTheirs: 'na' } as const;
-
-function diffRowElement(origin: string, uiState: RowUi): HTMLTableRowElement {
-  const tr = document.createElement('tr');
-  tr.className = 'diff-row';
-  const cell = document.createElement('td');
-  cell.colSpan = 6;
-
-  if (uiState.externalScanning) {
-    cell.append(Object.assign(document.createElement('span'), { className: 'row-spinner' }));
-    cell.append(document.createTextNode(` ${t('externalScanRunning')}`));
-    tr.append(cell);
-    return tr;
-  }
-  if (uiState.externalError) {
-    const err = document.createElement('p');
-    err.className = 'row-error';
-    err.textContent = uiState.externalError;
-    cell.append(err);
-    tr.append(cell);
-    return tr;
-  }
-
-  const diff = uiState.diff;
-  if (!diff) {
-    tr.append(cell);
-    return tr;
-  }
-
-  const head = document.createElement('p');
-  head.className = 'diff-head';
-  head.textContent = t('diffSummary', diff.levelName, String(diff.level), String(diff.divergences));
-  cell.append(head);
-
-  const interesting = diff.rows.filter((r) => r.kind !== 'match');
-  if (interesting.length === 0) {
-    const allMatch = document.createElement('p');
-    allMatch.className = 'settings-hint';
-    allMatch.textContent = t('diffAllMatch');
-    cell.append(allMatch);
-  }
-  for (const row of interesting) {
-    const item = document.createElement('div');
-    item.className = `diff-item diff-item--${row.kind}`;
-    const status = icon(DIFF_KIND_ICON[row.kind], 14);
-    status.classList.add(`diff-icon--${row.kind}`);
-    const name = document.createElement('span');
-    name.className = 'diff-name';
-    // an id we don't know (CF added a check) must not render as a raw i18n key
-    const localized = t(`check_${row.id}`);
-    name.textContent = localized === `check_${row.id}` ? row.id : localized;
-    const verdicts = document.createElement('span');
-    verdicts.className = 'diff-verdicts';
-    verdicts.textContent = t('diffVerdicts', row.ours ?? '—', row.theirs ?? '—');
-    item.append(status, name, verdicts);
-    if (row.reasonKey) {
-      const reason = document.createElement('span');
-      reason.className = 'diff-reason';
-      reason.textContent = t(row.reasonKey);
-      item.append(reason);
-    }
-    cell.append(item);
-  }
-
-  const close = document.createElement('button');
-  close.type = 'button';
-  close.className = 'btn btn--small';
-  close.append(icon('close', 12), document.createTextNode(t('diffClose')));
-  close.addEventListener('click', () => {
-    const state = ui(origin);
-    state.diff = undefined;
-    state.externalError = undefined;
-    renderTable();
-  });
-  cell.append(close);
-
-  tr.append(cell);
   return tr;
 }
 
@@ -346,11 +240,7 @@ function renderTable(): void {
   for (const origin of origins) {
     const state = rows.get(origin);
     if (!state) continue;
-    const uiState = ui(origin);
-    body.append(renderRow(origin, state, uiState));
-    if (uiState.diff || uiState.externalScanning || uiState.externalError) {
-      body.append(diffRowElement(origin, uiState));
-    }
+    body.append(renderRow(origin, state, ui(origin)));
   }
   ($('sites-table') as HTMLElement).hidden = origins.length === 0;
   $('empty-state').hidden = origins.length > 0;
@@ -393,75 +283,6 @@ async function scanOne(origin: string): Promise<void> {
     ui(origin).scanning = false;
     await refreshRow(origin);
   }
-}
-
-// ---- External scan (official URL Scanner, spec §5/§8.1) ----
-
-/** Localized wording for CF failures; the English detail stays as the title. */
-function describeCfError(error: unknown): string {
-  if (error instanceof CfApiError) {
-    const localized = t(`cfError_${error.code}`);
-    return localized === `cfError_${error.code}` ? error.message : `${localized} (${error.message})`;
-  }
-  return error instanceof Error ? error.message : String(error);
-}
-
-let cfCreds: CfCredentials | null = null;
-/** Free tier allows one scan per 10s — serialize and space submissions. */
-const EXTERNAL_MIN_INTERVAL_MS = 10_000;
-let lastExternalScanAt = 0;
-let externalQueue: Promise<unknown> = Promise.resolve();
-
-async function externalScan(origin: string): Promise<void> {
-  const state = ui(origin);
-  if (!rows.has(origin) || !cfCreds || state.externalScanning) return;
-  if (!(await ensureCfDataPermission())) {
-    state.externalError = t('cfDataPermissionDenied');
-    renderTable();
-    return;
-  }
-  state.externalScanning = true;
-  state.externalError = undefined;
-  state.diff = undefined;
-  renderTable();
-
-  const task = async (): Promise<void> => {
-    const creds = cfCreds;
-    if (!creds || !rows.has(origin)) return;
-    try {
-      const wait = lastExternalScanAt + EXTERNAL_MIN_INTERVAL_MS - Date.now();
-      if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-      lastExternalScanAt = Date.now();
-
-      const readiness = await runExternalScan(creds, origin);
-      // compare against a fresh local run over the FULL matrix (same basis as
-      // scripts/calibrate.mts) so off-by-default checks CF reports are compared
-      // rather than surfacing as "only theirs"
-      const response = (await browser.runtime.sendMessage({
-        type: 'scan',
-        origin,
-        include: MATRIX.map((m) => m.id),
-      })) as { ok: true; results: CheckResult[] } | { ok: false; error: string };
-      if (!response.ok) throw new Error(response.error);
-      const summary = diffScans(response.results, readiness);
-      ui(origin).diff = {
-        rows: summary.rows,
-        level: readiness.level,
-        levelName: readiness.levelName,
-        divergences: summary.divergences,
-      };
-    } catch (error) {
-      ui(origin).externalError = describeCfError(error);
-    } finally {
-      ui(origin).externalScanning = false;
-      await refreshRow(origin);
-    }
-  };
-  // run on both settle paths so one failure can never poison the chain
-  // (same guard as StorageLayer.enqueue)
-  const next = externalQueue.then(task, task);
-  externalQueue = next.catch(() => {});
-  await next;
 }
 
 // ---- Batch (page-orchestrated: concurrency 2, politeness stagger) ----
@@ -864,121 +685,6 @@ async function renderCheckToggles(): Promise<void> {
   }
 }
 
-// ---- Settings: Cloudflare credentials ----
-
-function setCfStatus(message: string, kind: 'ok' | 'error' | 'info' = 'info'): void {
-  const el = $('cf-status');
-  el.textContent = message;
-  el.className = `cf-status cf-status--${kind}`;
-  el.hidden = false;
-}
-
-type FirefoxDataCollectionRequest = { data_collection: ('authenticationInfo' | 'browsingActivity')[] };
-
-const CF_DATA_REQUEST: FirefoxDataCollectionRequest = {
-  data_collection: ['authenticationInfo', 'browsingActivity'],
-};
-
-function dataPermissions(): {
-  contains(request: FirefoxDataCollectionRequest): Promise<boolean>;
-  request(request: FirefoxDataCollectionRequest): Promise<boolean>;
-} {
-  return browser.permissions as unknown as ReturnType<typeof dataPermissions>;
-}
-
-/**
- * Cached answer to "may we send the URL and token to Cloudflare". Resolved at
- * load and after a grant, never inside a click handler — see below.
- */
-let cfDataGranted = import.meta.env.BROWSER !== 'firefox';
-
-async function refreshCfDataPermission(): Promise<void> {
-  if (import.meta.env.BROWSER !== 'firefox') return;
-  try {
-    cfDataGranted = await dataPermissions().contains(CF_DATA_REQUEST);
-  } catch {
-    cfDataGranted = false;
-  }
-}
-
-/**
- * Firefox 140+ requires explicit consent for the optional CF transfer.
- *
- * NOT async, and that is the whole point: `permissions.request()` "can only be
- * made inside the handler for a user action", so it has to run in the same task
- * as the click. Awaiting anything first — storage, or even the `contains()`
- * check this used to start with — spends the gesture, Firefox refuses, and the
- * user is told they denied a prompt they were never shown. That is exactly how
- * this failed in the wild on 2026-08-06. Callers must invoke it BEFORE their
- * first await; `contains()` is answered from the cache instead.
- */
-function ensureCfDataPermission(): Promise<boolean> {
-  if (cfDataGranted) return Promise.resolve(true);
-  return dataPermissions()
-    .request(CF_DATA_REQUEST)
-    .then((granted) => {
-      cfDataGranted = granted;
-      return granted;
-    })
-    .catch(() => false);
-}
-
-async function loadCfCreds(): Promise<void> {
-  const { cfAccountId, cfToken } = await (await storage()).getSettings();
-  cfCreds = cfAccountId && cfToken ? { accountId: cfAccountId, token: cfToken } : null;
-  ($('cf-account') as HTMLInputElement).value = cfAccountId ?? '';
-  // leave the token field EMPTY when one is stored: pre-filling dots would make
-  // the field fail validation on any later save (e.g. fixing the account id)
-  const tokenInput = $('cf-token') as HTMLInputElement;
-  tokenInput.value = '';
-  tokenInput.placeholder = cfToken ? t('cfTokenStored') : t('cfTokenPlaceholder');
-  $('cf-clear').hidden = !cfCreds;
-  if (cfCreds) setCfStatus(t('cfConnected'), 'ok');
-}
-
-async function saveCfCreds(): Promise<void> {
-  const accountInput = $('cf-account') as HTMLInputElement;
-  const tokenInput = $('cf-token') as HTMLInputElement;
-
-  // a pasted test-curl fills both fields at once (301-ui pattern)
-  const pasted = parseCurlCredentials(`${accountInput.value}\n${tokenInput.value}`);
-  if (pasted) {
-    accountInput.value = pasted.accountId;
-    tokenInput.value = pasted.token;
-  }
-  const accountId = accountInput.value.trim();
-  // an empty field means "keep the stored token" (it is never rendered back);
-  // cfCreds holds it already, so this stays synchronous
-  const token = tokenInput.value.trim() || cfCreds?.token || '';
-  if (!isValidAccountId(accountId)) return setCfStatus(t('cfInvalidAccount'), 'error');
-  if (!isValidToken(token)) return setCfStatus(t('cfInvalidToken'), 'error');
-  // FIRST await of this handler, deliberately: the permission prompt needs the
-  // click that is still in scope, and anything awaited before it spends that.
-  if (!(await ensureCfDataPermission())) return setCfStatus(t('cfDataPermissionDenied'), 'error');
-
-  setCfStatus(t('cfVerifying'));
-  try {
-    await verifyToken(token, accountId);
-    await (await storage()).updateSettings({ cfAccountId: accountId, cfToken: token });
-    await loadCfCreds();
-    await refreshCfDataPermission();
-    setCfStatus(t('cfConnected'), 'ok');
-    renderTable(); // external-scan buttons appear
-  } catch (error) {
-    setCfStatus(describeCfError(error), 'error');
-  }
-}
-
-async function clearCfCreds(): Promise<void> {
-  await (await storage()).updateSettings({ cfAccountId: undefined, cfToken: undefined });
-  cfCreds = null;
-  ($('cf-account') as HTMLInputElement).value = '';
-  ($('cf-token') as HTMLInputElement).value = '';
-  $('cf-clear').hidden = true;
-  setCfStatus(t('cfCleared'), 'info');
-  renderTable();
-}
-
 // ---- Wiring ----
 
 $('theme-toggle').append(icon('theme', 16));
@@ -1094,20 +800,8 @@ browser.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && 'alerts' in changes) void renderAlerts();
 });
 
-$('cf-save').append(document.createTextNode(t('cfSave')));
-$('cf-clear').append(document.createTextNode(t('cfClear')));
-($('cf-form') as HTMLFormElement).addEventListener('submit', (event) => {
-  event.preventDefault();
-  void saveCfCreds();
-});
-$('cf-clear').addEventListener('click', () => void clearCfCreds());
-
 void (async () => {
   await renderPromo();
-  await loadCfCreds();
-  // resolved here, never inside a click: ensureCfDataPermission() must be able
-  // to answer "already granted?" without spending the gesture on contains()
-  await refreshCfDataPermission();
   await renderCheckToggles();
   await renderBrowsingSettings();
   await renderNewsSettings();

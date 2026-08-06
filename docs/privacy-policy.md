@@ -12,9 +12,8 @@ Chrome, and Mozilla Firefox. It audits websites against open standards used by
 AI agents.
 
 **The developer, 301.st, does not collect, receive, sell, or use your browsing
-data. The extension processes audit data in your browser. The only optional
-third-party transfer is a Cloudflare URL Scanner request that you explicitly
-enable and start.**
+data. The extension processes audit data in your browser, and transfers none of
+it to any third party.**
 
 ## Data the extension handles
 
@@ -24,8 +23,7 @@ To perform its user-facing audit, the extension handles:
 - HTTP response status, headers, and up to 512 KB of response text from the
   audited site;
 - scan verdicts, scores, and timestamps;
-- sites you save, monitoring alerts, and extension settings;
-- a Cloudflare Account ID and API token, only if you connect Cloudflare.
+- sites you save, monitoring alerts, and extension settings.
 
 The extension does not include analytics, advertising, telemetry, crash
 reporting, tracking identifiers, or remotely hosted code.
@@ -40,14 +38,11 @@ Data is stored only in the browser profile:
 | Scan history for saved sites | Trends and regression detection | Latest 50 scans per site |
 | Monitoring alerts | Local alert inbox | Latest 50 alerts |
 | Settings | Your selected checks and preferences | Until changed or the extension is removed |
-| Cloudflare Account ID and API token | Optional external scan | Until you disconnect Cloudflare or remove the extension |
 | Session score cache | Avoid repeated scans while browsing | Up to 100 origins; entries expire after 10 minutes and the cache ends with the browser session |
 
 A manual scan of an unsaved site does not create persistent scan history.
 Removing a saved site removes its history and related alerts. Uninstalling the
-extension removes its local data. Cloudflare credentials are stored in the
-browser's local extension storage and are not separately encrypted by the
-extension.
+extension removes its local data.
 
 ## Network requests
 
@@ -65,19 +60,23 @@ receives normal network information such as your IP address and request
 headers. If the site redirects a request, the browser follows that redirect.
 The destination site's own privacy policy applies.
 
-### Cloudflare URL Scanner (optional)
+### DNS lookups
 
-Cloudflare Connect is off by default. If you enter credentials and approve the
-feature, the extension sends your Cloudflare API token to
-`api.cloudflare.com` to verify it. When you press "External scan," it sends the
-target URL and Account ID, authenticated by that token, to Cloudflare's URL
-Scanner and polls Cloudflare for the result. Cloudflare therefore receives the
-target URL, Account ID, API token, your IP address, and ordinary request
-metadata. Cloudflare's privacy policy governs its processing.
+One check, DNS-AID, asks whether a site publishes `_index._agents` SVCB records
+and whether that answer is DNSSEC-validated. Browsers expose no DNS API, so the
+extension performs this as a DNS-over-HTTPS request to Cloudflare's public
+resolver at `cloudflare-dns.com`. The resolver receives the queried name — the
+audited hostname prefixed with `_index._agents` — and ordinary request metadata
+such as your IP address. It receives no page content, no cookies, and nothing
+about what you were reading. Cloudflare's privacy policy governs its processing.
 
-In Firefox 140 and later, the extension also requests Firefox's optional
-`authenticationInfo` and `browsingActivity` data permissions before making
-these Cloudflare requests. Declining leaves all local auditing available.
+### Removed: Cloudflare URL Scanner comparison
+
+Earlier versions offered an optional comparison that sent an API token, Account
+ID and target URL to `api.cloudflare.com`. That feature was removed in v0.1.1,
+along with Firefox's `authenticationInfo` and `browsingActivity` data
+permissions, which existed only to serve it. Any credentials a previous version
+stored are deleted when this version first runs.
 
 ### Links opened by you
 
@@ -108,7 +107,7 @@ request information described above under "Links and third-party destinations."
 301.st has no server receiving extension audit data and cannot access data in
 your browser profile. We do not sell user data or use it for advertising,
 creditworthiness, or any purpose unrelated to the extension's single purpose.
-No person at 301.st can read your scan data or Cloudflare credentials.
+No person at 301.st can read your scan data.
 
 The extension's use of information received from browser APIs complies with
 the Chrome Web Store User Data Policy, including its Limited Use requirements.
@@ -116,8 +115,8 @@ the Chrome Web Store User Data Policy, including its Limited Use requirements.
 ## Your controls
 
 You can remove a saved site and its history, clear monitoring alerts, disable
-watch or auto-scan, disconnect Cloudflare, revoke optional permissions in the
-browser, or uninstall the extension to remove all extension data.
+watch or auto-scan, revoke optional permissions in the browser, or uninstall the
+extension to remove all extension data.
 
 ## Children
 

@@ -139,36 +139,6 @@
           </div>
         </section>
 
-        <section class="settings-block">
-          <h2 data-i18n="settingsCf">Cloudflare account (optional)</h2>
-          <p class="settings-hint" data-i18n="settingsCfHint">
-            Lets you run an external scan through Cloudflare's URL Scanner and compare it with the in-browser
-            result. Either kind of token works: a user token (My Profile → API Tokens) or an account-owned one
-            (Manage Account → API Tokens). It needs the URL Scanner: Edit permission. Paste the token, or the
-            whole test curl from the token page. Stored locally, sent only to api.cloudflare.com.
-          </p>
-          <form id="cf-form" class="cf-form">
-            <input
-              id="cf-account"
-              type="text"
-              autocomplete="off"
-              spellcheck="false"
-              data-i18n-placeholder="cfAccountPlaceholder"
-              placeholder="Account ID"
-            />
-            <input
-              id="cf-token"
-              type="password"
-              autocomplete="off"
-              spellcheck="false"
-              data-i18n-placeholder="cfTokenPlaceholder"
-              placeholder="API token"
-            />
-            <button id="cf-save" type="submit" class="btn"></button>
-            <button id="cf-clear" type="button" class="btn" hidden></button>
-          </form>
-          <p id="cf-status" class="cf-status" role="status" hidden></p>
-        </section>
       </details>
 
       <!-- 301.st promo — the service behind the extension (RI pattern: inside

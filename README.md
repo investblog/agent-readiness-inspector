@@ -30,8 +30,6 @@ Linux-built packages from
   inbox, and optional browser notifications.
 - **Browsing controls** - optional automatic scans plus score and unread-alert
   badges on the toolbar icon.
-- **Cloudflare comparison** - an optional outside scan using your own
-  Cloudflare URL Scanner credentials, disabled by default.
 - **Dark and light themes** with English and Russian UI.
 - **Local-first storage** - scan results, saved sites, history, settings, and
   alerts stay in browser storage.
@@ -89,9 +87,9 @@ dependencies.
 ## Privacy
 
 The extension has no analytics and sends no scan or browsing data to 301.st.
-Manual scans contact only the selected site. Saved data remains in local browser
-storage. The optional Cloudflare comparison sends the selected URL and locally
-stored credentials to Cloudflare only after the user enables it.
+Manual scans contact only the selected site, plus a DNS-over-HTTPS lookup of its
+_index._agents name for the DNS-AID check. Saved data remains in local browser
+storage. There is no third-party transfer of your data.
 
 User-selected links open their destination normally. After uninstall, the
 browser opens a visible 301.st feedback page without scan results, settings, or

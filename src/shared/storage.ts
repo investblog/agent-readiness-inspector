@@ -8,8 +8,9 @@
 import type { CheckId, CheckStatus } from '@/checks';
 
 /** v1: sites/history/settings. v2: + watch fields (M3). v3: + alert inbox and
- * browsing/badge settings (M3.5). Every bump so far added OPTIONAL keys only. */
-export const SCHEMA_VERSION = 3;
+ * browsing/badge settings (M3.5). v4: REMOVES the Cloudflare credentials — the
+ * first bump that deletes rather than adds. */
+export const SCHEMA_VERSION = 4;
 /** FIFO retention per site — keeps ~100 sites × 50 snapshots well under the
  * ~10MB storage.local quota without the unlimitedStorage permission (spec §10). */
 export const MAX_SNAPSHOTS_PER_SITE = 50;
@@ -137,8 +138,6 @@ export function isNewsItem(item: InboxItem): item is NewsItem {
 export interface Settings {
   /** Per-check enable/disable on top of defaultEnabled (llmsTxt/a2a toggles). */
   checkOverrides?: Partial<Record<CheckId, boolean>>;
-  cfAccountId?: string;
-  cfToken?: string;
   /** v2 (M3). */
   watch?: WatchSettings;
   /** v3 (M3.5). */
@@ -186,11 +185,10 @@ export class StorageLayer {
   }
 
   /**
-   * Idempotent, stepwise: each version bump only ADDS what the new one needs.
-   * v2 and v3 introduced only OPTIONAL fields, so there is nothing to rewrite —
-   * the defaults are resolved on read (`getWatchSettings`, `getBrowsingSettings`),
-   * which also keeps a fresh install and an upgraded store the same shape. An
-   * upgraded store simply has no alert inbox until the watch cycle writes one.
+   * Idempotent and stepwise. v2 and v3 only ADDED optional fields, resolved on
+   * read, which keeps a fresh install and an upgraded store the same shape.
+   * v4 is the first bump that DELETES: the Cloudflare credentials go, because
+   * the feature that needed them is gone and a token nobody uses is pure risk.
    */
   async migrate(): Promise<void> {
     const { [KEY_VERSION]: stored, [KEY_SITES]: sites } = await this.area.get([KEY_VERSION, KEY_SITES]);
@@ -202,13 +200,28 @@ export class StorageLayer {
       return;
     }
 
+    // BEFORE any of the branches below, all of which return early: a store can
+    // hold credentials and no sites at all (connected an account, never saved a
+    // site), and that store must still be cleaned.
+    await this.dropCloudflareCredentials();
+
     if (sites === undefined) {
       // genuinely empty store (a missing/corrupt version alone must never wipe data)
       await this.area.set({ [KEY_VERSION]: SCHEMA_VERSION, [KEY_SITES]: {} });
       return;
     }
-    // v1 → v2 → v3: optional fields only; existing data stays as it is
     await this.area.set({ [KEY_VERSION]: SCHEMA_VERSION });
+  }
+
+  /** v4: remove the credentials of the retired external-comparison feature. */
+  private async dropCloudflareCredentials(): Promise<void> {
+    const { [KEY_SETTINGS]: settings } = await this.area.get(KEY_SETTINGS);
+    if (!settings || typeof settings !== 'object') return;
+    const rest = { ...(settings as Record<string, unknown>) };
+    if (!('cfToken' in rest) && !('cfAccountId' in rest)) return;
+    delete rest.cfToken;
+    delete rest.cfAccountId;
+    await this.area.set({ [KEY_SETTINGS]: rest });
   }
 
   async getSites(): Promise<Record<string, SiteMeta>> {

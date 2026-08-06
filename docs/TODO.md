@@ -120,51 +120,31 @@ the revised spec). This file is the index.
         store-assets/promo-marquee-1400x560.png
 - [x] M2 — dashboard: saved sites, batch, history, light CF Connect + external
       scan diff — DONE 2026-07-30 (plan: .agents/plans/done/m2-dashboard.md)
-      - [ ] Verify the external scan live — RUN 2026-08-06 with a real token,
-        and it found TWO defects. One is fixed, one blocks the feature.
-        - [x] verifyToken rejected a valid token. It asked `/user/tokens/verify`
-          only, and an account-owned token (`cfat_`, the kind the URL Scanner
-          instructions lead you to) answers 401 "Invalid API Token" there while
-          returning 200 "valid and active" from
-          `/accounts/{id}/tokens/verify` — both observed live on the same token.
-          Now both endpoints are tried, account-owned first (this feature has an
-          account id anyway), and a token is only rejected when BOTH refuse.
-          The setup copy names both routes and the `URL Scanner: Edit`
-          permission, because the old wording sent the user down one path
-          without saying there was another.
-        - [ ] **BLOCKER: the scan returns no agent-readiness data at all.**
-          Submitting with `options: {agentReadiness: true}` succeeds (200 +
-          uuid), the scan completes, and the finished result carries processors
-          geoip/asn/wappa/rdns/domainCategories/dns/urlCategories/radarRank/
-          phishing/phishing_v2/robotsTxt/whois — no `agentReadiness`, and no key
-          matching /agent|readiness/ anywhere in the payload except User-Agent
-          headers. So `fetchScanResult` can never find its block. Cloudflare's
-          changelog says the report is reachable "via our API" but no doc names
-          the request option or the response path. Next: find the real shape
-          (dashboard network tab on a scan report is the cheapest source), or
-          treat the comparison as dashboard-only and say so in the UI instead of
-          polling for something that never arrives.
-- [x] DNS-AID is checkable after all — DONE 2026-08-06, and it removes the one
-      check where the external scanner was strictly better. The old reasoning
-      ("extensions have no DNS API") was true and beside the point:
-      DNS-over-HTTPS is an ordinary fetch, and the JSON answer carries both
-      halves of the verdict — the SVCB records under `_index._agents` and `AD`,
-      the resolver's DNSSEC judgement, which is the second condition the scanner
-      applies ("records found, but DNSSEC was not validated"). No token, no
-      account, works for every user. Verified live before writing it: 301.sh
-      Status=0 AD=true 1 answer; cloudflare.com and example.com NOERROR with
-      zero answers; isitagentready.com NXDOMAIN — still not publishing its own
-      check. `na` is kept for exactly one case, an unreachable resolver: that
-      says nothing about the site, and failing it would invent a defect. Six
-      tests, verified by disabling the DNSSEC gate — the AD=false test went red.
-      Only `_index._agents` is queried; the per-protocol labels the Cloudflare
-      scanner invented (`_mcp`, `_a2a`) are not in the draft.
-      - [ ] **Both articles now overstate this and need a correction.** The
-        browser one says DNS-AID "cannot be checked from an extension at all"
-        and calls it "the one check where the datacenter scanner is strictly
-        better"; the comparison table says "no, always not-applicable". All of
-        that was true of extension APIs and false of the product. EN/DE/RU
-        changelog entries, synchronised.
+      - [x] External scan — REMOVED 2026-08-07 rather than fixed. Running it
+        live found that the data it needed does not exist on any surface we can
+        reach, and asking whether the feature was worth having answered itself.
+        - Three ways checked before deciding: the URL Scanner API result
+          carries no agent-readiness data at all; the public Radar report has no
+          Agent Readiness tab; the authenticated dashboard does not have one
+          either on this account. The strings and an AGENT_READINESS flag are in
+          the dashboard bundle, so the feature exists — it is simply not
+          reachable here, and guessing at a rollout is not a product plan.
+        - The deeper reason is not the data, though. Diffing our verdict against
+          a competitor's makes theirs the authority, and the source we would
+          have imported is one our own write-ups document as probing paths the
+          specification abandoned. The last word should be ours.
+        - Removed: CF Connect settings, token storage and verification, the
+          external diff UI, `cf-api.ts`, and Firefox's `authenticationInfo` /
+          `browsingActivity` data permissions, which existed only for this.
+          Storage went to v4 — the first migration that DELETES: stored
+          credentials are wiped on upgrade, because a token whose feature is
+          gone is pure risk. The privacy policy is updated accordingly; it is a
+          published document and described a transfer that no longer happens.
+        - Kept: the calibration vocabulary in `shared/diff.ts`, which is what
+          the weekly drift-watch job uses. Comparison belongs in CI, for us —
+          not in the user's report, showing someone else's number beside ours.
+        - No replacement link to isitagentready.com either: it is a competitor,
+          not a neutral reference.
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
 - [x] M3 — watch: alarms + diff + regression notifications — DONE 2026-07-31
       (plan: .agents/plans/done/m3-watch.md)
@@ -185,7 +165,9 @@ the revised spec). This file is the index.
         "seeded". Seven tests; one of them caught the author, not the code —
         79 is a level-4 composite, because the L5 floor is 80, the very boundary
         Cloudflare's two surfaces disagree about.
-- [ ] M4 — fix-apply + full CF Connect wizard (spec §8.1)
+- [ ] M4 — fix-apply (spec §8.1). The "full CF Connect wizard" half is moot:
+      CF Connect was removed 2026-08-07, so M4 is fix-apply alone unless a
+      reason to talk to Cloudflare reappears.
 - [ ] M5 — 301.st layer: cross-promo, spintax.net as living reference
       - [x] 301.sh feed — DONE 2026-08-06. Posts are filed in the SAME inbox as
         regressions rather than getting a surface of their own, so there is one

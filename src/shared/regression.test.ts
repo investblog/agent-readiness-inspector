@@ -150,7 +150,8 @@ describe('storage migration v1 → v2', () => {
     area.data.set('schemaVersion', 1);
     area.data.set('sites', { 'https://example.com': { addedAt: 10, lastScanAt: 20 } });
     area.data.set('history:https://example.com', [{ scannedAt: 20, composite: 40, level: 2, statuses: {} }]);
-    area.data.set('settings', { checkOverrides: { llmsTxt: true }, cfAccountId: 'a'.repeat(32) });
+    // the credentials a v1 store would still carry — v4 must remove them
+    area.data.set('settings', { checkOverrides: { llmsTxt: true }, cfAccountId: 'a'.repeat(32), cfToken: 'tok' });
 
     const store = new StorageLayer(area);
     await store.migrate();
@@ -162,8 +163,23 @@ describe('storage migration v1 → v2', () => {
     ]);
     const settings = await store.getSettings();
     expect(settings.checkOverrides?.llmsTxt).toBe(true); // v1 settings survive
-    expect(settings.cfAccountId).toBe('a'.repeat(32));
+    // ...but the retired feature's credentials do not
+    expect('cfAccountId' in settings).toBe(false);
+    expect('cfToken' in settings).toBe(false);
     expect(await store.getWatchSettings()).toEqual(DEFAULT_WATCH); // defaults resolve on read
+  });
+
+  it('removes the credentials even when the store has no sites at all', async () => {
+    // connected an account, never saved a site: this store used to take the
+    // empty-store branch and keep its token forever
+    const area = new FakeArea();
+    area.data.set('schemaVersion', 3);
+    area.data.set('settings', { cfToken: 'tok', cfAccountId: 'a'.repeat(32) });
+
+    await new StorageLayer(area).migrate();
+
+    expect(area.data.get('settings')).toEqual({});
+    expect(area.data.get('schemaVersion')).toBe(SCHEMA_VERSION);
   });
 
   it('does not overwrite watch settings the user already changed', async () => {

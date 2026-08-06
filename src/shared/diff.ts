@@ -1,39 +1,24 @@
-// Inside-vs-outside diff (M2-c, spec §5): our in-browser verdicts against the
-// Cloudflare URL Scanner's external view. Shared shape with the calibration
-// harness — CF reports {category:{checkId:{status}}} in both surfaces.
+// Calibration vocabulary — CI only (scripts/calibrate.mts).
 //
-// The expected-divergence list mirrors scripts/calibrate.mts ALLOWLIST: those
-// four are deliberate, documented differences (spec §3), not findings.
+// The user-facing "compare against Cloudflare" feature is gone (2026-08-07):
+// importing a competitor's verdict into our own report made their number the
+// authority, and the source we would have imported is one our own write-ups
+// document as probing paths the specification abandoned. What survives here is
+// the part that was always for US — the vocabulary the weekly calibration job
+// uses to notice when the upstream matrix drifts away from ours.
 
-import type { CheckId, CheckResult, CheckStatus } from '@/checks';
-import type { CfAgentReadiness, CfCheck } from './cf-api';
-
-export type DiffKind = 'match' | 'expected' | 'divergent' | 'onlyOurs' | 'onlyTheirs';
-
-export interface DiffRow {
-  id: string;
-  kind: DiffKind;
-  ours?: CheckStatus;
-  theirs?: string;
-  /** i18n key explaining a deliberate divergence, when kind === 'expected'. */
-  reasonKey?: string;
-  ourEvidence?: string;
-  theirMessage?: string;
-}
-
-export interface DiffSummary {
-  rows: DiffRow[];
-  matches: number;
-  divergences: number;
-  expected: number;
-}
+import type { CheckId, CheckStatus } from '@/checks';
 
 /**
- * Deliberate divergences: id → { our status that is expected, reason key }.
- * Single source of truth — scripts/calibrate.mts imports this instead of
- * keeping its own copy (the list is exactly what the plan flags as drift-prone).
+ * Deliberate, documented differences from the upstream tool (spec §3), not
+ * findings. The calibration job treats these as expected and fails only on the
+ * ones it cannot explain.
  */
 export const EXPECTED_DIVERGENCES: Partial<Record<CheckId, { ours: CheckStatus; reasonKey: string }>> = {
+  // NOTE: the dnsAid entry predates the DoH probe (2026-08-06). Our verdict is
+  // no longer `na` in the normal case, so this line now matches almost nothing
+  // — it is left exactly as it was rather than guessed at, because the right
+  // new value is whatever the next calibration run actually observes.
   dnsAid: { ours: 'na', reasonKey: 'diffReasonDns' },
   webMcp: { ours: 'na', reasonKey: 'diffReasonWebMcp' },
   mcpServerCard: { ours: 'pass', reasonKey: 'diffReasonMcp' },
@@ -43,54 +28,4 @@ export const EXPECTED_DIVERGENCES: Partial<Record<CheckId, { ours: CheckStatus; 
 /** CF reports skipped checks as `neutral`; our equivalent is `na`. */
 export function normalizeCfStatus(status: string): string {
   return status === 'neutral' ? 'na' : status;
-}
-
-function flattenCfChecks(readiness: CfAgentReadiness): Map<string, CfCheck> {
-  const flat = new Map<string, CfCheck>();
-  for (const group of Object.values(readiness.checks ?? {})) {
-    for (const [id, check] of Object.entries(group ?? {})) flat.set(id, check);
-  }
-  return flat;
-}
-
-export function diffScans(ours: readonly CheckResult[], theirs: CfAgentReadiness): DiffSummary {
-  const theirChecks = flattenCfChecks(theirs);
-  const ourById = new Map(ours.map((r) => [r.id as string, r]));
-  const rows: DiffRow[] = [];
-
-  for (const [id, our] of ourById) {
-    const their = theirChecks.get(id);
-    if (!their) {
-      rows.push({ id, kind: 'onlyOurs', ours: our.status, ourEvidence: our.evidence });
-      continue;
-    }
-    const theirStatus = normalizeCfStatus(their.status);
-    if (our.status === theirStatus) {
-      rows.push({ id, kind: 'match', ours: our.status, theirs: their.status });
-      continue;
-    }
-    const expected = EXPECTED_DIVERGENCES[id as CheckId];
-    rows.push({
-      id,
-      // directional, like the calibration allowlist: only the documented
-      // direction is "expected" — the opposite way round is a real finding
-      kind: expected && expected.ours === our.status ? 'expected' : 'divergent',
-      ours: our.status,
-      theirs: their.status,
-      reasonKey: expected?.ours === our.status ? expected.reasonKey : undefined,
-      ourEvidence: our.evidence,
-      theirMessage: their.message,
-    });
-  }
-
-  for (const [id, their] of theirChecks) {
-    if (!ourById.has(id)) rows.push({ id, kind: 'onlyTheirs', theirs: their.status, theirMessage: their.message });
-  }
-
-  return {
-    rows,
-    matches: rows.filter((r) => r.kind === 'match').length,
-    divergences: rows.filter((r) => r.kind === 'divergent').length,
-    expected: rows.filter((r) => r.kind === 'expected').length,
-  };
 }

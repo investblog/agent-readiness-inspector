@@ -101,9 +101,9 @@ describe('StorageLayer', () => {
   it('merges settings patches', async () => {
     const { store } = layer();
     await store.updateSettings({ checkOverrides: { llmsTxt: true } });
-    const merged = await store.updateSettings({ cfAccountId: 'a'.repeat(32) });
+    const merged = await store.updateSettings({ promoCollapsed: true });
     expect(merged.checkOverrides?.llmsTxt).toBe(true);
-    expect((await store.getSettings()).cfAccountId).toBe('a'.repeat(32));
+    expect((await store.getSettings()).promoCollapsed).toBe(true);
   });
 });
 

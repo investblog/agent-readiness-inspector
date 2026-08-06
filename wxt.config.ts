@@ -63,9 +63,10 @@ export default defineConfig({
         gecko: {
           id: 'agent-readiness-inspector@301.st',
           strict_min_version: '140.0',
+          // `none` and nothing optional: the only feature that ever collected
+          // anything was the Cloudflare comparison, retired 2026-08-07.
           data_collection_permissions: {
             required: ['none'],
-            optional: ['authenticationInfo', 'browsingActivity'],
           },
         },
         gecko_android: {
