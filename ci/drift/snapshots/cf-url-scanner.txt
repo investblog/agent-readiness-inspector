@@ -9,6 +9,8 @@ API
 SDKs
 Changelog
 Search
+Ctrl
+K
 Log in
 Radar
 /
