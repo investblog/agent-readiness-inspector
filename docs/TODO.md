@@ -39,6 +39,15 @@ the revised spec). This file is the index.
         error copy before the next Firefox update (M1-b review debt)
       - [ ] 3P-cookie block detection → session indicator (protocol field
         `session` already reserved)
+      - [ ] Auto-submit secrets: 3 of 10 set 2026-08-06 — the per-extension
+        identifiers (CHROME_EXTENSION_ID, FIREFOX_EXTENSION_ID, EDGE_PRODUCT_ID;
+        values and their derivation in docs/store-listings/submission-guide.md).
+        Edge's did NOT need approval — Partner Center issues the Product ID when
+        the submission is created. Missing: the 7 account-level credentials
+        (Chrome OAuth ×3, AMO JWT ×2, Edge API ×2), identical to the ones in
+        redirect-inspector but unreadable from there — GitHub never discloses a
+        secret's value. Until they are set, a `v*` tag fires Submit to stores and
+        it fails on auth.
       - [ ] Store links: Chrome and Firefox filled in store-links.ts 2026-08-06,
         both reviews pages verified 200; Edge still in review, its URL stays
         empty so getStoreInfo() keeps that link hidden. Close when Edge lands.

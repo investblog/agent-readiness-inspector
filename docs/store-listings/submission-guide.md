@@ -48,6 +48,39 @@ GitHub Actions Linux runner:
 - Edge: `EDGE_PRODUCT_ID`, `EDGE_CLIENT_ID`, `EDGE_API_KEY`;
 - Firefox: `FIREFOX_EXTENSION_ID`, `FIREFOX_JWT_ISSUER`, `FIREFOX_JWT_SECRET`.
 
+Семь кредов аккаунтные и общие со всеми расширениями investblog; различаются
+только три идентификатора. **Все три проставлены 06.08.2026** — ждать одобрения
+стора для этого не нужно, идентификаторы выдаются при заведении submission:
+
+| Секрет | Значение | Источник |
+|---|---|---|
+| `CHROME_EXTENSION_ID` | `diofmjhnegmcccocikabageabmaokobd` | адрес листинга в Chrome Web Store |
+| `FIREFOX_EXTENSION_ID` | `agent-readiness-inspector@301.st` | `gecko.id` из `wxt.config.ts` |
+| `EDGE_PRODUCT_ID` | `35642ed3-dd11-41fc-bbe4-b1897972ec87` | Partner Center → Extension identity → **Product ID** |
+
+**У Edge на странице три идентификатора, и нужен не тот, который выглядит
+главным.** Store ID (`0RDCKD4NX0H3`) и CRX ID (`jkhmlkoehfmmpgihkknnopanjcipmiho`)
+к API отношения не имеют: `publish-browser-extension` строит
+`https://api.addons.microsoftedge.microsoft.com/v1/products/${productId}/submissions`,
+то есть в секрет идёт **Product ID** — GUID.
+
+CRX ID пригодится позже, для другого: из него собирается адрес листинга,
+`https://microsoftedge.microsoft.com/addons/detail/jkhmlkoehfmmpgihkknnopanjcipmiho`.
+В `store-links.ts` его вписывать рано — до публикации по этому адресу отдаётся
+пустая оболочка. Причём **с кодом 200**, как и у опубликованного расширения, так
+что проверять надо содержимое: у живого листинга имя расширения есть в HTML, у
+неопубликованного нет.
+
+**Почему у Firefox именно GUID.** Документация wxt переменную перечисляет, но
+не говорит, что в неё класть. Значение прослеживается по коду: `wxt submit`
+вызывает `publish-browser-extension`, который строит
+`https://addons.mozilla.org/api/v5/addons/addon/${extensionId}/versions/`, а
+AMO описывает этот сегмент пути как `(int:id | string:slug | string:guid)` —
+годятся все три формы. Берём GUID (`gecko.id`), потому что он зафиксирован в
+нашем же манифесте и не может разъехаться, тогда как slug на AMO переименовуем.
+В терминах Mozilla это **GUID**, не UUID — по слову «UUID» документация не
+ищется.
+
 ## Ассеты
 
 Финальные оптимизированные файлы лежат в `store-assets/`:
