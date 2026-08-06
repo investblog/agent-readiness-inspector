@@ -7,17 +7,19 @@ export interface StoreInfo {
   label: string;
 }
 
+// Each URL points at the store's REVIEWS page, not the listing: the link is
+// labelled "Rate us", so it should land where a rating can be left.
 const STORES: Record<string, StoreInfo> = {
   chrome: {
-    url: '', // filled after Chrome Web Store publication (M1.5)
+    url: 'https://chromewebstore.google.com/detail/agent-readiness-inspector/diofmjhnegmcccocikabageabmaokobd/reviews',
     label: 'Chrome Web Store',
   },
   edge: {
-    url: '', // filled after Edge Add-ons publication
+    url: '', // still in review 2026-08-06 — the link stays hidden until it lands
     label: 'Edge Add-ons',
   },
   firefox: {
-    url: '', // filled after AMO publication
+    url: 'https://addons.mozilla.org/firefox/addon/agent-readiness-inspector/reviews/',
     label: 'Firefox Add-ons',
   },
 };

@@ -19,20 +19,40 @@ the revised spec). This file is the index.
         packaged PNGs. Web surfaces render the SVG so its currentColor eyes
         follow the theme; the PNGs use the brand colour (the only one legible
         on light, Chrome-grey and dark toolbars alike).
+      - [x] Welcome CTA opens the side panel as well as the reference site —
+        DONE 2026-08-05 (src/entrypoints/welcome/main.ts). The first run used to
+        show spintax.net with the panel shut, i.e. the page and none of the
+        product. Both APIs are gesture-bound, confirmed against the docs rather
+        than from memory: Chrome "This may only be called in response to a user
+        action" (open() is Chrome 116+, takes tabId or windowId, at least one);
+        Firefox "only ... from inside the handler for a user action". So the
+        window id is resolved at page load — awaiting it inside the click would
+        spend the gesture — and openPanel() runs before the awaited tabs.create.
+        Chromium and Firefox are told apart by feature detection, not BROWSER.
+        Verified: typecheck, Biome, 254 tests, both builds, and the shipped
+        welcome chunk carries both API names with the calls in the right order
+        (`()=>{E(),o.tabs.create(...)}`). NOT yet verified in a running browser —
+        load dist/chrome-mv3 unpacked and click the CTA once before release.
+        Still open, and pairs with this: the M3.5 onboarding item below.
       - [ ] Firefox UX debt: host permissions are opt-in there → tab.url is
         undefined until granted; add permissions.request() flow + FF-specific
         error copy before the next Firefox update (M1-b review debt)
       - [ ] 3P-cookie block detection → session indicator (protocol field
         `session` already reserved)
-      - [ ] Store links: fill store-links.ts URLs after publication; decide
-        whether Edge gets its own build (BROWSER===chrome would show the
-        Chrome store link to Edge users otherwise)
-        - [ ] Do it per store the moment that store approves, not in one batch
+      - [ ] Store links: Chrome and Firefox filled in store-links.ts 2026-08-06,
+        both reviews pages verified 200; Edge still in review, its URL stays
+        empty so getStoreInfo() keeps that link hidden. Close when Edge lands.
+        Edge does get its own build (`npm run build:edge`), so BROWSER is 'edge'
+        there and it will never show the Chrome link.
+        - [x] Do it per store the moment that store approves, not in one batch
           after all three: the review link is what collects ratings, and the
           first days after publication are when the traffic is there.
           getStoreInfo() returns null while the URL is empty, so the footer
           link simply stays hidden until then — no release is blocked by a
           store that is still in review.
+        - Both point at the store's REVIEWS page rather than the listing, since
+          the link reads "Rate us". This differs from redirect-inspector, which
+          deep-links reviews on Chrome but uses the plain listing on AMO.
       - [ ] Footer GitHub link has no icon while everything beside it does
         (301.st carries its logo): add `github` to the sprite manifest in
         scripts/build-icons.mjs, rebuild with `npm run build:icons`, and render
