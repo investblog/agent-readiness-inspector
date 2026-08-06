@@ -926,7 +926,7 @@ async function saveCfCreds(): Promise<void> {
 
   setCfStatus(t('cfVerifying'));
   try {
-    await verifyToken(token);
+    await verifyToken(token, accountId);
     await (await storage()).updateSettings({ cfAccountId: accountId, cfToken: token });
     await loadCfCreds();
     setCfStatus(t('cfConnected'), 'ok');

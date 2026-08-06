@@ -97,13 +97,38 @@ async function cfFetch(path: string, token: string, init: RequestInit = {}): Pro
   }
 }
 
-/** GET /user/tokens/verify — confirms the token is live before we store it. */
-export async function verifyToken(token: string, fetchImpl = cfFetch): Promise<void> {
-  const res = await fetchImpl('/user/tokens/verify', token);
-  if (res.status === 401 || res.status === 403) {
-    throw new CfApiError('tokenRejected', await cfErrorDetail(res), res.status);
+/**
+ * Confirms the token is live before we store it — against BOTH verify
+ * endpoints, because Cloudflare has two kinds of token and the dashboard offers
+ * both routes to get one.
+ *
+ * A user token (`cfut_`, or the older unprefixed form) verifies at
+ * `/user/tokens/verify`. An account-owned token (`cfat_`) does not: that one
+ * answers only at `/accounts/{id}/tokens/verify`, and asking the user endpoint
+ * about it returns 401 "Invalid API Token" — a perfectly good token reported as
+ * rejected. Observed live 2026-08-06: the same account-owned token returns 401
+ * from the user path and 200 "valid and active" from the account path.
+ *
+ * The account path goes first because this feature needs an account id anyway,
+ * and account-owned is what the URL Scanner instructions lead you to.
+ */
+export async function verifyToken(token: string, accountId?: string, fetchImpl = cfFetch): Promise<void> {
+  const paths = accountId && isValidAccountId(accountId) ? [`/accounts/${accountId}/tokens/verify`] : [];
+  paths.push('/user/tokens/verify');
+
+  let rejected: CfApiError | undefined;
+  for (const path of paths) {
+    const res = await fetchImpl(path, token);
+    if (res.ok) return;
+    if (res.status === 401 || res.status === 403) {
+      // keep the FIRST rejection: it comes from the endpoint that matches the
+      // account id the user gave us, so its message is the relevant one
+      rejected ??= new CfApiError('tokenRejected', await cfErrorDetail(res), res.status);
+      continue; // the other kind of token may still verify elsewhere
+    }
+    throw new CfApiError('verifyFailed', await cfErrorDetail(res), res.status);
   }
-  if (!res.ok) throw new CfApiError('verifyFailed', await cfErrorDetail(res), res.status);
+  throw rejected ?? new CfApiError('verifyFailed', 'no verify endpoint accepted the token');
 }
 
 export interface ExternalScanOptions {

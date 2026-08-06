@@ -45,24 +45,53 @@ describe('credential validators', () => {
 });
 
 describe('verifyToken', () => {
-  it('resolves on 200', async () => {
+  it('resolves on 200 from the user endpoint when no account id is known', async () => {
     const fetchImpl = vi.fn(async () => jsonResponse(200, { success: true }));
-    await expect(verifyToken(CREDS.token, fetchImpl)).resolves.toBeUndefined();
+    await expect(verifyToken(CREDS.token, undefined, fetchImpl)).resolves.toBeUndefined();
     expect(fetchImpl).toHaveBeenCalledWith('/user/tokens/verify', CREDS.token);
   });
 
-  it('reports a rejected token distinctly from other failures, by stable code', async () => {
-    await expect(verifyToken(CREDS.token, async () => jsonResponse(403))).rejects.toMatchObject({
+  it('tries the account-owned endpoint FIRST when an account id is known', async () => {
+    const fetchImpl = vi.fn(async () => jsonResponse(200, { success: true }));
+    await expect(verifyToken(CREDS.token, CREDS.accountId, fetchImpl)).resolves.toBeUndefined();
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledWith(`/accounts/${CREDS.accountId}/tokens/verify`, CREDS.token);
+  });
+
+  it('accepts a USER token even when an account id is given', async () => {
+    // an account-owned endpoint answers 401 for a user token; the user endpoint
+    // is what accepts it, and one 401 must not condemn the whole token
+    const fetchImpl = vi.fn(async (path: string) =>
+      path.startsWith('/accounts/')
+        ? jsonResponse(401, { errors: [{ message: 'Invalid API Token' }] })
+        : jsonResponse(200, { success: true }),
+    );
+    await expect(verifyToken(CREDS.token, CREDS.accountId, fetchImpl)).resolves.toBeUndefined();
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects only when BOTH endpoints refuse the token', async () => {
+    const fetchImpl = vi.fn(async () => jsonResponse(401, { errors: [{ message: 'Invalid API Token' }] }));
+    await expect(verifyToken(CREDS.token, CREDS.accountId, fetchImpl)).rejects.toMatchObject({
       code: 'tokenRejected',
     });
-    await expect(verifyToken(CREDS.token, async () => jsonResponse(500))).rejects.toMatchObject({
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports a rejected token distinctly from other failures, by stable code', async () => {
+    await expect(verifyToken(CREDS.token, undefined, async () => jsonResponse(403))).rejects.toMatchObject({
+      code: 'tokenRejected',
+    });
+    await expect(verifyToken(CREDS.token, undefined, async () => jsonResponse(500))).rejects.toMatchObject({
       code: 'verifyFailed',
     });
   });
 
   it("surfaces Cloudflare's own error text as the detail", async () => {
     await expect(
-      verifyToken(CREDS.token, async () => jsonResponse(403, { errors: [{ message: 'Invalid API Token' }] })),
+      verifyToken(CREDS.token, undefined, async () =>
+        jsonResponse(403, { errors: [{ message: 'Invalid API Token' }] }),
+      ),
     ).rejects.toThrow(/Invalid API Token/);
   });
 });

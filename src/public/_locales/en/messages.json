@@ -302,7 +302,7 @@
 		"message": "Cloudflare account (optional)"
 	},
 	"settingsCfHint": {
-		"message": "Lets you run an external scan through Cloudflare's URL Scanner and compare it with the in-browser result. Paste a token, or the whole test curl from the token page. Stored locally in your browser (unencrypted), sent only to api.cloudflare.com."
+		"message": "Lets you run an external scan through Cloudflare's URL Scanner and compare it with the in-browser result. Either kind of token works: a user token (My Profile → API Tokens) or an account-owned one (Manage Account → API Tokens) — the two are verified at different endpoints and both are accepted. It needs the URL Scanner: Edit permission. Paste the token, or the whole test curl from the token page. Stored locally in your browser (unencrypted), sent only to api.cloudflare.com."
 	},
 	"cfAccountPlaceholder": {
 		"message": "Account ID"

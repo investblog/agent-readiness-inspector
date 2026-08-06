@@ -107,8 +107,30 @@ the revised spec). This file is the index.
         store-assets/promo-marquee-1400x560.png
 - [x] M2 — dashboard: saved sites, batch, history, light CF Connect + external
       scan diff — DONE 2026-07-30 (plan: .agents/plans/done/m2-dashboard.md)
-      - [ ] Verify the external scan live: needs a Cloudflare token with
-        `URL Scanner: Edit` (only DoD item left open in M2)
+      - [ ] Verify the external scan live — RUN 2026-08-06 with a real token,
+        and it found TWO defects. One is fixed, one blocks the feature.
+        - [x] verifyToken rejected a valid token. It asked `/user/tokens/verify`
+          only, and an account-owned token (`cfat_`, the kind the URL Scanner
+          instructions lead you to) answers 401 "Invalid API Token" there while
+          returning 200 "valid and active" from
+          `/accounts/{id}/tokens/verify` — both observed live on the same token.
+          Now both endpoints are tried, account-owned first (this feature has an
+          account id anyway), and a token is only rejected when BOTH refuse.
+          The setup copy names both routes and the `URL Scanner: Edit`
+          permission, because the old wording sent the user down one path
+          without saying there was another.
+        - [ ] **BLOCKER: the scan returns no agent-readiness data at all.**
+          Submitting with `options: {agentReadiness: true}` succeeds (200 +
+          uuid), the scan completes, and the finished result carries processors
+          geoip/asn/wappa/rdns/domainCategories/dns/urlCategories/radarRank/
+          phishing/phishing_v2/robotsTxt/whois — no `agentReadiness`, and no key
+          matching /agent|readiness/ anywhere in the payload except User-Agent
+          headers. So `fetchScanResult` can never find its block. Cloudflare's
+          changelog says the report is reachable "via our API" but no doc names
+          the request option or the response path. Next: find the real shape
+          (dashboard network tab on a scan report is the cheapest source), or
+          treat the comparison as dashboard-only and say so in the UI instead of
+          polling for something that never arrives.
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
 - [x] M3 — watch: alarms + diff + regression notifications — DONE 2026-07-31
       (plan: .agents/plans/done/m3-watch.md)
