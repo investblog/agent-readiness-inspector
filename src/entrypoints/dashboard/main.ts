@@ -875,22 +875,52 @@ function setCfStatus(message: string, kind: 'ok' | 'error' | 'info' = 'info'): v
 
 type FirefoxDataCollectionRequest = { data_collection: ('authenticationInfo' | 'browsingActivity')[] };
 
-/** Firefox 140+ requires explicit built-in consent for the optional CF transfer. */
-async function ensureCfDataPermission(): Promise<boolean> {
-  if (import.meta.env.BROWSER !== 'firefox') return true;
-  const permissions = browser.permissions as unknown as {
-    contains(request: FirefoxDataCollectionRequest): Promise<boolean>;
-    request(request: FirefoxDataCollectionRequest): Promise<boolean>;
-  };
-  const request: FirefoxDataCollectionRequest = {
-    data_collection: ['authenticationInfo', 'browsingActivity'],
-  };
-  if (await permissions.contains(request)) return true;
+const CF_DATA_REQUEST: FirefoxDataCollectionRequest = {
+  data_collection: ['authenticationInfo', 'browsingActivity'],
+};
+
+function dataPermissions(): {
+  contains(request: FirefoxDataCollectionRequest): Promise<boolean>;
+  request(request: FirefoxDataCollectionRequest): Promise<boolean>;
+} {
+  return browser.permissions as unknown as ReturnType<typeof dataPermissions>;
+}
+
+/**
+ * Cached answer to "may we send the URL and token to Cloudflare". Resolved at
+ * load and after a grant, never inside a click handler — see below.
+ */
+let cfDataGranted = import.meta.env.BROWSER !== 'firefox';
+
+async function refreshCfDataPermission(): Promise<void> {
+  if (import.meta.env.BROWSER !== 'firefox') return;
   try {
-    return await permissions.request(request);
+    cfDataGranted = await dataPermissions().contains(CF_DATA_REQUEST);
   } catch {
-    return false;
+    cfDataGranted = false;
   }
+}
+
+/**
+ * Firefox 140+ requires explicit consent for the optional CF transfer.
+ *
+ * NOT async, and that is the whole point: `permissions.request()` "can only be
+ * made inside the handler for a user action", so it has to run in the same task
+ * as the click. Awaiting anything first — storage, or even the `contains()`
+ * check this used to start with — spends the gesture, Firefox refuses, and the
+ * user is told they denied a prompt they were never shown. That is exactly how
+ * this failed in the wild on 2026-08-06. Callers must invoke it BEFORE their
+ * first await; `contains()` is answered from the cache instead.
+ */
+function ensureCfDataPermission(): Promise<boolean> {
+  if (cfDataGranted) return Promise.resolve(true);
+  return dataPermissions()
+    .request(CF_DATA_REQUEST)
+    .then((granted) => {
+      cfDataGranted = granted;
+      return granted;
+    })
+    .catch(() => false);
 }
 
 async function loadCfCreds(): Promise<void> {
@@ -917,11 +947,13 @@ async function saveCfCreds(): Promise<void> {
     tokenInput.value = pasted.token;
   }
   const accountId = accountInput.value.trim();
-  const stored = await (await storage()).getSettings();
-  // an empty field means "keep the stored token" (it is never rendered back)
-  const token = tokenInput.value.trim() || stored.cfToken || '';
+  // an empty field means "keep the stored token" (it is never rendered back);
+  // cfCreds holds it already, so this stays synchronous
+  const token = tokenInput.value.trim() || cfCreds?.token || '';
   if (!isValidAccountId(accountId)) return setCfStatus(t('cfInvalidAccount'), 'error');
   if (!isValidToken(token)) return setCfStatus(t('cfInvalidToken'), 'error');
+  // FIRST await of this handler, deliberately: the permission prompt needs the
+  // click that is still in scope, and anything awaited before it spends that.
   if (!(await ensureCfDataPermission())) return setCfStatus(t('cfDataPermissionDenied'), 'error');
 
   setCfStatus(t('cfVerifying'));
@@ -929,6 +961,7 @@ async function saveCfCreds(): Promise<void> {
     await verifyToken(token, accountId);
     await (await storage()).updateSettings({ cfAccountId: accountId, cfToken: token });
     await loadCfCreds();
+    await refreshCfDataPermission();
     setCfStatus(t('cfConnected'), 'ok');
     renderTable(); // external-scan buttons appear
   } catch (error) {
@@ -1072,6 +1105,9 @@ $('cf-clear').addEventListener('click', () => void clearCfCreds());
 void (async () => {
   await renderPromo();
   await loadCfCreds();
+  // resolved here, never inside a click: ensureCfDataPermission() must be able
+  // to answer "already granted?" without spending the gesture on contains()
+  await refreshCfDataPermission();
   await renderCheckToggles();
   await renderBrowsingSettings();
   await renderNewsSettings();

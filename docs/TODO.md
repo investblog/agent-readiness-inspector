@@ -34,9 +34,22 @@ the revised spec). This file is the index.
         (`()=>{E(),o.tabs.create(...)}`). NOT yet verified in a running browser —
         load dist/chrome-mv3 unpacked and click the CTA once before release.
         Still open, and pairs with this: the M3.5 onboarding item below.
-      - [ ] Firefox UX debt: host permissions are opt-in there → tab.url is
-        undefined until granted; add permissions.request() flow + FF-specific
-        error copy before the next Firefox update (M1-b review debt)
+      - [x] Firefox UX debt — the premise was wrong and the real bug was next
+        door. Checked 2026-08-06: the Firefox build is MV2 with `<all_urls>` in
+        REQUIRED `permissions`, granted at install, so `tab.url` is fine and the
+        planned permissions.request() flow for host access was never needed.
+        What IS Firefox-only is the data-collection consent (gecko 140+), and it
+        was broken: `permissions.request()` "can only be made inside the handler
+        for a user action", and the Verify-and-save handler awaited storage —
+        and then `contains()` — before asking. The gesture was gone by then, the
+        request failed, and the user was told they had denied a prompt Firefox
+        never showed. Reported from a live Firefox install with the panel open.
+        Fixed the same way the welcome CTA was: the answer to "already granted?"
+        is cached at page load, `ensureCfDataPermission()` is deliberately NOT
+        async so `request()` runs in the click's own task, and the handler reads
+        the stored token from the in-memory creds instead of awaiting storage.
+        Third instance of one bug family now — worth remembering that any
+        permission or panel API is gesture-bound and must precede every await.
       - [ ] 3P-cookie block detection → session indicator (protocol field
         `session` already reserved)
       - [x] Auto-submit secrets: all 10 set 2026-08-06 and validated end to end.
