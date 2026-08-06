@@ -320,6 +320,8 @@ body {
 .welcome__social-link {
   display: inline-flex;
   align-items: center;
+  /* the mark and the word are one link; without this they sit flush */
+  gap: 4px;
   color: var(--text-subtle, #8a8f99);
   transition: color 120ms ease-out;
 }

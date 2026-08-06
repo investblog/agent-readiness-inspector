@@ -3,7 +3,7 @@ import '@/assets/css/welcome.css';
 import { browser } from 'wxt/browser';
 import { mascot, svg301Logo } from '@/shared/brand';
 import { hydrate, t } from '@/shared/i18n';
-import { injectSprite } from '@/shared/icons';
+import { icon, injectSprite } from '@/shared/icons';
 import { initTheme } from '@/shared/theme';
 
 document.documentElement.lang = browser.i18n.getUILanguage?.() ?? 'en';
@@ -25,6 +25,7 @@ if (versionEl) versionEl.textContent = `v${browser.runtime.getManifest().version
 
 document.getElementById('brand-mascot')?.append(mascot(44));
 document.getElementById('brand-logo')?.append(svg301Logo(14));
+document.getElementById('github-link')?.prepend(icon('github', 14));
 
 // Opening the reference site alone shows the page and none of the report, so the
 // CTA opens the panel too. Both APIs may only run inside a user-gesture handler

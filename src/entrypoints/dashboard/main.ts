@@ -951,6 +951,7 @@ async function clearCfCreds(): Promise<void> {
 $('theme-toggle').append(icon('theme', 16));
 $('theme-toggle').addEventListener('click', toggleTheme);
 $('footer-brand').append(svg301Logo(14));
+$('github-link').prepend(icon('github', 14));
 $('promo-logo').append(svg301Logo(18));
 
 /** Every foldable block wears the same sprite chevron — the native marker next

@@ -93,14 +93,16 @@ the revised spec). This file is the index.
         - Both point at the store's REVIEWS page rather than the listing, since
           the link reads "Rate us". This differs from redirect-inspector, which
           deep-links reviews on Chrome but uses the plain listing on AMO.
-      - [ ] Footer GitHub link has no icon while everything beside it does
-        (301.st carries its logo): add `github` to the sprite manifest in
-        scripts/build-icons.mjs, rebuild with `npm run build:icons`, and render
-        it via icon('github', …) in the popup and welcome footers
-        (src/entrypoints/popup/index.html, src/entrypoints/welcome/index.html —
-        both are plain-text "GitHub" today). Same pass should decide whether
-        the rate link gets a store glyph and whether the dashboard footer,
-        which has no GitHub link at all, should get one.
+      - [x] Footer GitHub link carries the mark — DONE 2026-08-06. `github`
+        added to the sprite manifest (24 icons now), rendered in the popup,
+        welcome and dashboard footers. The dashboard had no GitHub link at all
+        and got one; its footer became a flex row, because two links with no gap
+        read as one run-on label. Welcome needed the same gap on
+        `.welcome__social-link`. The other half of the question is DECIDED
+        AGAINST: the rate link gets no store glyph. Its label already names the
+        store ("Rate us · Chrome Web Store"), and the three marks are vendor
+        trademarks that are not in @mdi/svg — a glyph would cost licence
+        questions to repeat what the words say.
       - [x] Store banner 1400×560 built from the mascot:
         store-assets/promo-marquee-1400x560.png
 - [x] M2 — dashboard: saved sites, batch, history, light CF Connect + external

@@ -287,6 +287,10 @@ body {
   padding-top: var(--space-3);
   border-top: var(--border-width) var(--border-style) var(--border-subtle);
   font-size: var(--fs-xs);
+  /* two links now: without a row gap they read as one run-on label */
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .dash-footer a {

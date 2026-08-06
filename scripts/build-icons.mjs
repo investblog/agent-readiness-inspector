@@ -37,6 +37,7 @@ const ICONS = {
   close: 'close',
   watchOn: 'bell-ring-outline',
   watchOff: 'bell-off-outline',
+  github: 'github',
 };
 
 const ROOT = process.cwd();

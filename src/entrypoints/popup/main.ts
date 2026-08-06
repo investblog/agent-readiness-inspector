@@ -338,6 +338,9 @@ async function bootstrap(): Promise<void> {
 }
 
 $('footer-brand').append(svg301Logo(14));
+// Its neighbours in this footer both carry a mark (the 301.st logo, the store
+// glyph); a bare word read as an unfinished link.
+$('github-link').prepend(icon('github', 14));
 const store = getStoreInfo();
 if (store) {
   const rate = $('rate-link') as HTMLAnchorElement;
