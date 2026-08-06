@@ -529,6 +529,13 @@ details[open] > summary .summary-chevron {
   border-left: 3px solid transparent;
 }
 
+/* One inbox, two kinds. A muted rail is enough to tell a post from a regression
+   at a glance. Declared BEFORE --new deliberately: an unread post carries both
+   classes at equal specificity, and unread has to win. */
+.alert-row--news {
+  border-left-color: var(--border-strong);
+}
+
 .alert-row--new {
   border-left-color: var(--primary);
   background: var(--notice-info-bg);

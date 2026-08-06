@@ -68,6 +68,12 @@ export const DEFAULT_BROWSING: BrowsingSettings = { autoScan: false, scoreBadge:
  * it, so it must not depend on it.
  */
 export interface WatchAlert {
+  /**
+   * Absent on every record written before news existed, which is why it is
+   * optional rather than required: an old inbox stays valid and needs no
+   * migration.
+   */
+  kind?: 'regression';
   /** `${origin}|${signature}` — the same identity the watch cycle deduplicates on. */
   id: string;
   origin: string;
@@ -80,6 +86,54 @@ export interface WatchAlert {
   readAt?: number;
 }
 
+/**
+ * A post from the 301.sh feed, filed in the same inbox as regressions (M5).
+ *
+ * It shares the inbox rather than getting a surface of its own so there is one
+ * unread count and one place to look. It stays a distinct `kind` because the
+ * two are not the same kind of event: a regression asks for action, a post does
+ * not, and only the regression path may ever fire without the user opting in.
+ */
+export interface NewsItem {
+  kind: 'news';
+  /** `news:${slug}` — stable, so a re-published post never doubles. */
+  id: string;
+  at: number;
+  title: string;
+  body: string;
+  url: string;
+  readAt?: number;
+}
+
+/**
+ * Feed settings (M5). Off by default and never turned on implicitly: while
+ * `enabled` is false the extension makes no request to the feed at all.
+ *
+ * `seen` exists separately from the inbox because the two answer different
+ * questions. The inbox is capped and its entries can be dismissed; "have we
+ * ever filed this post" must survive both, or a dismissed post returns on the
+ * next cycle.
+ */
+export interface NewsSettings {
+  enabled: boolean;
+  /** Slugs already filed or seeded, FIFO-capped. */
+  seen: string[];
+  /** Seeded at enable time so the backlog is never filed as new. */
+  seeded: boolean;
+}
+
+export const DEFAULT_NEWS: NewsSettings = { enabled: false, seen: [], seeded: false };
+
+/** FIFO retention for the seen-set: far past any plausible feed length. */
+export const MAX_SEEN_SLUGS = 300;
+
+/** One entry of the alert inbox, of either kind. */
+export type InboxItem = WatchAlert | NewsItem;
+
+export function isNewsItem(item: InboxItem): item is NewsItem {
+  return item.kind === 'news';
+}
+
 export interface Settings {
   /** Per-check enable/disable on top of defaultEnabled (llmsTxt/a2a toggles). */
   checkOverrides?: Partial<Record<CheckId, boolean>>;
@@ -89,6 +143,8 @@ export interface Settings {
   watch?: WatchSettings;
   /** v3 (M3.5). */
   browsing?: Partial<BrowsingSettings>;
+  /** v3 (M5) — the 301.sh feed. Absent means it was never switched on. */
+  news?: Partial<NewsSettings>;
   /** The 301.st block was folded away; unset means "never folded". */
   promoCollapsed?: boolean;
 }
@@ -184,7 +240,8 @@ export class StorageLayer {
       // alerts about a site the user deleted are noise, and their unread count
       // would keep the badge lit for something that no longer exists
       const alerts = await this.getAlerts();
-      const kept = alerts.filter((alert) => alert.origin !== origin);
+      // news is not about any site, so deleting a site never drops a post
+      const kept = alerts.filter((alert) => isNewsItem(alert) || alert.origin !== origin);
       if (kept.length !== alerts.length) await this.area.set({ [KEY_ALERTS]: kept });
     });
   }
@@ -227,6 +284,23 @@ export class StorageLayer {
     return { ...DEFAULT_WATCH, ...watch };
   }
 
+  /** Feed settings with defaults applied (M5). */
+  async getNewsSettings(): Promise<NewsSettings> {
+    const { news } = await this.getSettings();
+    return { ...DEFAULT_NEWS, ...news };
+  }
+
+  /** Patches feed settings without clobbering the rest of the settings blob. */
+  updateNewsSettings(patch: Partial<NewsSettings>): Promise<NewsSettings> {
+    return this.enqueue(async () => {
+      const settings = await this.getSettings();
+      const merged: NewsSettings = { ...DEFAULT_NEWS, ...settings.news, ...patch };
+      merged.seen = merged.seen.slice(-MAX_SEEN_SLUGS);
+      await this.area.set({ [KEY_SETTINGS]: { ...settings, news: merged } });
+      return merged;
+    });
+  }
+
   /** Browsing/badge settings with defaults applied (same pattern as watch). */
   async getBrowsingSettings(): Promise<BrowsingSettings> {
     const { browsing } = await this.getSettings();
@@ -235,9 +309,9 @@ export class StorageLayer {
 
   // ---- Alert inbox (v3) ----
 
-  async getAlerts(): Promise<WatchAlert[]> {
+  async getAlerts(): Promise<InboxItem[]> {
     const { [KEY_ALERTS]: alerts } = await this.area.get(KEY_ALERTS);
-    return (alerts as WatchAlert[] | undefined) ?? [];
+    return (alerts as InboxItem[] | undefined) ?? [];
   }
 
   async countUnreadAlerts(): Promise<number> {
@@ -250,7 +324,7 @@ export class StorageLayer {
    * signature after a recovery, so a repeat is a genuine re-occurrence and has
    * to surface again even if the earlier one was read.
    */
-  addAlert(alert: WatchAlert): Promise<void> {
+  addAlert(alert: InboxItem): Promise<void> {
     return this.enqueue(async () => {
       const alerts = (await this.getAlerts()).filter((existing) => existing.id !== alert.id);
       alerts.push(alert);

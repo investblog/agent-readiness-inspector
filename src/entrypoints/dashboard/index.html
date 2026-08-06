@@ -126,6 +126,20 @@
         </section>
 
         <section class="settings-block">
+          <h2 data-i18n="settingsNews">Blog updates</h2>
+          <p class="settings-hint" data-i18n="settingsNewsHint">
+            New posts from 301.sh about agent readiness, redirects and Cloudflare, filed in the same inbox as
+            regressions. Off by default: nothing is fetched until you switch it on.
+          </p>
+          <div class="watch-settings">
+            <label class="toggle">
+              <input id="news-enabled" type="checkbox" />
+              <span data-i18n="newsEnabled">Tell me about new posts</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-block">
           <h2 data-i18n="settingsCf">Cloudflare account (optional)</h2>
           <p class="settings-hint" data-i18n="settingsCfHint">
             Lets you run an external scan through Cloudflare's URL Scanner and compare it with the in-browser

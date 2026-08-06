@@ -1,6 +1,7 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
 import { type ActionLike, clearBadge, resolveBadge, setAlertBadge, setScoreBadge } from '@/background/badge';
+import { disableNews, enableNews, fetchNewsPosts, NEWS_ALARM, runNewsCycle, scheduleNews } from '@/background/news';
 // scores are cached per ORIGIN (every check is origin-level) and survive
 // service-worker restarts — see score-cache.ts
 import { type CachedScore, scoreCache } from '@/background/score-cache';
@@ -9,11 +10,16 @@ import type { CheckId } from '@/checks';
 import { cardRefsFromCatalog, PROBE, resolveCheckIds, runChecks, scoreResults } from '@/checks';
 import { probeKeysFor, runFollowUps, runProbes } from '@/probe/probe-layer';
 import { t } from '@/shared/i18n';
-import { isRescheduleWatchRequest, isScanRequest, type ScanResponse } from '@/shared/messaging';
+import {
+  isRescheduleWatchRequest,
+  isScanRequest,
+  isSetNewsEnabledRequest,
+  type ScanResponse,
+} from '@/shared/messaging';
 import { normalizeOrigin } from '@/shared/origin';
 import type { SnapshotDiff } from '@/shared/regression';
 import { snapshotFromScan } from '@/shared/snapshots';
-import { type BrowsingSettings, DEFAULT_BROWSING, storage } from '@/shared/storage';
+import { type BrowsingSettings, DEFAULT_BROWSING, isNewsItem, type NewsItem, storage } from '@/shared/storage';
 
 /** browser.action (MV3) / browser.browserAction (MV2 Firefox). */
 const action = ((browser as unknown as { action?: ActionLike; browserAction?: ActionLike }).action ??
@@ -290,6 +296,22 @@ async function browsingSettings(): Promise<BrowsingSettings> {
   }
 }
 
+/**
+ * Notification for a filed post — only when the user granted the permission.
+ * The inbox entry is already written by the time this runs, so declining
+ * notifications costs nothing but the toast.
+ */
+async function notifyNews(item: NewsItem): Promise<void> {
+  const granted = await browser.permissions.contains({ permissions: ['notifications'] });
+  if (!granted || !browser.notifications) return;
+  await browser.notifications.create(item.id, {
+    type: 'basic',
+    iconUrl: browser.runtime.getURL('/icons/128.png'),
+    title: item.title,
+    message: item.body.slice(0, 200),
+  });
+}
+
 /** Notification for a regression — only when the user granted the permission. */
 async function notifyRegression(origin: string, diff: SnapshotDiff): Promise<void> {
   const { notify } = await (await storage()).getWatchSettings();
@@ -398,7 +420,28 @@ export default defineBackground(() => {
   // drop alarms across extension updates, and create() replaces by name.
   void scheduleWatch().catch((error: unknown) => console.warn('[agent-readiness] scheduleWatch failed', error));
 
+  // 301.sh feed (spec §9). Same alarm discipline as watch; scheduleNews clears
+  // the alarm when the feature is off, so a disabled feed leaves nothing behind.
+  void scheduleNews().catch((error: unknown) => console.warn('[agent-readiness] scheduleNews failed', error));
+
+  browser.notifications?.onClicked?.addListener((id) => {
+    if (!id.startsWith('news:')) return;
+    void (async () => {
+      const item = (await (await storage()).getAlerts()).find((entry) => entry.id === id);
+      if (item && isNewsItem(item)) await browser.tabs.create({ url: item.url });
+      browser.notifications?.clear?.(id);
+    })().catch((error: unknown) => console.warn('[agent-readiness] news click failed', error));
+  });
+
   browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === NEWS_ALARM) {
+      void (async () => {
+        const store = await storage();
+        const { filed } = await runNewsCycle({ store, fetchPosts: fetchNewsPosts, notify: notifyNews });
+        if (filed.length > 0) await rebuildBadges();
+      })().catch((error: unknown) => console.warn('[agent-readiness] news cycle failed', error));
+      return;
+    }
     if (alarm.name !== WATCH_ALARM) return;
     void (async () => {
       const store = await storage();
@@ -421,6 +464,18 @@ export default defineBackground(() => {
     if (isRescheduleWatchRequest(message)) {
       return scheduleWatch()
         .catch((error: unknown) => console.warn('[agent-readiness] reschedule failed', error))
+        .then(() => undefined);
+    }
+    if (isSetNewsEnabledRequest(message)) {
+      return (async () => {
+        const store = await storage();
+        if (message.enabled) {
+          await enableNews({ store, fetchPosts: fetchNewsPosts, notify: notifyNews });
+        } else {
+          await disableNews(store);
+        }
+      })()
+        .catch((error: unknown) => console.warn('[agent-readiness] news toggle failed', error))
         .then(() => undefined);
     }
     if (!isScanRequest(message)) return undefined;

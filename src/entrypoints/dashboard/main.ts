@@ -25,8 +25,8 @@ import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
 import type { ScanResponse } from '@/shared/messaging';
 import { isSafeOrigin, normalizeOrigin } from '@/shared/origin';
-import type { BrowsingSettings, ScanSnapshot, SiteMeta, WatchAlert } from '@/shared/storage';
-import { storage } from '@/shared/storage';
+import type { BrowsingSettings, NewsItem, ScanSnapshot, SiteMeta, WatchAlert } from '@/shared/storage';
+import { isNewsItem, storage } from '@/shared/storage';
 import { initTheme, toggleTheme } from '@/shared/theme';
 
 document.documentElement.lang = browser.i18n.getUILanguage?.() ?? 'en';
@@ -634,6 +634,60 @@ function alertText(alert: WatchAlert): string {
   return t('alertLevelDropped', String(Math.abs(alert.levelDelta)));
 }
 
+/**
+ * A filed post. Same row shape as a regression so the inbox reads as one list,
+ * with the two differences that matter: it links to the article rather than to
+ * a site, and it offers no rescan — there is nothing to re-measure.
+ */
+function newsRow(item: NewsItem): HTMLLIElement {
+  const li = document.createElement('li');
+  li.className = 'alert-row alert-row--news';
+  li.classList.toggle('alert-row--new', highlighted.has(item.id));
+
+  const main = document.createElement('div');
+  main.className = 'alert-main';
+
+  const head = document.createElement('div');
+  head.className = 'alert-head';
+  const link = document.createElement('a');
+  link.href = item.url;
+  link.target = '_blank';
+  link.rel = 'noreferrer noopener';
+  link.className = 'site-link';
+  link.textContent = item.title;
+  head.append(link);
+  if (highlighted.has(item.id)) {
+    const chip = document.createElement('span');
+    chip.className = 'alert-new';
+    chip.textContent = t('alertsNew');
+    head.append(chip);
+  }
+  const when = document.createElement('span');
+  when.className = 'alert-time';
+  when.textContent = new Date(item.at).toLocaleString();
+  head.append(when);
+  main.append(head);
+
+  const text = document.createElement('p');
+  text.className = 'alert-text';
+  text.textContent = item.body;
+  main.append(text);
+  li.append(main);
+
+  const actions = document.createElement('div');
+  actions.className = 'alert-actions';
+  const dismiss = document.createElement('button');
+  dismiss.type = 'button';
+  dismiss.className = 'icon-btn';
+  dismiss.title = t('alertDismiss');
+  dismiss.setAttribute('aria-label', `${t('alertDismiss')} ${item.title}`);
+  dismiss.append(icon('close', 15));
+  dismiss.addEventListener('click', () => void dismissAlert(item.id));
+  actions.append(dismiss);
+  li.append(actions);
+  return li;
+}
+
 function alertRow(alert: WatchAlert): HTMLLIElement {
   const li = document.createElement('li');
   li.className = 'alert-row';
@@ -711,7 +765,7 @@ async function renderAlerts(): Promise<void> {
   }
   const list = $('alerts-list');
   list.replaceChildren();
-  for (const alert of alerts) list.append(alertRow(alert));
+  for (const alert of alerts) list.append(isNewsItem(alert) ? newsRow(alert) : alertRow(alert));
   $('alerts').hidden = alerts.length === 0;
   await flushRead();
 }
@@ -758,6 +812,23 @@ async function renderBrowsingSettings(): Promise<void> {
 async function updateBrowsing(patch: Partial<BrowsingSettings>): Promise<void> {
   const store = await storage();
   await store.updateSettings({ browsing: { ...(await store.getBrowsingSettings()), ...patch } });
+  setToolbarNote(t('settingsSaved'));
+}
+
+// ---- Settings: blog updates (M5) ----
+
+async function renderNewsSettings(): Promise<void> {
+  const { enabled } = await (await storage()).getNewsSettings();
+  ($('news-enabled') as HTMLInputElement).checked = enabled;
+}
+
+/**
+ * The background owns this switch: enabling has to seed the seen-set before the
+ * first tick, and it owns the alarm. Writing the setting from here would leave
+ * the alarm and the seed to whoever happened to run next.
+ */
+async function updateNews(enabled: boolean): Promise<void> {
+  await browser.runtime.sendMessage({ type: 'setNewsEnabled', enabled });
   setToolbarNote(t('settingsSaved'));
 }
 
@@ -971,6 +1042,16 @@ window.addEventListener('focus', () => void flushRead()); // came back to this w
 ($('badge-alerts') as HTMLInputElement).addEventListener('change', (event) => {
   void updateBrowsing({ alertBadge: (event.target as HTMLInputElement).checked });
 });
+// Asking for `notifications` here rides the click that switched the feed on —
+// the permission is optional and must be requested from a user gesture. A
+// refusal is fine: the inbox entry is the surface everyone gets.
+($('news-enabled') as HTMLInputElement).addEventListener('change', (event) => {
+  const enabled = (event.target as HTMLInputElement).checked;
+  void (async () => {
+    if (enabled) await browser.permissions.request({ permissions: ['notifications'] }).catch(() => false);
+    await updateNews(enabled);
+  })();
+});
 
 // a watch cycle can land while this page is open — show it without a reload.
 // (Our own read/dismiss writes re-enter here once and then settle: everything
@@ -992,6 +1073,7 @@ void (async () => {
   await loadCfCreds();
   await renderCheckToggles();
   await renderBrowsingSettings();
+  await renderNewsSettings();
   await renderWatchSettings();
   await loadState();
   renderTable();

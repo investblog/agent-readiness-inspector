@@ -51,11 +51,13 @@ the revised spec). This file is the index.
         the log shows `DRY RUN: Skipped upload and publishing`, so no AMO version
         number was spent. Note `tag=main` — the only tag is v0.1.0, which
         submit.yml deliberately skips, and `tag` is just a checkout ref.
-        - [ ] The Firefox job DOES run on `stores=all` via workflow_dispatch,
+        - [x] The Firefox job DOES run on `stores=all` via workflow_dispatch,
           confirmed by that run. Intended — releases normally go to all three at
-          once — but the comment in geo-tier-builder's store-submit.yml claims no
-          caller can auto-submit Firefox, which is only true of tag pushes. Fix
-          the comment there so the next reader is not misled.
+          once — but the comment in geo-tier-builder's store-submit.yml claimed
+          no caller can auto-submit Firefox, which is only true of tag pushes.
+          Corrected there (2eef207) and in this repo's Cut release input, which
+          said "Firefox stays manual" above a dropdown offering `all`. The same
+          wording is still in the other nine callers.
       - [x] MCP Server Card follows the AI Catalog first — DONE 2026-08-06,
         after SEP-2127 split discovery on 2026-08-03 (surfaced by drift-watch:
         the proposal dropped "via .well-known" from its own title). The card
@@ -121,7 +123,24 @@ the revised spec). This file is the index.
         have this problem — it is painted from storage by the background and is
         covered by the live smoke with no panel open.
 - [ ] M4 — fix-apply + full CF Connect wizard (spec §8.1)
-- [ ] M5 — 301.st layer: news panel, cross-promo, spintax.net as living reference
+- [ ] M5 — 301.st layer: cross-promo, spintax.net as living reference
+      - [x] 301.sh feed — DONE 2026-08-06. Posts are filed in the SAME inbox as
+        regressions rather than getting a surface of their own, so there is one
+        unread count and the toolbar badge already covers them with no change to
+        the precedence rule. Opt-in and silent until then: no alarm and no
+        request while it is off. Enabling seeds the seen-set instead of filing
+        the backlog — seventeen unread items on switch-on reads as spam and
+        would bury a real regression sitting beside them. The seen-set is
+        separate from the inbox because the inbox is capped and dismissable, and
+        "have we filed this" must outlive both. Notifications stay optional
+        decoration: the inbox entry is what everyone gets, exactly as with
+        regressions. Ten tests, and two real defects came out of writing them —
+        the seen-set was stored newest-first, so its FIFO cap would have dropped
+        the newest slugs and re-filed them forever, and the feed validator only
+        ran on the network path, so anything else feeding the cycle bypassed it.
+- [ ] M5 — feed follow-ups: a post older than the install is never shown (by
+      design); consider surfacing the last few on enable behind an explicit
+      "catch me up" instead of the current silent seed
 
 Decisions: name is Agent Readiness Inspector (2026-07-30); the extension has no
 paid tier (2026-07-31). Fix prompts and weights remain bundled; reconsider remote

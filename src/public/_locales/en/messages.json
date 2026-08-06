@@ -527,5 +527,14 @@
 	},
 	"alertDismiss": {
 		"message": "Dismiss"
+	},
+	"settingsNews": {
+		"message": "Blog updates"
+	},
+	"settingsNewsHint": {
+		"message": "New posts from 301.sh about agent readiness, redirects and Cloudflare, filed in the same inbox as regressions. Off by default: nothing is fetched until you switch it on."
+	},
+	"newsEnabled": {
+		"message": "Tell me about new posts"
 	}
 }

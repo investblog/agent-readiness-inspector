@@ -57,6 +57,25 @@ export function isRescheduleWatchRequest(msg: unknown): msg is RescheduleWatchRe
   return typeof msg === 'object' && msg !== null && (msg as { type?: unknown }).type === 'rescheduleWatch';
 }
 
+/**
+ * Switches the 301.sh feed on or off. Like the watch alarm, the background owns
+ * the news alarm outright — and enabling has to seed the seen-set before the
+ * first tick, which is background work, not a settings write the UI can do.
+ */
+export interface SetNewsEnabledRequest {
+  type: 'setNewsEnabled';
+  enabled: boolean;
+}
+
+export function isSetNewsEnabledRequest(msg: unknown): msg is SetNewsEnabledRequest {
+  return (
+    typeof msg === 'object' &&
+    msg !== null &&
+    (msg as { type?: unknown }).type === 'setNewsEnabled' &&
+    typeof (msg as { enabled?: unknown }).enabled === 'boolean'
+  );
+}
+
 export function isScanRequest(msg: unknown): msg is ScanRequest {
   return (
     typeof msg === 'object' &&
