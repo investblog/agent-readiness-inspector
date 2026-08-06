@@ -8,7 +8,7 @@
 import '@/assets/css/theme.css';
 import '@/assets/css/dashboard.css';
 import { browser } from 'wxt/browser';
-import type { CheckId, CheckResult } from '@/checks';
+import type { CheckId } from '@/checks';
 import { MATRIX } from '@/checks';
 import { svg301Logo } from '@/shared/brand';
 import { hydrate, t } from '@/shared/i18n';

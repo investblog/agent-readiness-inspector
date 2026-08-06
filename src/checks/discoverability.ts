@@ -83,7 +83,7 @@ export const linkHeaders: CheckFn = (ctx) => {
  */
 export const dnsAid: CheckFn = (ctx) => {
   const res = ctx.responses.get(PROBE.dnsAid);
-  if (!res || res.status !== 200) {
+  if (res?.status !== 200) {
     return { status: 'na', evidence: `DoH lookup unavailable (${res ? `HTTP ${res.status}` : 'no response'})` };
   }
   let answer: { Status?: number; AD?: boolean; Answer?: { data?: string }[] };
