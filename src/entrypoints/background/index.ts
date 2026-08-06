@@ -6,8 +6,8 @@ import { type ActionLike, clearBadge, resolveBadge, setAlertBadge, setScoreBadge
 import { type CachedScore, scoreCache } from '@/background/score-cache';
 import { runWatchCycle, scheduleWatch, WATCH_ALARM } from '@/background/watch';
 import type { CheckId } from '@/checks';
-import { resolveCheckIds, runChecks, scoreResults } from '@/checks';
-import { probeKeysFor, runProbes } from '@/probe/probe-layer';
+import { cardRefsFromCatalog, PROBE, resolveCheckIds, runChecks, scoreResults } from '@/checks';
+import { probeKeysFor, runFollowUps, runProbes } from '@/probe/probe-layer';
 import { t } from '@/shared/i18n';
 import { isRescheduleWatchRequest, isScanRequest, type ScanResponse } from '@/shared/messaging';
 import { normalizeOrigin } from '@/shared/origin';
@@ -195,6 +195,12 @@ async function handleScan(origin: string, requestedInclude?: CheckId[], tabId?: 
     const include = requestedInclude ?? resolveCheckIds(checkOverrides);
 
     const { responses, unreached } = await runProbes(parsed.origin, probeKeysFor(include));
+    // Second round: a Server Card's address is only known after the AI Catalog
+    // is read, so it cannot be part of the fixed probe set (SEP-2127).
+    const cardRefs = cardRefsFromCatalog(responses.get(PROBE.aiCatalog));
+    if (cardRefs.urls.length > 0) {
+      for (const [url, res] of await runFollowUps(cardRefs.urls)) responses.set(url, res);
+    }
     const results = runChecks({ origin: parsed.origin, responses }, { include });
     const scan: ScanResponse = {
       ok: true,

@@ -108,11 +108,75 @@ describe('a2aAgentCard check (off by default)', () => {
 
 describe('mcpServerCard check (tiered, spec §3)', () => {
   const card = JSON.stringify({ name: 'Example MCP', url: 'https://mcp.example.com' });
+  const CARD_URL = 'https://example.com/mcp/server-card';
+  const catalogNaming = (url: string) =>
+    JSON.stringify({
+      specVersion: '1.0',
+      entries: [{ identifier: 'urn:air:example.com:mcp:x', type: 'application/mcp-server-card+json', url }],
+    });
 
-  it('passes on the draft-canonical tier and names it', () => {
+  it('prefers the AI Catalog route and follows the url it names', () => {
+    const r = run('mcpServerCard', {
+      [PROBE.aiCatalog]: { body: catalogNaming(CARD_URL) },
+      [CARD_URL]: { body: card },
+      // a de-facto path is present too — the catalog must still win
+      [PROBE.mcpJsonLegacy]: { body: card },
+    });
+    expect(r.status).toBe('pass');
+    expect(r.evidence).toContain('AI Catalog, spec');
+    expect(r.evidence).toContain(CARD_URL);
+  });
+
+  it('passes on a card embedded in the catalog without any follow-up', () => {
+    const r = run('mcpServerCard', {
+      [PROBE.aiCatalog]: {
+        body: JSON.stringify({
+          specVersion: '1.0',
+          entries: [
+            {
+              identifier: 'urn:air:example.com:mcp:x',
+              type: 'application/mcp-server-card+json',
+              data: { name: 'Example MCP', url: 'https://mcp.example.com' },
+            },
+          ],
+        }),
+      },
+    });
+    expect(r.status).toBe('pass');
+    expect(r.evidence).toContain('embedded');
+  });
+
+  it('fails when the catalog names a card that does not resolve to one', () => {
+    const r = run('mcpServerCard', {
+      [PROBE.aiCatalog]: { body: catalogNaming(CARD_URL) },
+      [CARD_URL]: { status: 404 },
+      // the de-facto fallback must NOT rescue a broken promise
+      [PROBE.mcpJsonLegacy]: { body: card },
+    });
+    expect(r.status).toBe('fail');
+    expect(r.evidence).toContain('do not resolve');
+  });
+
+  it('ignores catalog entries of another media type', () => {
+    const r = run('mcpServerCard', {
+      [PROBE.aiCatalog]: {
+        body: JSON.stringify({
+          specVersion: '1.0',
+          entries: [{ identifier: 'urn:air:example.com:a2a:x', type: 'application/a2a+json', url: CARD_URL }],
+        }),
+      },
+      [PROBE.mcpJsonLegacy]: { body: card },
+    });
+    expect(r.status).toBe('pass');
+    expect(r.evidence).toContain('de-facto legacy');
+  });
+
+  it('passes on the former draft path but does not call it canonical', () => {
     const r = run('mcpServerCard', { [PROBE.mcpServerCard]: { body: card } });
     expect(r.status).toBe('pass');
-    expect(r.evidence).toContain('draft-canonical');
+    expect(r.evidence).toContain('former SEP-2127 draft path');
+    expect(r.evidence).toContain('outside the current spec');
+    expect(r.evidence).not.toContain('draft-canonical');
   });
 
   it('falls through tiers to de-facto legacy mcp.json (spintax/cloudflare.com case)', () => {

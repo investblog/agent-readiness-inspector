@@ -56,6 +56,22 @@ the revised spec). This file is the index.
           once — but the comment in geo-tier-builder's store-submit.yml claims no
           caller can auto-submit Firefox, which is only true of tag pushes. Fix
           the comment there so the next reader is not misled.
+      - [x] MCP Server Card follows the AI Catalog first — DONE 2026-08-06,
+        after SEP-2127 split discovery on 2026-08-03 (surfaced by drift-watch:
+        the proposal dropped "via .well-known" from its own title). The card
+        moved out of .well-known to sit beside its server, so all five paths we
+        probed became de-facto overnight, the two Cloudflare probes included.
+        `/.well-known/ai-catalog.json` is now a PROBE, deliberately not a scored
+        check: the composite mirrors CF's matrix and a new check would move every
+        score. Because a card's address is only known after the catalog is read,
+        the probe layer gained a second, dependent round (`runFollowUps`) driven
+        by a pure extractor (`cardRefsFromCatalog`) — the engine still does no
+        I/O. A catalog naming a card that does not resolve now FAILS instead of
+        quietly falling through to the old paths: an unkept promise about an
+        address is worse than no catalog. Old paths still pass, labelled
+        "outside the current spec". Four new tests, and they were verified by
+        breaking the media-type constant — exactly the three catalog tests went
+        red.
       - [ ] Next release waits for Edge and then ships all three in one pass
         (decided 2026-08-06). Nothing shipped since v0.1.0 is urgent, and one
         pass keeps the three listings on the same version. When Edge approves:

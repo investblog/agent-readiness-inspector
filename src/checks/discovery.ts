@@ -1,5 +1,5 @@
 import { PROBE } from './config';
-import type { CheckFn } from './types';
+import type { CheckFn, ProbeResponse } from './types';
 import { classifyJsonProbe, header, looksLikeHtml } from './util';
 
 // discovery/agentSkills (Cloudflare Agent Skills Discovery RFC v0.2).
@@ -99,8 +99,10 @@ export const a2aAgentCard: CheckFn = (ctx) => {
   return { status: 'fail', evidence: softFail ?? attempts.join('; ') };
 };
 
+// All de-facto since 2026-08-03 — the spec route is the AI Catalog above. The
+// labels say where each path came from, not that any of them is current.
 const MCP_TIERS: readonly { probe: string; tier: string }[] = [
-  { probe: PROBE.mcpServerCard, tier: 'draft-canonical (SEP-2127 v2)' },
+  { probe: PROBE.mcpServerCard, tier: 'former SEP-2127 draft path' },
   { probe: PROBE.mcpServerIetf, tier: 'draft-canonical (IETF mcp-discovery-uri)' },
   { probe: PROBE.mcpServerCardJson, tier: 'CF-scored (blog path)' },
   { probe: PROBE.mcpServerCardsJson, tier: 'CF-scored (plural path)' },
@@ -140,16 +142,83 @@ function isMcpCard(json: unknown): boolean {
   return hasIdentity && hasEndpoint;
 }
 
-// discovery/mcpServerCard — tiered strategy, no single "correct" path (spec §3):
-// pass on the first valid card, evidence names the tier and path.
+/** Media type an AI Catalog entry MUST carry to name a Server Card. */
+const CARD_MEDIA_TYPE = 'application/mcp-server-card+json';
+
+export interface CatalogCardRefs {
+  /** Absolute URLs of cards the catalog names — fetched in a follow-up round. */
+  urls: string[];
+  /** Cards embedded in the catalog; already in hand, nothing to fetch. */
+  inline: unknown[];
+}
+
+/**
+ * Card references out of an AI Catalog document — pure, so the engine keeps
+ * doing no I/O. The orchestrator calls this between probe rounds because a
+ * card's address is only known after the catalog is read (SEP-2127: entries
+ * carry exactly one of `url` or `data`).
+ */
+export function cardRefsFromCatalog(catalog: ProbeResponse | undefined): CatalogCardRefs {
+  const refs: CatalogCardRefs = { urls: [], inline: [] };
+  const outcome = classifyJsonProbe(catalog);
+  if (outcome.kind !== 'json') return refs;
+  const entries = (outcome.json as { entries?: unknown }).entries;
+  if (!Array.isArray(entries)) return refs;
+  for (const raw of entries) {
+    if (raw === null || typeof raw !== 'object') continue;
+    const entry = raw as Record<string, unknown>;
+    if (entry.type !== CARD_MEDIA_TYPE) continue;
+    if (entry.data !== null && typeof entry.data === 'object') refs.inline.push(entry.data);
+    else if (typeof entry.url === 'string' && entry.url.length > 0) refs.urls.push(entry.url);
+  }
+  return refs;
+}
+
+/**
+ * discovery/mcpServerCard — the AI Catalog first, the old paths after it.
+ *
+ * SEP-2127 split discovery on 2026-08-03: the catalog answers "which servers
+ * does this domain have", and the card moved out of .well-known to sit beside
+ * its server (`<streamable-http-url>/server-card`). So none of the five paths
+ * below is where the specification puts a card any more — including the two the
+ * Cloudflare scanner probes. They stay because real sites are still on them,
+ * but they are reported as de-facto, never as canonical: a checker that calls a
+ * dead address canonical is the failure this whole check exists to describe.
+ */
 export const mcpServerCard: CheckFn = (ctx) => {
+  const refs = cardRefsFromCatalog(ctx.responses.get(PROBE.aiCatalog));
+
+  for (const card of refs.inline) {
+    if (isMcpCard(card)) {
+      return { status: 'pass', evidence: `MCP server card embedded in ${PROBE.aiCatalog} [AI Catalog, spec]` };
+    }
+  }
+
+  // A named card is a promise about an address; an unkept one is worse than no
+  // catalog at all, so a url that does not resolve to a card fails loudly
+  // instead of quietly falling through to the de-facto paths.
+  const brokenRefs: string[] = [];
+  for (const url of refs.urls) {
+    const outcome = classifyJsonProbe(ctx.responses.get(url));
+    if (outcome.kind === 'json' && isMcpCard(outcome.json)) {
+      return { status: 'pass', evidence: `MCP server card at ${url}, named by ${PROBE.aiCatalog} [AI Catalog, spec]` };
+    }
+    brokenRefs.push(`${url} (${outcome.kind})`);
+  }
+  if (brokenRefs.length > 0) {
+    return {
+      status: 'fail',
+      evidence: `${PROBE.aiCatalog} names ${brokenRefs.length} card(s) that do not resolve to one: ${brokenRefs.join(', ')}`,
+    };
+  }
+
   let softFail: string | undefined;
   const soft404s: string[] = [];
   for (const { probe, tier } of MCP_TIERS) {
     const outcome = classifyJsonProbe(ctx.responses.get(probe));
     if (outcome.kind === 'json') {
       if (isMcpCard(outcome.json)) {
-        return { status: 'pass', evidence: `MCP server card at ${probe} [${tier}]` };
+        return { status: 'pass', evidence: `MCP server card at ${probe} [${tier}] — outside the current spec` };
       }
       softFail ??= `${probe}: JSON lacks card identity/endpoint fields`;
     } else if (outcome.kind === 'invalid') {

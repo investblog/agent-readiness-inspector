@@ -3,7 +3,7 @@
 // ci/drift/snapshots/isitagentready-matrix.txt (guarded by config.test.ts);
 // drift-watch CI files an issue when upstream moves.
 
-export const MATRIX_VERSION = '2026-07-30';
+export const MATRIX_VERSION = '2026-08-06';
 
 export type CategoryId = 'discoverability' | 'contentAccessibility' | 'botAccessControl' | 'discovery' | 'commerce';
 
@@ -24,6 +24,14 @@ export const PROBE = {
   authMd: '/.well-known/auth.md',
   a2aAgentCard: '/.well-known/agent-card.json',
   a2aAgentCardLegacy: '/.well-known/agent.json',
+  /**
+   * AI Catalog — the SPEC route to a Server Card since SEP-2127 split discovery
+   * (2026-08-03): the catalog does domain-level discovery here, and the card it
+   * names lives next to its server, not under .well-known. Deliberately a probe
+   * and not a scored check of its own — the composite mirrors Cloudflare's
+   * matrix, and adding a check would silently move every score.
+   */
+  aiCatalog: '/.well-known/ai-catalog.json',
   // MCP tiers (spec §3): draft-canonical -> CF-scored -> de-facto legacy
   mcpServerCard: '/.well-known/mcp/server-card',
   mcpServerIetf: '/.well-known/mcp-server',
@@ -175,6 +183,7 @@ export const MATRIX = [
     scored: true,
     defaultEnabled: true,
     probes: [
+      PROBE.aiCatalog,
       PROBE.mcpServerCard,
       PROBE.mcpServerIetf,
       PROBE.mcpServerCardJson,
