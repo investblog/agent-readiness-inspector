@@ -18,6 +18,12 @@ export const PROBE = {
    */
   dnsAid: 'dns:_index._agents',
   root: '/',
+  /**
+   * The same page again, WITHOUT credentials. Not consumed by any check — it
+   * exists so the panel can say whether your session changed what we saw,
+   * instead of claiming it did and never looking (see checks/session.ts).
+   */
+  rootAnonymous: '/::anonymous',
   /** GET / with `Accept: text/markdown` (Cloudflare Markdown for Agents). */
   rootMarkdown: '/::accept-markdown',
   /** `.md`-suffix convention (Mintlify) — a separate convention from negotiation. */

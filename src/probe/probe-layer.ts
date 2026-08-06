@@ -43,6 +43,9 @@ export interface ProbeRequest {
 
 /** Map a probe key to its concrete request. Special keys carry an Accept header. */
 export function requestFor(origin: string, key: string): ProbeRequest {
+  if (key === PROBE.rootAnonymous) {
+    return { url: new URL('/', origin).toString() };
+  }
   if (key === PROBE.rootMarkdown) {
     return { url: new URL('/', origin).toString(), headers: { accept: 'text/markdown' } };
   }

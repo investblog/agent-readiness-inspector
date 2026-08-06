@@ -8,7 +8,7 @@ import { type CachedScore, scoreCache } from '@/background/score-cache';
 import { isFromHistory, storedScore } from '@/background/stored-score';
 import { runWatchCycle, scheduleWatch, WATCH_ALARM } from '@/background/watch';
 import type { CheckId } from '@/checks';
-import { cardRefsFromCatalog, PROBE, resolveCheckIds, runChecks, scoreResults } from '@/checks';
+import { cardRefsFromCatalog, PROBE, resolveCheckIds, runChecks, scoreResults, sessionVerdict } from '@/checks';
 import { needsDnsProbe, probeKeysFor, runDnsProbe, runFollowUps, runProbes } from '@/probe/probe-layer';
 import { t } from '@/shared/i18n';
 import {
@@ -206,7 +206,9 @@ async function handleScan(origin: string, requestedInclude?: CheckId[], tabId?: 
     const { checkOverrides } = await store.getSettings();
     const include = requestedInclude ?? resolveCheckIds(checkOverrides);
 
-    const { responses, unreached } = await runProbes(parsed.origin, probeKeysFor(include));
+    // the anonymous twin of the page ride along with the rest: it belongs to no
+    // check, it exists so the panel can verify its own claim about your session
+    const { responses, unreached } = await runProbes(parsed.origin, [...probeKeysFor(include), PROBE.rootAnonymous]);
     // DNS-AID is not an HTTP path off the origin — it is a DoH lookup, run
     // alongside the rest and stored under its synthetic key.
     if (needsDnsProbe(include)) {
@@ -228,7 +230,7 @@ async function handleScan(origin: string, requestedInclude?: CheckId[], tabId?: 
       results,
       scorecard: scoreResults(results),
       unreachedProbes: unreached,
-      session: 'unknown',
+      session: sessionVerdict(responses.get(PROBE.root), responses.get(PROBE.rootAnonymous)),
     };
     // single write point: history is recorded only for saved sites (privacy
     // rule). Best-effort — a storage failure (e.g. quota) must never turn a

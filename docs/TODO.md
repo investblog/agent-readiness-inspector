@@ -50,8 +50,24 @@ the revised spec). This file is the index.
         the stored token from the in-memory creds instead of awaiting storage.
         Third instance of one bug family now — worth remembering that any
         permission or panel API is gesture-bound and must precede every await.
-      - [ ] 3P-cookie block detection → session indicator (protocol field
-        `session` already reserved)
+      - [x] Session indicator — DONE 2026-08-07, but answering a narrower
+        question than the item asked for, on purpose. "Are third-party cookies
+        blocked" needs the `cookies` permission to answer properly, and it is
+        not what the user needs to know. What the panel CLAIMS is that the page
+        is fetched with your cookies so a site behind a login is graded
+        honestly, and that claim went unverified on every scan while the
+        protocol field answered `unknown` — an honesty claim nobody checks is
+        the exact thing this tool exists to complain about.
+        So the page is now fetched twice, with credentials and without, and the
+        two are compared. Status difference or a different landing URL is the
+        strong signal; a body-size difference counts only above 10%, because
+        nonces, CSRF tokens and timestamps make any two fetches differ a little.
+        When nothing differs the verdict is `none`, never `blocked`: no session
+        and a suppressed session look identical from here, and only one of them
+        is a defect — naming a cause we cannot see would be inventing one.
+        The line shows in the panel only when it says something. Seven tests,
+        verified by disabling the landing-URL comparison — that test alone went
+        red. Cost: one extra request to the audited origin per scan.
       - [x] Auto-submit secrets: all 10 set 2026-08-06 and validated end to end.
         The three per-extension identifiers are derived in
         docs/store-listings/submission-guide.md; Edge's did NOT need approval,

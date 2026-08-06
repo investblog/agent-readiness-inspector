@@ -2,7 +2,7 @@
 // origin. The engine runs in the background (single source of verdicts); the
 // panel only renders.
 
-import type { CheckId, CheckResult, Scorecard } from '@/checks';
+import type { CheckId, CheckResult, Scorecard, SessionVerdict } from '@/checks';
 
 export interface ScanRequest {
   type: 'scan';
@@ -30,11 +30,11 @@ export interface ScanSuccess {
   /** Probe keys that got no response (timeout/network) — shown as transparency. */
   unreachedProbes: string[];
   /**
-   * Session state of the credentialed page refetch (spec §11 honesty):
-   * 'unknown' until the 3P-cookie-block detection lands (M1-b/M1 debt) —
-   * field reserved now to avoid a protocol rev.
+   * Whether your session changed what the audit saw (spec §11 honesty). The
+   * panel tells you the page is fetched with your cookies; this is the check on
+   * that claim, made by asking the same URL again without them.
    */
-  session: 'unknown' | 'active' | 'blocked';
+  session: SessionVerdict;
 }
 
 export interface ScanFailure {

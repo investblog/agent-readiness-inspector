@@ -84,4 +84,6 @@ export type { CatalogCardRefs } from './discovery';
 export { cardRefsFromCatalog } from './discovery';
 export type { CategoryScore, Scorecard } from './scoring';
 export { levelFor, scoreResults } from './scoring';
+export type { SessionState, SessionVerdict } from './session';
+export { sessionVerdict } from './session';
 export type { CheckContext, CheckFn, CheckResult, CheckStatus, ProbeResponse, Verdict } from './types';

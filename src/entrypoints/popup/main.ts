@@ -202,6 +202,17 @@ function renderResults(scan: ScanSuccess): void {
   renderCategories(scan);
   renderChecklist(scan);
 
+  // The panel says the page is fetched with your cookies. This is the line that
+  // checks that claim instead of repeating it — shown only when it says
+  // something, i.e. when a session actually changed what we saw.
+  const session = $('session-note');
+  if (scan.session.state === 'active') {
+    session.hidden = false;
+    session.textContent = `${t('sessionActive')} — ${scan.session.evidence}`;
+  } else {
+    session.hidden = true;
+  }
+
   const unreached = $('unreached-note');
   if (scan.unreachedProbes.length > 0) {
     unreached.hidden = false;

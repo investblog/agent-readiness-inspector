@@ -140,7 +140,7 @@ describe('snapshotFromScan', () => {
       })),
       scorecard: { composite: 42, level: 2, levelName: 'Bot-Aware', categories: {} },
       unreachedProbes: [],
-      session: 'unknown',
+      session: { state: 'unknown', evidence: 'test fixture' },
     };
   }
 
