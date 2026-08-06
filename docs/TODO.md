@@ -39,15 +39,28 @@ the revised spec). This file is the index.
         error copy before the next Firefox update (M1-b review debt)
       - [ ] 3P-cookie block detection → session indicator (protocol field
         `session` already reserved)
-      - [ ] Auto-submit secrets: 3 of 10 set 2026-08-06 — the per-extension
-        identifiers (CHROME_EXTENSION_ID, FIREFOX_EXTENSION_ID, EDGE_PRODUCT_ID;
-        values and their derivation in docs/store-listings/submission-guide.md).
-        Edge's did NOT need approval — Partner Center issues the Product ID when
-        the submission is created. Missing: the 7 account-level credentials
-        (Chrome OAuth ×3, AMO JWT ×2, Edge API ×2), identical to the ones in
-        redirect-inspector but unreadable from there — GitHub never discloses a
-        secret's value. Until they are set, a `v*` tag fires Submit to stores and
-        it fails on auth.
+      - [x] Auto-submit secrets: all 10 set 2026-08-06 and validated end to end.
+        The three per-extension identifiers are derived in
+        docs/store-listings/submission-guide.md; Edge's did NOT need approval,
+        Partner Center issues the Product ID when the submission is created. The
+        seven account-level credentials had to come from their original source:
+        they exist in the other nine extension repos but cannot be read back out
+        of any of them, because GitHub never discloses a secret's value.
+        Verified by a dry run rather than by assuming (run 31100568253,
+        `stores=all`, `dry_run=true`): chrome, edge and firefox all green, and
+        the log shows `DRY RUN: Skipped upload and publishing`, so no AMO version
+        number was spent. Note `tag=main` — the only tag is v0.1.0, which
+        submit.yml deliberately skips, and `tag` is just a checkout ref.
+        - [ ] The Firefox job DOES run on `stores=all` via workflow_dispatch,
+          confirmed by that run. Intended — releases normally go to all three at
+          once — but the comment in geo-tier-builder's store-submit.yml claims no
+          caller can auto-submit Firefox, which is only true of tag pushes. Fix
+          the comment there so the next reader is not misled.
+      - [ ] Next release waits for Edge and then ships all three in one pass
+        (decided 2026-08-06). Nothing shipped since v0.1.0 is urgent, and one
+        pass keeps the three listings on the same version. When Edge approves:
+        fill its store link, bump the version in package.json +
+        package-lock.json + wxt.config.ts, then Cut release with `all`.
       - [ ] Store links: Chrome and Firefox filled in store-links.ts 2026-08-06,
         both reviews pages verified 200; Edge still in review, its URL stays
         empty so getStoreInfo() keeps that link hidden. Close when Edge lands.

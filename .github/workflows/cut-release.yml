@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       submit:
-        description: 'Auto-submit after tagging (ignored for v0.1.0; Firefox stays manual)'
+        description: 'Auto-submit after tagging (ignored for v0.1.0). `all` includes Firefox — AMO burns the version number even if the release is later pulled'
         type: choice
         options:
           - chrome-edge
