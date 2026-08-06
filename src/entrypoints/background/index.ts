@@ -5,6 +5,7 @@ import { disableNews, enableNews, fetchNewsPosts, NEWS_ALARM, runNewsCycle, sche
 // scores are cached per ORIGIN (every check is origin-level) and survive
 // service-worker restarts — see score-cache.ts
 import { type CachedScore, scoreCache } from '@/background/score-cache';
+import { isFromHistory, storedScore } from '@/background/stored-score';
 import { runWatchCycle, scheduleWatch, WATCH_ALARM } from '@/background/watch';
 import type { CheckId } from '@/checks';
 import { cardRefsFromCatalog, PROBE, resolveCheckIds, runChecks, scoreResults } from '@/checks';
@@ -26,7 +27,12 @@ const action = ((browser as unknown as { action?: ActionLike; browserAction?: Ac
   (browser as unknown as { browserAction: ActionLike }).browserAction) as ActionLike;
 
 function scoreTitle(score: CachedScore): string {
-  return `${t('extName')} — ${score.composite} · L${score.level} ${score.levelName}`;
+  const head = `${t('extName')} — ${score.composite} · L${score.level} ${score.levelName}`;
+  // A seeded score keeps the number but has to carry its date: an undated old
+  // one is the "stale is worse than none" case badge.ts warns about, and a
+  // dated one is not stale, it is history.
+  if (!isFromHistory(score)) return head;
+  return `${head} · ${t('badgeScoreMeasured', new Date(score.at).toLocaleDateString())}`;
 }
 
 /** True while the tab is still on the origin the score describes. */
@@ -268,6 +274,18 @@ async function onTabShowsOrigin(tabId: number, origin: string): Promise<void> {
   if (cached) {
     if (scoreBadge) await paintScore(tabId, origin, cached);
     return;
+  }
+  // Nothing scanned this origin this session. For a saved site the last
+  // recorded score is a better answer than an empty icon — this is what made
+  // the badge look like it "only works with the side panel open".
+  if (scoreBadge) {
+    const stored = await storedScore(await storage(), origin);
+    if (stored) {
+      await paintScore(tabId, origin, stored);
+      // painted, but NOT returned: with auto-scan on, a stored number is a
+      // placeholder until the fresh scan below replaces it
+      if (!autoScan) return;
+    }
   }
   if (!autoScan || queuedOrigins.has(origin) || queuedOrigins.size >= AUTO_SCAN_MAX_QUEUE) return;
   queuedOrigins.add(origin);

@@ -536,5 +536,16 @@
 	},
 	"newsEnabled": {
 		"message": "Tell me about new posts"
+	},
+	"badgeScoreMeasured": {
+		"message": "measured $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"tipAutoScan": {
+		"message": "The icon shows a score once something has scanned that tab. Turn on auto-scan in the dashboard to have it scored as you browse — it is off by default because it sends requests to every site you open"
 	}
 }

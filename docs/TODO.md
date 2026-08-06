@@ -115,15 +115,20 @@ the revised spec). This file is the index.
 - [x] M3.5 — icon as a surface: score of the current tab while browsing (opt-in
       auto-scan) + unread monitoring count, precedence alert > score — DONE
       2026-08-02 (plan: .agents/plans/done/m3.5-ambient-badge.md)
-      - [ ] The score on the icon appears only after something scans that tab,
-        and with auto-scan off (the default) the side panel is the only thing
-        that does — dashboard scans carry no tabId, so they paint nothing.
-        Reported as "the counter only works with the side panel open".
-        Candidate fixes: seed the badge from stored history for saved sites (no
-        traffic), repaint on tab activation from that seed, and surface the
-        auto-scan switch during onboarding. The unread-alert count does NOT
-        have this problem — it is painted from storage by the background and is
-        covered by the live smoke with no panel open.
+      - [x] The score on the icon no longer needs the panel open — DONE
+        2026-08-06, all three parts. The badge is seeded from stored history for
+        SAVED sites (`src/background/stored-score.ts`), which costs no request
+        and stays inside the privacy rule — doing it for every origin visited
+        would turn the icon into a record of browsing. Tab activation repaints
+        from that seed. Onboarding now names the auto-scan switch and says why
+        it is off.
+        A seeded number is dated in the tooltip rather than shown bare: badge.ts
+        holds that a stale number is worse than none, and undated history IS
+        stale. Anything older than the session cooldown must have come from
+        storage (the cache drops expired entries), which is the whole test for
+        "seeded". Seven tests; one of them caught the author, not the code —
+        79 is a level-4 composite, because the L5 floor is 80, the very boundary
+        Cloudflare's two surfaces disagree about.
 - [ ] M4 — fix-apply + full CF Connect wizard (spec §8.1)
 - [ ] M5 — 301.st layer: cross-promo, spintax.net as living reference
       - [x] 301.sh feed — DONE 2026-08-06. Posts are filed in the SAME inbox as
