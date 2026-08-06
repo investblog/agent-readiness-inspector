@@ -3,12 +3,20 @@
 // ci/drift/snapshots/isitagentready-matrix.txt (guarded by config.test.ts);
 // drift-watch CI files an issue when upstream moves.
 
-export const MATRIX_VERSION = '2026-08-06';
+export const MATRIX_VERSION = '2026-08-06b';
 
 export type CategoryId = 'discoverability' | 'contentAccessibility' | 'botAccessControl' | 'discovery' | 'commerce';
 
 /** Probe keys: what the probe layer must fetch for the engine (spec §5). */
 export const PROBE = {
+  /**
+   * Synthetic key, not a path: the probe layer answers it with a DNS-over-HTTPS
+   * lookup of `_index._agents.<host>` (SVCB), body = the resolver's JSON. The
+   * draft defines the entry point at `_index._agents` and selects protocols
+   * through the alpn parameter, so the per-protocol labels the Cloudflare
+   * scanner also probes (`_mcp`, `_a2a`) are not queried here.
+   */
+  dnsAid: 'dns:_index._agents',
   root: '/',
   /** GET / with `Accept: text/markdown` (Cloudflare Markdown for Agents). */
   rootMarkdown: '/::accept-markdown',
@@ -98,7 +106,11 @@ export const MATRIX = [
     docUrl: 'https://blog.cloudflare.com/agent-readiness/',
     scored: true,
     defaultEnabled: true,
-    probes: [], // DNS is not probeable from an extension — needs external scan (spec §3)
+    // Extensions have no DNS API, which is why this used to be a permanent
+    // `na`. They do have fetch, and DNS-over-HTTPS is fetch: a JSON query
+    // answers with the records AND the DNSSEC `AD` flag, the two things this
+    // check needs. No token, no account, works for everyone.
+    probes: [PROBE.dnsAid],
   },
   // --- contentAccessibility ---
   {

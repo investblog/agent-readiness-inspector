@@ -83,10 +83,40 @@ describe('linkHeaders check', () => {
   });
 });
 
-describe('dnsAid check', () => {
-  it('is always na locally, pointing at the external scan', () => {
-    const r = run('dnsAid', {});
-    expect(r.status).toBe('na');
-    expect(r.evidence).toContain('external scan');
+describe('dnsAid check (DoH)', () => {
+  const doh = (body: unknown) => ({ [PROBE.dnsAid]: { body: JSON.stringify(body) } });
+  const RECORD = { data: '1 example.com. alpn=h2 port=443' };
+
+  it('passes on records with a validated DNSSEC chain', () => {
+    const r = run('dnsAid', doh({ Status: 0, AD: true, Answer: [RECORD] }));
+    expect(r.status).toBe('pass');
+    expect(r.evidence).toContain('DNSSEC validated');
+    expect(r.evidence).toContain('alpn=h2');
+  });
+
+  it('fails records the resolver could not validate — the scanner does too', () => {
+    const r = run('dnsAid', doh({ Status: 0, AD: false, Answer: [RECORD] }));
+    expect(r.status).toBe('fail');
+    expect(r.evidence).toContain('AD=false');
+  });
+
+  it('fails an empty NOERROR and names the rcode', () => {
+    const r = run('dnsAid', doh({ Status: 0, AD: true, Answer: [] }));
+    expect(r.status).toBe('fail');
+    expect(r.evidence).toContain('rcode 0');
+  });
+
+  it('fails NXDOMAIN by name', () => {
+    const r = run('dnsAid', doh({ Status: 3, AD: false }));
+    expect(r.status).toBe('fail');
+    expect(r.evidence).toContain('NXDOMAIN');
+  });
+
+  it('stays na when the resolver itself could not be reached', () => {
+    // a resolver we could not ask says nothing about the site — that is not a
+    // failure of the site, and scoring it as one would be inventing a defect
+    expect(run('dnsAid', {}).status).toBe('na');
+    expect(run('dnsAid', { [PROBE.dnsAid]: { status: 502 } }).status).toBe('na');
+    expect(run('dnsAid', { [PROBE.dnsAid]: { body: 'not json' } }).status).toBe('na');
   });
 });

@@ -144,6 +144,27 @@ the revised spec). This file is the index.
           (dashboard network tab on a scan report is the cheapest source), or
           treat the comparison as dashboard-only and say so in the UI instead of
           polling for something that never arrives.
+- [x] DNS-AID is checkable after all — DONE 2026-08-06, and it removes the one
+      check where the external scanner was strictly better. The old reasoning
+      ("extensions have no DNS API") was true and beside the point:
+      DNS-over-HTTPS is an ordinary fetch, and the JSON answer carries both
+      halves of the verdict — the SVCB records under `_index._agents` and `AD`,
+      the resolver's DNSSEC judgement, which is the second condition the scanner
+      applies ("records found, but DNSSEC was not validated"). No token, no
+      account, works for every user. Verified live before writing it: 301.sh
+      Status=0 AD=true 1 answer; cloudflare.com and example.com NOERROR with
+      zero answers; isitagentready.com NXDOMAIN — still not publishing its own
+      check. `na` is kept for exactly one case, an unreachable resolver: that
+      says nothing about the site, and failing it would invent a defect. Six
+      tests, verified by disabling the DNSSEC gate — the AD=false test went red.
+      Only `_index._agents` is queried; the per-protocol labels the Cloudflare
+      scanner invented (`_mcp`, `_a2a`) are not in the draft.
+      - [ ] **Both articles now overstate this and need a correction.** The
+        browser one says DNS-AID "cannot be checked from an extension at all"
+        and calls it "the one check where the datacenter scanner is strictly
+        better"; the comparison table says "no, always not-applicable". All of
+        that was true of extension APIs and false of the product. EN/DE/RU
+        changelog entries, synchronised.
 - [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
 - [x] M3 — watch: alarms + diff + regression notifications — DONE 2026-07-31
       (plan: .agents/plans/done/m3-watch.md)

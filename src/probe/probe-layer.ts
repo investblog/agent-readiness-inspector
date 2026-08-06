@@ -17,6 +17,8 @@ const CONCURRENCY = 6;
 const BODY_CAP = 512 * 1024;
 /** A catalog names as many cards as it likes; we are not its crawler. */
 const FOLLOW_UP_CAP = 10;
+/** DoH resolver for the DNS-AID probe — validates DNSSEC and reports AD. */
+const DOH_ENDPOINT = 'https://cloudflare-dns.com/dns-query';
 
 /** Union of probe keys needed by the given checks (default: default-enabled set). */
 export function probeKeysFor(ids: readonly CheckId[] = defaultCheckIds()): string[] {
@@ -24,7 +26,14 @@ export function probeKeysFor(ids: readonly CheckId[] = defaultCheckIds()): strin
   for (const id of ids) {
     for (const probe of checkMeta(id).probes) keys.add(probe);
   }
+  // the DNS key is answered by runDnsProbe, not by an HTTP path off the origin
+  keys.delete(PROBE.dnsAid);
   return [...keys];
+}
+
+/** True when the check set includes the DNS-over-HTTPS lookup. */
+export function needsDnsProbe(ids: readonly CheckId[] = defaultCheckIds()): boolean {
+  return ids.some((id) => (checkMeta(id).probes as readonly string[]).includes(PROBE.dnsAid));
 }
 
 export interface ProbeRequest {
@@ -118,6 +127,30 @@ export async function runProbes(
 
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, keys.length) }, worker));
   return { responses, unreached };
+}
+
+/**
+ * DNS-over-HTTPS lookup of `_index._agents.<host>` — the one probe that is not
+ * an HTTP request to the audited site.
+ *
+ * A DoH resolver is asked over ordinary fetch, which is why this check stopped
+ * being "impossible from an extension": the JSON answer carries both the SVCB
+ * records and `AD`, the resolver's DNSSEC verdict, and the check needs exactly
+ * those two. Cloudflare's resolver is used because it validates DNSSEC and
+ * reports AD; it sees only the queried name, never the page.
+ *
+ * The result is stored as a ProbeResponse so the engine reads it the same way
+ * it reads every other probe.
+ */
+export async function runDnsProbe(origin: string, fetchFn: typeof fetch = fetch): Promise<ProbeResponse | null> {
+  let host: string;
+  try {
+    host = new URL(origin).hostname;
+  } catch {
+    return null;
+  }
+  const url = `${DOH_ENDPOINT}?name=${encodeURIComponent(`_index._agents.${host}`)}&type=SVCB`;
+  return fetchProbe({ url, headers: { accept: 'application/dns-json' } }, 'omit', fetchFn);
 }
 
 /**
