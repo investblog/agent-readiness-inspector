@@ -15,7 +15,10 @@ const STORES: Record<string, StoreInfo> = {
     label: 'Chrome Web Store',
   },
   edge: {
-    url: '', // still in review 2026-08-06 — the link stays hidden until it lands
+    // The listing itself, not a reviews page: Edge has none. `/reviews` answers
+    // 200 with an empty shell, which is how it fools a status-code check —
+    // verified 2026-08-07 by looking for the extension name in the HTML.
+    url: 'https://microsoftedge.microsoft.com/addons/detail/agent-readiness-inspector/jkhmlkoehfmmpgihkknnopanjcipmiho',
     label: 'Edge Add-ons',
   },
   firefox: {

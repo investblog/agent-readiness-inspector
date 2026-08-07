@@ -103,16 +103,18 @@ the revised spec). This file is the index.
         "outside the current spec". Four new tests, and they were verified by
         breaking the media-type constant — exactly the three catalog tests went
         red.
-      - [ ] Next release waits for Edge and then ships all three in one pass
-        (decided 2026-08-06). Nothing shipped since v0.1.0 is urgent, and one
-        pass keeps the three listings on the same version. When Edge approves:
-        fill its store link, bump the version in package.json +
-        package-lock.json + wxt.config.ts, then Cut release with `all`.
-      - [ ] Store links: Chrome and Firefox filled in store-links.ts 2026-08-06,
-        both reviews pages verified 200; Edge still in review, its URL stays
-        empty so getStoreInfo() keeps that link hidden. Close when Edge lands.
-        Edge does get its own build (`npm run build:edge`), so BROWSER is 'edge'
-        there and it will never show the Chrome link.
+      - [ ] Release v0.1.1 — UNBLOCKED 2026-08-07. Edge approved, its link is
+        in, the version is already bumped in all three files, and the three
+        builds are green. Remaining: `Cut release` with `submit=all`. Note that
+        `all` DOES submit Firefox (confirmed by the 2026-08-06 dry run) and AMO
+        burns the version number whether or not the release is later pulled —
+        so this is the irreversible step, not the tag.
+      - [x] Store links — COMPLETE 2026-08-07, Edge approved and filled in.
+        Chrome and Firefox point at their reviews pages; Edge points at the
+        listing because it has none — `/reviews` there answers 200 with an empty
+        shell, which is exactly how a status-code check gets fooled, so it was
+        verified by looking for the extension name in the HTML. Each build
+        carries only its own link, confirmed in the three built packages.
         - [x] Do it per store the moment that store approves, not in one batch
           after all three: the review link is what collects ratings, and the
           first days after publication are when the traffic is there.
