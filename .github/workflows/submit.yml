@@ -26,6 +26,10 @@ on:
         description: 'Validate credentials only, publish nothing'
         type: boolean
         default: true
+      hold:
+        description: 'Upload but do NOT submit — waits as a draft for you to publish (Chrome/Edge only; AMO has no such state)'
+        type: boolean
+        default: false
 
 concurrency:
   group: submit-${{ github.ref }}
@@ -41,6 +45,7 @@ jobs:
     with:
       ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
       dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+      hold: ${{ github.event_name == 'workflow_dispatch' && inputs.hold || false }}
       chrome: ${{ github.event_name == 'push' || inputs.stores == 'chrome' || inputs.stores == 'chrome-edge' || inputs.stores == 'all' }}
       firefox: ${{ inputs.stores == 'firefox' || inputs.stores == 'all' }}
       edge: ${{ github.event_name == 'push' || inputs.stores == 'edge' || inputs.stores == 'chrome-edge' || inputs.stores == 'all' }}

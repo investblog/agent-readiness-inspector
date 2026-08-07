@@ -52,6 +52,22 @@ Vanilla DOM, Manifest V3, Biome, Vitest.
   URL Scanner API and the 301.st news feed are explicit opt-ins (spec §2, §10).
 - **Mirror Cloudflare's matrix.** Check IDs, categories, and scoring mirror
   isitagentready so scores stay comparable (spec §3–§4). Weights live in config.
+- **[CRITICAL] A release only ever leaves CI.** Never upload a locally built ZIP
+  to a store. `Cut release` tags, and the packages that reach the stores are the
+  ones GitHub Actions built on a clean Linux runner from a clean checkout. Two
+  reasons, and both have teeth. The working copy here is Windows: CRLF, path
+  separators and locale-dependent tooling all differ, and a store package is the
+  one artifact nobody re-reads before it reaches users. And CI is where the full
+  gate runs — typecheck, Biome, the listing drift check, the whole suite — so a
+  mistake is caught while it is still free. A store rejection costs days; AMO
+  costs the version number permanently.
+- **Publishing is a separate, human step from building.** `hold: true` on
+  `Submit to stores` uploads the package and stops, leaving it as a draft for a
+  person to publish. Use it whenever the listing needs editing first — Chrome
+  only offers a listing language once the UPLOADED package contains that
+  `_locales` directory, so new locales cannot be filled in before their package
+  is up. Firefox has no such state and burns the version number on upload, so it
+  goes last, once the other two look right.
 
 ## Self-configuration (adapt and explain)
 `~/.agents` provides a minimal shared baseline. Adapting to the project is standard
