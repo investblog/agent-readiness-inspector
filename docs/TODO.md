@@ -260,4 +260,13 @@ Scaffold debts:
       default locale for every key a locale omits, so the UI stays English. The
       trade-off to know: a German user sees a German name and description over
       an English interface.
+      SECOND CORRECTION, from comparing against redirect-inspector: `_locales`
+      directories are named with an UNDERSCORE (`pt_BR`). The hyphenated one I
+      shipped would simply not be found — the locale would not exist and its
+      listing language would never appear, with nothing failing loudly. The
+      listing FILES keep the hyphen, which is how the stores spell it. Turkish
+      added while there, so the set now matches RI exactly: de en es fr pt_BR
+      ru tr. Where we diverge from RI is deliberate: it translates all 106
+      strings in all seven locales; we translate two and fall back, because
+      this tool's readers are developers and SEO teams.
       - [ ] Expand the UI beyond en + ru only when installs name a language.
