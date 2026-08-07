@@ -250,4 +250,14 @@ Scaffold debts:
       The four are generated from one source per language by
       scripts/build-listings.mjs; `--check` runs inside `npm run check` and was
       verified by hand-editing a generated file. NOT native-reviewed.
+      CORRECTION, same day: "the manifest is untouched" was wrong, and asserted
+      without checking. The Chrome Web Store builds its localized-listing
+      language menu from the `_locales` directories in the uploaded package —
+      "Each item in the list corresponds to one of the _locales/LOCALE_CODE
+      directories that you uploaded" — so the four listings had nowhere to go.
+      The generator now also writes a SPARSE _locales/<lang>/messages.json with
+      only extName and extDescription; both vendors document falling back to the
+      default locale for every key a locale omits, so the UI stays English. The
+      trade-off to know: a German user sees a German name and description over
+      an English interface.
       - [ ] Expand the UI beyond en + ru only when installs name a language.

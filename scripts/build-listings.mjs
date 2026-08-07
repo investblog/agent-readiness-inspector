@@ -9,6 +9,14 @@
 // wording that survived store review, and regenerating them would trade a known
 // text for a derived one to no benefit.
 //
+// It also writes a SPARSE _locales/<lang>/messages.json for each language,
+// carrying only extName and extDescription. That is not UI translation: Chrome
+// falls back to the default locale for every key a locale omits ("your
+// extension will run no matter how sparse a translation is"). The directory has
+// to exist for a different reason — the Chrome Web Store builds its
+// localized-listing language menu from the _locales directories in the uploaded
+// package, so without it there is nowhere to put a German listing at all.
+//
 // Usage: node scripts/build-listings.mjs [--check]
 //   --check exits non-zero if a generated file is missing or stale.
 
@@ -17,6 +25,10 @@ import path from 'node:path';
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, 'docs', 'store-listings');
+const LOCALES = path.join(ROOT, 'src', 'public', '_locales');
+
+/** Chrome's manifest description field is capped at the same 132. */
+const EXT_NAME = 'Agent Readiness Inspector';
 
 /** Chrome and Edge cap the short description; the longest here must fit. */
 const SHORT_MAX = 132;
@@ -230,6 +242,19 @@ ${t.disclaimer}
 `;
 }
 
+/** Only the two keys the manifest interpolates; everything else falls back. */
+function sparseMessages(t) {
+  return `${JSON.stringify(
+    {
+      extName: { message: EXT_NAME },
+      extDescription: { message: t.short },
+    },
+    null,
+    '	',
+  )}
+`;
+}
+
 const targets = [
   { dir: 'chrome', ext: 'txt', render: chromeText },
   { dir: 'edge', ext: 'txt', render: chromeText },
@@ -260,6 +285,21 @@ for (const [lang, t] of Object.entries(L)) {
       fs.writeFileSync(file, content, 'utf8');
       written += 1;
     }
+  }
+
+  // the sparse locale directory that makes the listing language selectable
+  const localeFile = path.join(LOCALES, lang, 'messages.json');
+  const localeContent = sparseMessages(t);
+  const currentLocale = fs.existsSync(localeFile) ? fs.readFileSync(localeFile, 'utf8') : null;
+  if (check) {
+    if (currentLocale !== localeContent) {
+      console.error(`[listings] stale or missing: ${path.relative(ROOT, localeFile)}`);
+      problems += 1;
+    }
+  } else if (currentLocale !== localeContent) {
+    fs.mkdirSync(path.dirname(localeFile), { recursive: true });
+    fs.writeFileSync(localeFile, localeContent, 'utf8');
+    written += 1;
   }
 }
 

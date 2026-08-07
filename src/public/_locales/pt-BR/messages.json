@@ -1,0 +1,8 @@
+{
+	"extName": {
+		"message": "Agent Readiness Inspector"
+	},
+	"extDescription": {
+		"message": "Audite sites para agentes de IA: robots.txt, llms.txt, negociação Markdown, MCP, Content Signals. Local, sem analytics."
+	}
+}

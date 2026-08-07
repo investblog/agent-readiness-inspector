@@ -1,0 +1,8 @@
+{
+	"extName": {
+		"message": "Agent Readiness Inspector"
+	},
+	"extDescription": {
+		"message": "Websites auf KI-Agenten-Tauglichkeit prüfen: robots.txt, llms.txt, Markdown-Negotiation, MCP, Content Signals."
+	}
+}
