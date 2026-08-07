@@ -7,26 +7,35 @@ TEST STEPS
 1. Open any regular HTTP or HTTPS page.
 2. Select the extension icon. Chrome and Edge open a side panel; Firefox opens a popup and also provides a sidebar.
 3. Wait for the score and check list. Expand a check to inspect evidence and copy its fix prompt.
-4. Save the site, open Dashboard, and run a rescan to see local history.
-5. Toggle watch for the saved site. Notifications are optional; the local monitoring inbox works without them.
-6. Cloudflare Connect is optional and is not needed to review the primary functionality. It requires the reviewer's own Cloudflare Account ID and API token with URL Scanner: Edit.
+4. Expand a failing check to see its repair kit: the requirement, the change for the detected hosting stack, and a command that verifies the fix.
+5. Save the site, open Dashboard, and run a rescan to see local history.
+6. Toggle watch for the saved site. Notifications are optional; the local monitoring inbox works without them.
+7. Optionally enable "Blog updates" in Dashboard settings. It is off by default and makes no network request until enabled; it then polls a public JSON feed at 301.sh every six hours and files new posts in the same local inbox.
 
 PERMISSIONS
 
 <all_urls>: Core functionality. The user can audit any HTTP or HTTPS site. The extension fetches that site's root page, response headers, robots.txt, sitemap, and well-known resources. It does not inject scripts or promotional content into visited pages.
 
-storage: Stores settings, saved site origins, up to 50 local snapshots per saved site, up to 50 monitoring alerts, optional Cloudflare credentials, and a short-lived session score cache.
+storage: Stores settings, saved site origins, up to 50 local snapshots per saved site, up to 50 monitoring alerts, and a short-lived session score cache.
 
-alarms: Runs scheduled rescans only for sites the user explicitly puts on watch.
+alarms: Runs scheduled rescans only for sites the user explicitly puts on watch, and the optional blog-updates poll.
 
 sidePanel (Chrome and Edge): Displays the report beside the audited tab.
 
-notifications (optional): Shows regression alerts after a user enables notifications. Monitoring remains usable through the local inbox when denied.
+notifications (optional): Shows regression alerts, and blog updates if enabled, after the user grants the permission. Both remain usable through the local inbox when denied.
 
-FIREFOX OPTIONAL DATA PERMISSIONS
+NETWORK REQUESTS
 
-authenticationInfo and browsingActivity are requested only when the user connects the optional Cloudflare URL Scanner integration. They cover sending the user's Cloudflare API token for verification and sending the explicitly selected target URL for an external comparison scan. Declining leaves all local features available.
+To the audited site: its root page (twice — once with credentials and once without, so the report can state whether the user's session changed what was seen), robots.txt, sitemap, llms.txt, and the /.well-known/ resources the standards define.
+
+To cloudflare-dns.com: one DNS-over-HTTPS query per scan, for the DNS-AID check. The resolver receives only the queried name (the audited hostname prefixed with _index._agents) and returns whether agent-discovery records exist and whether DNSSEC validated. No page content and no cookies are sent.
+
+To 301.sh: only if the user enables the optional blog-updates feature, and only to read a public JSON feed of published posts.
 
 DATA AND REMOTE CODE
 
-The developer receives no scan, browsing, credential, analytics, or telemetry data. Cloudflare receives a token during verification and a target URL only for the user-initiated optional external scan. The package contains no remotely hosted code and executes no code fetched from the network.
+The developer receives no scan, browsing, credential, analytics, or telemetry data. The extension declares no data collection in Firefox. It contains no remotely hosted code and executes no code fetched from the network.
+
+CHANGES SINCE 0.1.0
+
+The optional Cloudflare URL Scanner comparison has been removed, together with the stored Cloudflare credentials and the Firefox authenticationInfo and browsingActivity data permissions that existed only to serve it. Credentials stored by 0.1.0 are deleted when this version first runs.

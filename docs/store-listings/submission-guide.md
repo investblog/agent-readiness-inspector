@@ -108,18 +108,22 @@ Chrome требует хотя бы один скриншот 1280x800 (до п�
 обрабатывает даже локально:
 
 - Web history / browsing activity — URL и origin выбранных и сохранённых сайтов;
-- Website content — HTTP headers и response text проверяемого сайта;
-- Authentication information — опциональный Cloudflare API token.
+- Website content — HTTP headers и response text проверяемого сайта.
 
-Указать: local processing для первых двух; Cloudflare transfer только для
-явно включённой внешней проверки; 301.st ничего не получает; данные не
-продаются, не используются для рекламы и не доступны человеку. Remote code:
-No. Single purpose и permission justifications можно взять из
-`reviewer-notes.txt`.
+Authentication information из списка **убрано в v0.1.1**: токен хранить больше
+негде и незачем, сравнение через Cloudflare удалено.
 
-Firefox-манифест объявляет `required: [none]` и опциональные
-`authenticationInfo`, `browsingActivity`; разрешение запрашивается перед
-подключением Cloudflare.
+Указать: всё обрабатывается локально; 301.st ничего не получает; данные не
+продаются, не используются для рекламы и не доступны человеку. Единственные
+исходящие запросы, кроме самого проверяемого сайта, — DNS-over-HTTPS к
+`cloudflare-dns.com` для проверки DNS-AID и, если пользователь включил новости,
+публичный JSON-фид 301.sh. Remote code: No. Single purpose и permission
+justifications можно взять из `reviewer-notes.txt`.
+
+Firefox-манифест объявляет `required: [none]` и **ничего опционального**:
+`authenticationInfo` и `browsingActivity` убраны в v0.1.1 вместе со сравнением
+через Cloudflare, ради которого они и существовали. Расширение не декларирует
+сбор данных вовсе.
 
 ## Официальные требования
 

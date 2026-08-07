@@ -21,13 +21,13 @@ KEY FEATURES
 
 The audit runs inside Edge, so it can inspect staging sites and many authenticated pages that an outside scanner cannot reach. Browser cookie protections may limit session access on some sites.
 
-OPTIONAL CLOUDFLARE COMPARISON
+REPAIR KITS
 
-Users may connect their own Cloudflare URL Scanner token and explicitly run an outside scan for comparison. The feature is off by default, its data transfer is disclosed in the interface, and the stored credentials can be removed at any time.
+A failed check comes with the fix: what the standard requires, the change for the stack the site appears to run on (Cloudflare, Vercel, Netlify, nginx, Next.js), and the one command that proves it landed.
 
 PRIVACY AND DATA USE
 
-Website URLs and response content are handled only to provide the audit. Results, saved sites, history, settings, and alerts remain in local Edge extension storage. 301.st receives no scan or browsing data. The extension contains no analytics, telemetry, advertising, or remotely hosted code.
+Website URLs and response content are handled only to provide the audit. Results, saved sites, history, settings, and alerts remain in local Edge extension storage. 301.st receives no scan or browsing data. The extension contains no analytics, telemetry, advertising, or remotely hosted code. One check reads DNS, asking a public DNS-over-HTTPS resolver whether the audited hostname publishes agent-discovery records.
 
 The extension requires access to websites because its single purpose is to audit any HTTP or HTTPS site the user chooses. It reads the selected site's headers and machine-readable resources and does not inject content into visited pages.
 

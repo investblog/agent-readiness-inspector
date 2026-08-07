@@ -12,8 +12,9 @@ Chrome, and Mozilla Firefox. It audits websites against open standards used by
 AI agents.
 
 **The developer, 301.st, does not collect, receive, sell, or use your browsing
-data. The extension processes audit data in your browser, and transfers none of
-it to any third party.**
+data. The extension processes audit data in your browser and transfers none of
+it to 301.st. Two narrow exceptions are described under Network requests: a DNS
+lookup that one check needs, and the blog feed, if you switch it on.**
 
 ## Data the extension handles
 
@@ -69,6 +70,15 @@ resolver at `cloudflare-dns.com`. The resolver receives the queried name — the
 audited hostname prefixed with `_index._agents` — and ordinary request metadata
 such as your IP address. It receives no page content, no cookies, and nothing
 about what you were reading. Cloudflare's privacy policy governs its processing.
+
+### Blog updates (optional)
+
+Off by default. Nothing is requested until you enable it in Dashboard settings.
+Once enabled, the extension reads a public JSON feed of published posts at
+`301.sh/posts.json` every six hours. The request carries no identifier and no
+information about you or the sites you audit; 301.st sees an ordinary read of a
+public file, the same as a browser visiting the blog. New posts are filed in
+your local inbox. Disabling it stops the schedule.
 
 ### Removed: Cloudflare URL Scanner comparison
 

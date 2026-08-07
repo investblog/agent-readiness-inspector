@@ -22,13 +22,13 @@ WHAT YOU GET
 
 Because the audit runs inside the browser, it can inspect staging sites and many authenticated pages that an external scanner cannot reach. Browser cookie protections may limit session access on some sites.
 
-OPTIONAL CLOUDFLARE COMPARISON
+REPAIR KITS
 
-Connect your own Cloudflare URL Scanner token to compare the in-browser result with an outside scan. This feature is off by default, clearly disclosed, and can be disconnected at any time.
+A failed check comes with the fix: what the standard requires, the change for the stack the site appears to run on (Cloudflare, Vercel, Netlify, nginx, Next.js), and the one command that proves it landed.
 
 PRIVACY
 
-The extension handles site URLs and response content only to produce the audit. Results, saved sites, history, settings, and alerts stay in local browser storage. 301.st receives no scan or browsing data. There is no analytics, telemetry, advertising, or remote code.
+The extension handles site URLs and response content only to produce the audit. Results, saved sites, history, settings, and alerts stay in local browser storage. 301.st receives no scan or browsing data. There is no analytics, telemetry, advertising, or remote code. One check reads DNS: it asks a public DNS-over-HTTPS resolver whether the audited hostname publishes agent-discovery records.
 
 WHY SITE ACCESS IS REQUIRED
 

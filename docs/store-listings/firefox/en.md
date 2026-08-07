@@ -29,19 +29,21 @@ Because the audit runs inside Firefox, it can inspect staging sites and many
 authenticated pages that an external scanner cannot reach. Firefox privacy and
 cookie protections may limit session access on some sites.
 
-### Optional Cloudflare comparison
+### Repair kits
 
-You can connect your own Cloudflare URL Scanner token and explicitly run an
-outside scan for comparison. Firefox asks for optional authentication and
-browsing-activity data permissions before this transfer. Declining leaves all
-local auditing available, and you can disconnect Cloudflare at any time.
+A failed check comes with the fix: what the standard requires, the change for
+the stack the site appears to run on (Cloudflare, Vercel, Netlify, nginx,
+Next.js), and the one command that proves it landed.
 
 ### Privacy
 
 Website URLs and response content are handled only to produce the audit.
 Results, saved sites, history, settings, and alerts remain in local Firefox
 extension storage. 301.st receives no scan or browsing data. There is no
-analytics, telemetry, advertising, or remotely hosted code.
+analytics, telemetry, advertising, or remotely hosted code. The extension
+declares no data collection. One check reads DNS, asking a public
+DNS-over-HTTPS resolver whether the audited hostname publishes agent-discovery
+records.
 
 The extension needs access to websites because its single purpose is to audit
 any HTTP or HTTPS site you choose. It does not inject content into visited
