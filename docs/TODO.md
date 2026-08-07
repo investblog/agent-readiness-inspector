@@ -103,23 +103,35 @@ the revised spec). This file is the index.
         "outside the current spec". Four new tests, and they were verified by
         breaking the media-type constant — exactly the three catalog tests went
         red.
-      - [ ] Edge API credentials are INVALID — found 2026-08-07 on the first
-        real call ever made to that API (v0.1.0 was submitted by hand). The
-        upload answered 401 "API Key is Invalid" on
-        `v1/products/{id}/submissions/draft/package` after the token step
-        "succeeded". It succeeded because Edge's getToken() in
-        publish-browser-extension performs NO network call — it wraps the API
-        key in an object — so `dry_run=true` can never validate Edge, and the
-        2026-08-06 dry run that reported all three green was, for Edge,
-        meaningless. Needs a human in Partner Center: check whether the API key
-        expired or was rotated, regenerate it, and update the EDGE_API_KEY
-        secret. Chrome and Firefox creds are unaffected.
-      - [ ] Release v0.1.1 — UNBLOCKED 2026-08-07. Edge approved, its link is
-        in, the version is already bumped in all three files, and the three
-        builds are green. Remaining: `Cut release` with `submit=all`. Note that
-        `all` DOES submit Firefox (confirmed by the 2026-08-06 dry run) and AMO
-        burns the version number whether or not the release is later pulled —
-        so this is the irreversible step, not the tag.
+      - [x] v0.1.1 SHIPPED BY HAND 2026-08-07. CI cut the tag and built the
+        packages on Linux, as the rule requires; they then went to the stores
+        manually from the GitHub Release, because auto-publish did not get us
+        there. Chrome had already been uploaded by CI with `hold=true` and was
+        submitted from the dashboard. Listing locales are filled in the
+        dashboards either way — that part was never automated.
+        Edge certification notes: docs/store-listings/edge/certification-notes.txt.
+        A few lines, not the full reviewer notes — certification skims a
+        maintenance update, and what it wants to know is whether the scopes
+        moved.
+      - [ ] NEXT: fix auto-publish. It failed on its first real use and the
+        failure was invisible beforehand:
+        - Edge API credentials are INVALID — found 2026-08-07 on the first
+          real call ever made to that API (v0.1.0 was submitted by hand). The
+          upload answered 401 "API Key is Invalid" on
+          `v1/products/{id}/submissions/draft/package` after the token step
+          "succeeded". It succeeded because Edge's getToken() in
+          publish-browser-extension performs NO network call — it wraps the API
+          key in an object — so `dry_run=true` can never validate Edge, and the
+          2026-08-06 dry run that reported all three green was, for Edge,
+          meaningless. Needs a human in Partner Center: check whether the API key
+          expired or was rotated, regenerate it, and update the EDGE_API_KEY
+          secret. Chrome and Firefox creds are unaffected.
+        - The `hold` flag itself works — Chrome logged "Skipping submission
+          (skipSubmitReview=true)" on its first live use, so that half is proven.
+        - No repo in the fleet has EVER submitted to Edge through CI. Every
+          sibling's single submit run (2026-05-19) was `dry_run=true` with the
+          edge job SKIPPED. So the Edge credential is untested in all ten repos,
+          not just this one — fixing it here fixes a fleet-wide latent problem.
       - [x] Store links — COMPLETE 2026-08-07, Edge approved and filled in.
         Chrome and Firefox point at their reviews pages; Edge points at the
         listing because it has none — `/reviews` there answers 200 with an empty

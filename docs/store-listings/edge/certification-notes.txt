@@ -1,0 +1,12 @@
+Notes for certification — keep it to a few lines. Certification skims; a page
+of prose buys nothing. Say what changed and whether the scopes moved. The full
+version, for a first submission or a review that asks, is in
+../reviewer-notes.txt.
+
+---
+
+Maintenance update. No new permissions — the scope set is unchanged from 0.1.0.
+
+Removed the optional Cloudflare URL Scanner comparison and the credentials it stored; any left by 0.1.0 are deleted on first run. Fixed a few defects and added per-stack fix guidance for failed checks.
+
+No remote code, no analytics, no telemetry. All data stays in local extension storage.
