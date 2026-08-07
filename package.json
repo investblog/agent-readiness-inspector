@@ -1,6 +1,6 @@
 {
   "name": "agent-readiness-inspector",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Browser extension that audits websites for AI-agent readiness with 22 local checks.",
   "type": "module",
   "scripts": {

@@ -85,7 +85,7 @@ describe('linkHeaders check', () => {
 
 describe('dnsAid check (DoH)', () => {
   const doh = (body: unknown) => ({ [PROBE.dnsAid]: { body: JSON.stringify(body) } });
-  const RECORD = { data: '1 example.com. alpn=h2 port=443' };
+  const RECORD = { type: 64, data: '1 example.com. alpn=h2 port=443' };
 
   it('passes on records with a validated DNSSEC chain', () => {
     const r = run('dnsAid', doh({ Status: 0, AD: true, Answer: [RECORD] }));
@@ -110,6 +110,14 @@ describe('dnsAid check (DoH)', () => {
     const r = run('dnsAid', doh({ Status: 3, AD: false }));
     expect(r.status).toBe('fail');
     expect(r.evidence).toContain('NXDOMAIN');
+  });
+
+  it('does not count a CNAME chain as SVCB records', () => {
+    // the answer section carries the aliases that led to the name; counting
+    // them passes a domain that publishes an alias and no SVCB at all
+    const r = run('dnsAid', doh({ Status: 0, AD: true, Answer: [{ type: 5, data: 'agents.example.com.' }] }));
+    expect(r.status).toBe('fail');
+    expect(r.evidence).toContain('no records');
   });
 
   it('stays na when the resolver itself could not be reached', () => {

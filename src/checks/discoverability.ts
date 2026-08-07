@@ -68,6 +68,9 @@ export const linkHeaders: CheckFn = (ctx) => {
   };
 };
 
+/** SVCB, the record type DNS-AID uses (RFC 9460). */
+const SVCB_TYPE = 64;
+
 /**
  * discoverability/dnsAid — SVCB records under `_index._agents`, over DoH.
  *
@@ -86,13 +89,17 @@ export const dnsAid: CheckFn = (ctx) => {
   if (res?.status !== 200) {
     return { status: 'na', evidence: `DoH lookup unavailable (${res ? `HTTP ${res.status}` : 'no response'})` };
   }
-  let answer: { Status?: number; AD?: boolean; Answer?: { data?: string }[] };
+  let answer: { Status?: number; AD?: boolean; Answer?: { type?: number; data?: string }[] };
   try {
     answer = JSON.parse(res.body);
   } catch {
     return { status: 'na', evidence: 'DoH resolver returned a body that is not JSON' };
   }
-  const records = Array.isArray(answer.Answer) ? answer.Answer : [];
+  // Filter by RR type, not just presence. A DoH answer section can carry the
+  // CNAME chain that led to the name; counting those as records passes a domain
+  // that publishes an alias and no SVCB at all, and prints the alias target as
+  // if it were the record.
+  const records = (Array.isArray(answer.Answer) ? answer.Answer : []).filter((r) => r.type === SVCB_TYPE);
   if (records.length === 0) {
     // NXDOMAIN (3) and an empty NOERROR both mean "not published"; naming which
     // keeps the evidence useful to someone who expects the records to be there

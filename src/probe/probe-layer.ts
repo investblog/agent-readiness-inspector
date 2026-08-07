@@ -8,13 +8,12 @@
 // and must be judged as agents see them.
 
 import type { CheckId, ProbeResponse } from '@/checks';
-import { checkMeta, defaultCheckIds, PROBE } from '@/checks';
+import { BODY_CAP, checkMeta, defaultCheckIds, PROBE } from '@/checks';
 
 const PAGE_KEYS = new Set<string>([PROBE.root, PROBE.rootMarkdown, PROBE.rootMdSuffix]);
 
 export const PROBE_TIMEOUT_MS = 15_000; // well under the 30s fetch-kills-SW limit
 const CONCURRENCY = 6;
-const BODY_CAP = 512 * 1024;
 /** A catalog names as many cards as it likes; we are not its crawler. */
 const FOLLOW_UP_CAP = 10;
 /** DoH resolver for the DNS-AID probe — validates DNSSEC and reports AD. */
@@ -72,6 +71,7 @@ async function fetchProbe(
   request: ProbeRequest,
   credentials: RequestCredentials,
   fetchFn: typeof fetch,
+  cache: RequestCache = 'default',
 ): Promise<ProbeResponse | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT_MS);
@@ -84,6 +84,7 @@ async function fetchProbe(
     const res = await fetchFn(url, {
       redirect: 'follow',
       credentials,
+      cache,
       signal: ctrl.signal,
       headers,
     });
@@ -122,7 +123,16 @@ export async function runProbes(
 
   async function worker(): Promise<void> {
     for (let key = queue.shift(); key !== undefined; key = queue.shift()) {
-      const res = await fetchProbe(requestFor(origin, key), credentialsFor(key), fetchFn);
+      // The HTTP cache is keyed by URL, NOT by credentials mode, and concurrent
+      // identical GETs are coalesced. Without this, the anonymous twin of the
+      // page can be answered from the credentialed fetch's entry — identical
+      // bodies, and the session check reports "no session" every time.
+      const res = await fetchProbe(
+        requestFor(origin, key),
+        credentialsFor(key),
+        fetchFn,
+        key === PROBE.rootAnonymous ? 'no-store' : 'default',
+      );
       if (res) responses.set(key, res);
       else unreached.push(key);
     }

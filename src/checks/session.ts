@@ -11,6 +11,7 @@
 // that question needs the `cookies` permission to answer properly, and the
 // answer users care about is narrower — did it matter here.
 
+import { BODY_CAP } from './config';
 import type { ProbeResponse } from './types';
 
 export type SessionState = 'active' | 'none' | 'unknown';
@@ -49,6 +50,16 @@ export function sessionVerdict(
   }
   const a = credentialed.body.length;
   const b = anonymous.body.length;
+  // Bodies are truncated at a cap by the probe layer. Two pages that both
+  // exceed it arrive the same length whatever they contain, and a logged-in
+  // dashboard is exactly the kind of page that does. Comparing sizes there
+  // would answer "no session" with confidence we do not have.
+  if (a >= BODY_CAP && b >= BODY_CAP) {
+    return {
+      state: 'unknown',
+      evidence: `both responses hit the ${BODY_CAP}-character read limit — too truncated to compare`,
+    };
+  }
   const largest = Math.max(a, b);
   if (largest > 0 && Math.abs(a - b) / largest > SIZE_DIFF_RATIO) {
     return {
