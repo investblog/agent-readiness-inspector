@@ -6,7 +6,7 @@ Browser extension by [301.st](https://301.st) that audits websites for
 AI-agent readiness. It runs 22 standards-based checks in the browser and shows
 the score, evidence, and copy-ready fix prompts beside the current tab.
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/agent-readiness-inspector/diofmjhnegmcccocikabageabmaokobd) [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-FF7139?logo=firefox&logoColor=white)](https://addons.mozilla.org/firefox/addon/agent-readiness-inspector/) [![Edge Add-ons](https://img.shields.io/badge/Edge-Add--ons-0078D7?logo=microsoftedge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/agent-readiness-inspector/jkhmlkoehfmmpgihkknnopanjcipmiho)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/agent-readiness-inspector/diofmjhnegmcccocikabageabmaokobd) [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-FF7139?logo=firefox&logoColor=white)](https://addons.mozilla.org/firefox/addon/agent-readiness-inspector/) [![Edge Add-ons](https://img.shields.io/badge/Edge-Add--ons-0078D7?logo=microsoftedge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/agent-readiness-inspector/jkhmlkoehfmmpgihkknnopanjcipmiho) [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
 Chrome and Edge use a native side panel. Firefox provides the same interface as
 a popup and sidebar. Because the audit runs in the browser, it can inspect
