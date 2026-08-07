@@ -103,6 +103,17 @@ the revised spec). This file is the index.
         "outside the current spec". Four new tests, and they were verified by
         breaking the media-type constant — exactly the three catalog tests went
         red.
+      - [ ] Edge API credentials are INVALID — found 2026-08-07 on the first
+        real call ever made to that API (v0.1.0 was submitted by hand). The
+        upload answered 401 "API Key is Invalid" on
+        `v1/products/{id}/submissions/draft/package` after the token step
+        "succeeded". It succeeded because Edge's getToken() in
+        publish-browser-extension performs NO network call — it wraps the API
+        key in an object — so `dry_run=true` can never validate Edge, and the
+        2026-08-06 dry run that reported all three green was, for Edge,
+        meaningless. Needs a human in Partner Center: check whether the API key
+        expired or was rotated, regenerate it, and update the EDGE_API_KEY
+        secret. Chrome and Firefox creds are unaffected.
       - [ ] Release v0.1.1 — UNBLOCKED 2026-08-07. Edge approved, its link is
         in, the version is already bumped in all three files, and the three
         builds are green. Remaining: `Cut release` with `submit=all`. Note that
