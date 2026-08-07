@@ -170,6 +170,40 @@ const L = {
     summaryH: 'Résumé',
     descriptionH: 'Description',
   },
+  tr: {
+    locale: 'tr',
+    short:
+      'Siteleri yapay zekâ ajanlarına hazırlık için denetleyin: robots.txt, llms.txt, Markdown, MCP, Content Signals.',
+    lead: 'Yapay zekâ ajanlarının bu sitede gerçekten neyi bulabildiğini, okuyabildiğini ve kullanabildiğini görün.',
+    body: 'Agent Readiness Inspector, standartlara dayalı 22 denetimi doğrudan tarayıcınızda çalıştırır: robots.txt ve yapay zekâ tarayıcı kuralları, site haritaları, llms.txt, Markdown içerik pazarlığı, Content Signals, Link başlıkları, Agent Skills, API Catalogs, MCP Server Cards, OAuth keşfi, Web Bot Auth, WebMCP ve gelişmekte olan ticaret protokolleri.',
+    featuresH: 'NELER ELDE EDERSİNİZ',
+    features: [
+      'Karşılaştırılabilir bir puan ve hazırlık seviyesi',
+      'Her karar için ham kanıt',
+      'Önceliklendirilmiş, kopyalamaya hazır düzeltme istemleri',
+      'Geçerli sekmenin yanında kalan bir panel',
+      'Kayıtlı siteler, toplu yeniden tarama ve puan geçmişi',
+      'Yerel bildirim kutusuyla zamanlanmış izleme',
+      'Bir denetim geri gittiğinde isteğe bağlı bildirimler',
+      'İsteğe bağlı puan rozeti ve otomatik tarama, ayarlardan',
+    ],
+    browserNote:
+      'Denetim tarayıcının içinde çalıştığı için, dış bir tarayıcının erişemediği staging sitelerine ve oturum arkasındaki birçok sayfaya ulaşır. Tarayıcının çerez korumaları bazı sitelerde oturum erişimini sınırlayabilir.',
+    kitsH: 'ONARIM KİTLERİ',
+    kits: 'Başarısız her denetim düzeltmesiyle birlikte gelir: standardın ne istediği, sitenin üzerinde çalıştığı görünen altyapı için gereken değişiklik (Cloudflare, Vercel, Netlify, nginx, Next.js) ve düzeltmenin işe yaradığını kanıtlayan tek komut.',
+    privacyH: 'GİZLİLİK',
+    privacy:
+      'Uzantı, site adreslerini ve yanıtlarını yalnızca denetimi üretmek için işler. Sonuçlar, kayıtlı siteler, geçmiş, ayarlar ve bildirimler tarayıcının yerel deposunda kalır. 301.st hiçbir tarama veya gezinme verisi almaz. Analitik, telemetri, reklam veya uzak kod yoktur. Bir denetim DNS okur: denetlenen alan adının ajan keşif kayıtları yayımlayıp yayımlamadığını açık bir DNS-over-HTTPS çözücüsüne sorar.',
+    accessH: 'SİTE ERİŞİMİ NEDEN GEREKLİ',
+    access:
+      'Uzantı seçtiğiniz her siteyi denetler; bunun için o sitenin başlıklarına, robots.txt, site haritası ve well-known kaynaklarına erişmesi gerekir. Ziyaret ettiğiniz sayfalara hiçbir içerik eklemez.',
+    disclaimer:
+      'Agent Readiness Inspector, açık web standartlarının bağımsız bir uygulamasıdır. Cloudflare ile bağlantılı değildir ve Cloudflare tarafından onaylanmamıştır.',
+    kitsTitle: 'Onarım kitleri',
+    privacyTitle: 'Gizlilik',
+    summaryH: 'Özet',
+    descriptionH: 'Açıklama',
+  },
 };
 
 // Headings are spelled out per language rather than derived from the SHOUTED
@@ -287,8 +321,11 @@ for (const [lang, t] of Object.entries(L)) {
     }
   }
 
-  // the sparse locale directory that makes the listing language selectable
-  const localeFile = path.join(LOCALES, lang, 'messages.json');
+  // Chrome's _locales directories use an UNDERSCORE for the region — pt_BR, not
+  // pt-BR. A hyphenated directory is simply not found, so the locale silently
+  // does not exist and its listing language never appears. The listing FILES
+  // keep the hyphen, because that is how the stores spell the language.
+  const localeFile = path.join(LOCALES, lang.replace('-', '_'), 'messages.json');
   const localeContent = sparseMessages(t);
   const currentLocale = fs.existsSync(localeFile) ? fs.readFileSync(localeFile, 'utf8') : null;
   if (check) {

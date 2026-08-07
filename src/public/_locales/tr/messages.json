@@ -1,0 +1,8 @@
+{
+	"extName": {
+		"message": "Agent Readiness Inspector"
+	},
+	"extDescription": {
+		"message": "Siteleri yapay zekâ ajanlarına hazırlık için denetleyin: robots.txt, llms.txt, Markdown, MCP, Content Signals."
+	}
+}
