@@ -1,0 +1,37 @@
+TITLE
+Agent Readiness Inspector
+
+SHORT DESCRIPTION
+Websites auf KI-Agenten-Tauglichkeit prüfen: robots.txt, llms.txt, Markdown-Negotiation, MCP, Content Signals.
+
+DETAILED DESCRIPTION
+Sehen Sie, was KI-Agenten auf der aktuellen Seite wirklich finden, lesen und nutzen können.
+
+Agent Readiness Inspector führt 22 standardbasierte Prüfungen direkt in Ihrem Browser aus: robots.txt und KI-Crawler-Regeln, Sitemaps, llms.txt, Markdown-Negotiation, Content Signals, Link-Header, Agent Skills, API Catalogs, MCP Server Cards, OAuth-Discovery, Web Bot Auth, WebMCP und die entstehenden Commerce-Protokolle.
+
+WAS SIE BEKOMMEN
+
+- Einen vergleichbaren Wert und ein Readiness-Level
+- Den Rohbeleg zu jedem Urteil
+- Priorisierte, kopierfertige Fix-Prompts
+- Ein Panel, das neben dem aktuellen Tab bleibt
+- Gespeicherte Seiten, Sammel-Rescans und Verlauf
+- Geplante Überwachung mit lokalem Posteingang
+- Optionale Benachrichtigungen, wenn eine Prüfung zurückfällt
+- Optionales Score-Badge und Auto-Scan, beides in den Einstellungen
+
+Weil das Audit im Browser läuft, erreicht es Staging-Seiten und viele Seiten hinter einem Login, an die ein externer Scanner nicht herankommt. Cookie-Schutz im Browser kann den Session-Zugriff auf manchen Seiten einschränken.
+
+REPARATUR-KITS
+
+Zu jeder fehlgeschlagenen Prüfung gehört die Behebung: was der Standard verlangt, die Änderung für den Stack, auf dem die Seite zu laufen scheint (Cloudflare, Vercel, Netlify, nginx, Next.js), und der eine Befehl, der zeigt, dass sie greift.
+
+DATENSCHUTZ
+
+Die Erweiterung verarbeitet Adressen und Antworten der Seite ausschließlich für das Audit. Ergebnisse, gespeicherte Seiten, Verlauf, Einstellungen und Meldungen bleiben im lokalen Browser-Speicher. 301.st erhält keine Scan- oder Browsing-Daten. Es gibt keine Analytics, keine Telemetrie, keine Werbung und keinen Remote-Code. Eine Prüfung liest DNS: Sie fragt einen öffentlichen DNS-over-HTTPS-Resolver, ob der geprüfte Hostname Agent-Discovery-Einträge veröffentlicht.
+
+WARUM SEITENZUGRIFF NÖTIG IST
+
+Die Erweiterung prüft jede Seite, die Sie auswählen, und braucht dafür Zugriff auf deren Header, robots.txt, Sitemap und well-known-Ressourcen. Sie fügt den besuchten Seiten nichts hinzu.
+
+Agent Readiness Inspector ist eine unabhängige Umsetzung offener Webstandards und weder mit Cloudflare verbunden noch von Cloudflare unterstützt.

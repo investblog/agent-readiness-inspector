@@ -239,4 +239,15 @@ Scaffold debts:
       currentColor for both themes; extend the manifest in `scripts/build-icons.mjs`)
 - [x] Toolbar/store PNGs use the 301.st robot mascot; generated from
       src/assets/brand-icon.svg
-- [ ] Locales: en + ru shipped in v0.1.0; expand based on store demand
+- [x] Locales — DECIDED 2026-08-07, and the decision is asymmetric. Store
+      listings expanded to de, es, pt-BR, fr; the extension UI stays en + ru.
+      A listing is bought once and moves store search, which is where the
+      SEO/agency segment in branding.md actually looks; a UI locale is 136
+      strings forever, multiplied by every string added later, and the
+      indie-dev segment reads English anyway. There is still no demand signal
+      to choose on — AMO showed 1 daily user three days after publication — so
+      this is a bet, and the cheap reversible half is the one taken.
+      The four are generated from one source per language by
+      scripts/build-listings.mjs; `--check` runs inside `npm run check` and was
+      verified by hand-editing a generated file. NOT native-reviewed.
+      - [ ] Expand the UI beyond en + ru only when installs name a language.

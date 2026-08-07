@@ -1,0 +1,34 @@
+# Agent Readiness Inspector
+
+## Resumo
+
+Audite sites para agentes de IA: robots.txt, llms.txt, negociação Markdown, MCP, Content Signals. Local, sem analytics.
+
+## Descrição
+
+**Veja o que os agentes de IA realmente conseguem descobrir, ler e usar no site atual.**
+
+O Agent Readiness Inspector executa 22 verificações baseadas em padrões dentro do seu navegador: robots.txt e regras para rastreadores de IA, sitemaps, llms.txt, negociação Markdown, Content Signals, cabeçalhos Link, Agent Skills, API Catalogs, MCP Server Cards, descoberta OAuth, Web Bot Auth, WebMCP e os protocolos de comércio emergentes.
+
+- Uma pontuação comparável e um nível de prontidão
+- A evidência bruta de cada veredicto
+- Prompts de correção priorizados e prontos para copiar
+- Um painel que fica ao lado da aba atual
+- Sites salvos, rescans em lote e histórico
+- Monitoramento agendado com caixa local de alertas
+- Notificações opcionais quando uma verificação regride
+- Selo de pontuação e autoescaneamento opcionais, nas configurações
+
+Como a auditoria roda dentro do navegador, ela alcança sites de staging e muitas páginas atrás de login que um scanner externo não consegue ver. Proteções de cookies do navegador podem limitar o acesso à sessão em alguns sites.
+
+### Kits de reparo
+
+Cada verificação reprovada vem com o conserto: o que o padrão exige, a mudança para a stack em que o site parece rodar (Cloudflare, Vercel, Netlify, nginx, Next.js) e o único comando que prova que funcionou.
+
+### Privacidade
+
+A extensão manipula URLs e respostas do site apenas para produzir a auditoria. Resultados, sites salvos, histórico, configurações e alertas permanecem no armazenamento local do navegador. A 301.st não recebe dados de varredura nem de navegação. Não há analytics, telemetria, publicidade ou código remoto. Uma verificação consulta o DNS: ela pergunta a um resolvedor público DNS-over-HTTPS se o domínio auditado publica registros de descoberta para agentes.
+
+A extensão audita qualquer site que você escolher, por isso precisa de acesso para ler cabeçalhos, robots.txt, sitemap e recursos well-known daquele site. Ela não injeta conteúdo nas páginas que você visita.
+
+O Agent Readiness Inspector é uma implementação independente de padrões web abertos. Não é afiliado à Cloudflare nem endossado por ela.
