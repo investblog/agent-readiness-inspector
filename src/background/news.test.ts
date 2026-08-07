@@ -51,13 +51,17 @@ describe('news cycle', () => {
     expect(await h.inbox()).toEqual([]);
   });
 
-  it('seeds on enable instead of filing the backlog', async () => {
+  it('files the newest post on enable and marks the rest seen', async () => {
     const h = await harness();
     await enableNews(
       { store: h.store, fetchPosts: async () => [post('a'), post('b'), post('c')] },
       { get: async () => undefined, create: () => {}, clear: () => true },
     );
-    expect(await h.inbox()).toEqual([]);
+    // one, not zero (an inbox that stays empty for a week reads as broken) and
+    // not three (that is spam, and it buries a regression in the same list)
+    const inbox = await h.inbox();
+    expect(inbox).toHaveLength(1);
+    expect(inbox[0].id).toBe('news:c');
     const settings = await h.store.getNewsSettings();
     expect(settings.enabled).toBe(true);
     expect(settings.seeded).toBe(true);
@@ -95,12 +99,12 @@ describe('news cycle', () => {
     expect((await h.store.getNewsSettings()).seen).toEqual(['a', 'b', 'c', 'd', 'e']);
   });
 
-  it('seeds silently when an enable-time seed never succeeded', async () => {
+  it('recovers from a failed enable-time seed without dumping the backlog', async () => {
     const h = await harness();
     // enabled, but the seed failed (network) — `seeded` stayed false
     await h.store.updateNewsSettings({ enabled: true, seen: [], seeded: false });
     const result = await h.run([post('a'), post('b')]);
-    expect(result.filed).toEqual([]);
+    expect(result.filed).toEqual(['news:b']); // the newest only, as on enable
     expect((await h.store.getNewsSettings()).seeded).toBe(true);
     // and the NEXT post is filed normally
     const second = await h.run([post('a'), post('b'), post('c')]);

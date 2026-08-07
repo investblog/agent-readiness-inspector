@@ -6,7 +6,8 @@
 import '@/assets/css/theme.css';
 import '@/assets/css/popup.css';
 import { browser } from 'wxt/browser';
-import type { CategoryId, CheckResult } from '@/checks';
+import type { CategoryId, CheckResult, StackId } from '@/checks';
+import { repairKitFor } from '@/checks';
 import { svg301Logo } from '@/shared/brand';
 import { hydrate, t } from '@/shared/i18n';
 import { icon, injectSprite } from '@/shared/icons';
@@ -113,7 +114,7 @@ function renderCategories(scan: ScanSuccess): void {
   }
 }
 
-function checkItem(result: CheckResult): HTMLElement {
+function checkItem(result: CheckResult, stacks: readonly StackId[]): HTMLElement {
   const item = document.createElement('details');
   item.className = `check check--${result.status}`;
 
@@ -167,6 +168,57 @@ function checkItem(result: CheckResult): HTMLElement {
   actions.append(doc);
   body.append(actions);
 
+  // A prompt tells an agent what to build; this is for the person — the edit,
+  // where it goes on their stack, and the command that proves it landed.
+  const found = result.status === 'fail' ? repairKitFor(result.id, stacks) : undefined;
+  if (found) {
+    const kit = document.createElement('details');
+    kit.className = 'repair-kit';
+    const kitSummary = document.createElement('summary');
+    kitSummary.textContent = t('repairHowTo', t(`stack_${found.stack}`));
+    kit.append(kitSummary);
+
+    const requirement = document.createElement('p');
+    requirement.className = 'repair-requirement';
+    requirement.textContent = found.kit.requirement;
+    kit.append(requirement);
+
+    const where = document.createElement('p');
+    where.className = 'repair-where';
+    where.textContent = `${t('repairWhere')}: ${found.recipe.where}`;
+    kit.append(where);
+
+    const snippet = document.createElement('pre');
+    snippet.className = 'repair-snippet';
+    snippet.textContent = found.recipe.snippet;
+    kit.append(snippet);
+
+    if (found.recipe.caveat) {
+      const caveat = document.createElement('p');
+      caveat.className = 'repair-caveat';
+      caveat.textContent = found.recipe.caveat;
+      kit.append(caveat);
+    }
+    if (found.alsoDetected.length > 0) {
+      const also = document.createElement('p');
+      also.className = 'repair-caveat';
+      also.textContent = t('repairAlso', found.alsoDetected.map((id) => t(`stack_${id}`)).join(', '));
+      kit.append(also);
+    }
+
+    const verify = document.createElement('pre');
+    verify.className = 'repair-snippet';
+    verify.textContent = found.kit.verify;
+    kit.append(verify);
+
+    const expect = document.createElement('p');
+    expect.className = 'repair-expect';
+    expect.textContent = `${t('repairExpect')}: ${found.kit.expect}`;
+    kit.append(expect);
+
+    body.append(kit);
+  }
+
   item.append(body);
   return item;
 }
@@ -183,7 +235,7 @@ function renderChecklist(scan: ScanSuccess): void {
     heading.textContent =
       category === 'commerce' ? `${t('category_commerce')} — ${t('unscoredPreview')}` : t(`category_${category}`);
     section.append(heading);
-    for (const result of results) section.append(checkItem(result));
+    for (const result of results) section.append(checkItem(result, scan.stacks));
     list.append(section);
   }
 }

@@ -8,7 +8,15 @@ import { type CachedScore, scoreCache } from '@/background/score-cache';
 import { isFromHistory, storedScore } from '@/background/stored-score';
 import { runWatchCycle, scheduleWatch, WATCH_ALARM } from '@/background/watch';
 import type { CheckId } from '@/checks';
-import { cardRefsFromCatalog, PROBE, resolveCheckIds, runChecks, scoreResults, sessionVerdict } from '@/checks';
+import {
+  cardRefsFromCatalog,
+  detectStacks,
+  PROBE,
+  resolveCheckIds,
+  runChecks,
+  scoreResults,
+  sessionVerdict,
+} from '@/checks';
 import { needsDnsProbe, probeKeysFor, runDnsProbe, runFollowUps, runProbes } from '@/probe/probe-layer';
 import { t } from '@/shared/i18n';
 import {
@@ -231,6 +239,7 @@ async function handleScan(origin: string, requestedInclude?: CheckId[], tabId?: 
       scorecard: scoreResults(results),
       unreachedProbes: unreached,
       session: sessionVerdict(responses.get(PROBE.root), responses.get(PROBE.rootAnonymous)),
+      stacks: detectStacks(responses.get(PROBE.root)),
     };
     // single write point: history is recorded only for saved sites (privacy
     // rule). Best-effort — a storage failure (e.g. quota) must never turn a

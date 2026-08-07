@@ -5,6 +5,13 @@
 
 export const MATRIX_VERSION = '2026-08-06b';
 
+/**
+ * How much of a response body the probe layer keeps. Lives here rather than in
+ * the probe layer because the session comparison needs it too, and a second
+ * copy of a number two modules must agree on is a bug waiting for a rainy day.
+ */
+export const BODY_CAP = 512 * 1024;
+
 export type CategoryId = 'discoverability' | 'contentAccessibility' | 'botAccessControl' | 'discovery' | 'commerce';
 
 /** Probe keys: what the probe layer must fetch for the engine (spec §5). */

@@ -298,18 +298,6 @@
 	"settingsSaved": {
 		"message": "Настройки сохранены."
 	},
-	"diffReasonDns": {
-		"message": "ожидаемо: DNS-записи из браузера не пробить"
-	},
-	"diffReasonWebMcp": {
-		"message": "ожидаемо: детект на странице требует открытой вкладки"
-	},
-	"diffReasonMcp": {
-		"message": "ожидаемо: мы принимаем формы MCP-карт, встречающиеся в поле"
-	},
-	"diffReasonA2a": {
-		"message": "ожидаемо: мы читаем и legacy-путь agent.json"
-	},
 	"settingsWatch": {
 		"message": "Режим наблюдения"
 	},
@@ -397,7 +385,7 @@
 		"message": "Сканировать страницы при браузинге"
 	},
 	"browseAutoScanHint": {
-		"message": "По умолчанию выключено: это те же запросы, что и при ручном скане, по одному на каждый открытый сайт. История по-прежнему пишется только для сохранённых сайтов."
+		"message": "По умолчанию выключено: расширение шлёт те же запросы, что и ручной скан, по одному разу на каждый открытый сайт — включая DNS-запрос по его имени к публичному резолверу. История по-прежнему пишется только для сохранённых сайтов."
 	},
 	"badgeScore": {
 		"message": "Показывать скор страницы на иконке"
@@ -447,5 +435,45 @@
 	},
 	"sessionActive": {
 		"message": "Ваша сессия изменила то, что увидел аудит"
+	},
+	"repairHowTo": {
+		"message": "Как починить на $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"repairWhere": {
+		"message": "Где"
+	},
+	"repairExpect": {
+		"message": "Ожидается"
+	},
+	"repairAlso": {
+		"message": "Также определено: $1 — правку можно сделать и там",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"stack_cloudflare": {
+		"message": "Cloudflare"
+	},
+	"stack_vercel": {
+		"message": "Vercel"
+	},
+	"stack_netlify": {
+		"message": "Netlify"
+	},
+	"stack_nextjs": {
+		"message": "Next.js"
+	},
+	"stack_nginx": {
+		"message": "nginx"
+	},
+	"stack_generic": {
+		"message": "вашем стеке"
 	}
 }

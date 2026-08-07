@@ -2,16 +2,17 @@
 // origin. The engine runs in the background (single source of verdicts); the
 // panel only renders.
 
-import type { CheckId, CheckResult, Scorecard, SessionVerdict } from '@/checks';
+import type { CheckId, CheckResult, Scorecard, SessionVerdict, StackId } from '@/checks';
 
 export interface ScanRequest {
   type: 'scan';
   /** http(s) origin to audit, e.g. https://example.com */
   origin: string;
   /**
-   * Explicit check selection. Omit for the user's configured set (the normal
-   * case); the external-scan diff passes the full matrix so that checks CF
-   * reports are compared rather than showing up as "only theirs".
+   * Explicit check selection. Omit for the user's configured set, which is what
+   * every caller does today — the external-scan diff that used to pass the full
+   * matrix is gone. Kept because `handleScan` still branches on it to skip
+   * caching and badge painting for a scan the user did not initiate.
    */
   include?: CheckId[];
   /**
@@ -35,6 +36,12 @@ export interface ScanSuccess {
    * that claim, made by asking the same URL again without them.
    */
   session: SessionVerdict;
+  /**
+   * What the site looks like it runs on, from headers we already read. Drives
+   * which repair recipe the panel shows; all matches are carried, because a
+   * platform behind a CDN is genuinely both.
+   */
+  stacks: StackId[];
 }
 
 export interface ScanFailure {

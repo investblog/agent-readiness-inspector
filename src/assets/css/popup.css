@@ -361,6 +361,45 @@ body.sidepanel {
   overflow-wrap: anywhere;
 }
 
+.repair-kit {
+  border-top: var(--border-width) var(--border-style) var(--border-subtle);
+  padding-top: var(--space-2);
+  font-size: var(--fs-xs);
+}
+
+.repair-kit > summary {
+  cursor: pointer;
+  color: var(--primary);
+}
+
+.repair-requirement,
+.repair-where,
+.repair-caveat,
+.repair-expect {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.repair-caveat {
+  /* the part that stops the recipe being wrong in practice — not decoration */
+  border-left: 2px solid var(--border-strong);
+  padding-left: var(--space-2);
+}
+
+.repair-snippet {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  background: var(--code-bg, var(--notice-info-bg));
+  /* recipes are copied by hand: wrap rather than clip, and never scroll a panel
+     this narrow sideways */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--fs-xs);
+}
+
 .check-actions {
   display: flex;
   align-items: center;

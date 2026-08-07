@@ -32,8 +32,9 @@ export const FIX_PROMPTS: Partial<Record<CheckId, string>> = {
     'PerplexityBot, Google-Extended, Meta-ExternalAgent, CCBot, …) stating allow or disallow — an explicit ' +
     'decision either way beats silence.',
   dnsAid:
-    'DNS-AID cannot be evaluated or fixed from HTTP probes: configure the DNS record per the draft, ' +
-    'then verify via the external scan (Cloudflare URL Scanner with agentReadiness: true).',
+    'Publish SVCB records under `_index._agents.<your-domain>` per the DNS-AID draft, pointing at your agent ' +
+    'entry point and selecting protocols with the alpn parameter. DNSSEC must validate for the record to ' +
+    'count — records with an unvalidated chain are reported as a failure, not a pass.',
   webBotAuth:
     'To support Web Bot Auth (IETF draft-meunier-http-message-signatures-directory), serve a JWKS document at ' +
     '/.well-known/http-message-signatures-directory with a `keys` array (empty is valid) as application/json.',

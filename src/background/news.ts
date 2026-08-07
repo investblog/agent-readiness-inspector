@@ -5,9 +5,10 @@
 //
 //   1. Nothing happens until the user opts in. While `enabled` is false there is
 //      no alarm and no request — the feed is never fetched "just to be ready".
-//   2. Enabling seeds the seen-set instead of filing the backlog. Switching on a
-//      news feature and being handed seventeen unread items is indistinguishable
-//      from spam, and it buries a real regression sitting in the same inbox.
+//   2. Enabling files the newest post and marks the rest seen. Being handed
+//      seventeen unread items is indistinguishable from spam and would bury a
+//      real regression in the same inbox; being handed nothing for a week looks
+//      like a feature that does not work. One is neither.
 //
 // The notification is optional decoration on top: the inbox entry is what every
 // user gets, exactly as with regressions, because the notifications permission
@@ -21,6 +22,8 @@ export const NEWS_ALARM = 'agent-readiness:news';
 export const NEWS_PERIOD_HOURS = 6;
 /** A burst of posts becomes at most this many inbox entries per cycle. */
 export const MAX_NEW_PER_CYCLE = 3;
+/** Matches the probe layer's bound — well under the worker's idle timeout. */
+const FEED_TIMEOUT_MS = 15_000;
 
 /**
  * One entry of https://301.sh/posts.json (`posts` array, OLDEST FIRST).
@@ -69,20 +72,32 @@ export function newsItemFrom(post: NewsPost, at: number): NewsItem {
  * drive `runNewsCycle` with plain data and never touch fetch.
  */
 export async function fetchNewsPosts(): Promise<NewsPost[]> {
-  const response = await fetch(NEWS_FEED_URL, { headers: { 'cache-control': 'no-cache' } });
-  if (!response.ok) throw new Error(`news feed: HTTP ${response.status}`);
-  const data = (await response.json()) as { posts?: unknown };
-  return Array.isArray(data.posts) ? (data.posts as NewsPost[]).filter(isUsable) : [];
+  // Bounded like every other network call here. A stalled feed would otherwise
+  // hold the cycle open until the MV3 worker is killed mid-flight, and the seed
+  // would silently never finish.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FEED_TIMEOUT_MS);
+  try {
+    const response = await fetch(NEWS_FEED_URL, {
+      headers: { 'cache-control': 'no-cache' },
+      signal: ctrl.signal,
+    });
+    if (!response.ok) throw new Error(`news feed: HTTP ${response.status}`);
+    const data = (await response.json()) as { posts?: unknown };
+    return Array.isArray(data.posts) ? (data.posts as NewsPost[]).filter(isUsable) : [];
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /**
  * One feed cycle. Returns the ids filed, so a caller can decide whether the
  * badge needs repainting.
  *
- * `seedOnly` marks everything currently in the feed as seen and files nothing —
- * that is the enable path. A cycle that runs before seeding ever succeeded
- * seeds silently too, so a network failure at enable time cannot turn the whole
- * backlog into unread items on the next tick.
+ * `seedOnly` is the enable path: it files the single newest post and marks the
+ * rest seen. A cycle that runs before seeding ever succeeded behaves the same,
+ * so a network failure at enable time cannot turn the whole backlog into unread
+ * items on the next tick.
  */
 export async function runNewsCycle(deps: NewsDeps, opts: { seedOnly?: boolean } = {}): Promise<{ filed: string[] }> {
   const { store, fetchPosts, notify, now = Date.now } = deps;
@@ -110,9 +125,15 @@ export async function runNewsCycle(deps: NewsDeps, opts: { seedOnly?: boolean } 
   const newestFirst = [...fresh].reverse();
   const seeding = opts.seedOnly || !settings.seeded;
 
+  // Seeding files exactly ONE post — the newest — and marks the rest seen.
+  // Filing nothing left a new subscriber staring at an inbox that stays empty
+  // until the blog publishes again, which can be a week: indistinguishable from
+  // a feature that does not work. Filing the whole backlog is spam. One is
+  // neither: it shows what the feature does, in the shape it will always take.
   const filed: string[] = [];
-  if (!seeding) {
-    for (const post of newestFirst.slice(0, MAX_NEW_PER_CYCLE)) {
+  {
+    const batch = seeding ? newestFirst.slice(0, 1) : newestFirst.slice(0, MAX_NEW_PER_CYCLE);
+    for (const post of batch) {
       const item = newsItemFrom(post, now());
       await store.addAlert(item);
       filed.push(item.id);

@@ -79,9 +79,11 @@ export function runChecks(ctx: CheckContext, opts: RunOptions = {}): CheckResult
 }
 
 export type { CategoryId, CheckId, CheckMeta, LevelBand, ProbeKey } from './config';
-export { checkMeta, LEVELS, MATRIX, MATRIX_VERSION, PROBE } from './config';
+export { BODY_CAP, checkMeta, LEVELS, MATRIX, MATRIX_VERSION, PROBE } from './config';
 export type { CatalogCardRefs } from './discovery';
 export { cardRefsFromCatalog } from './discovery';
+export type { Recipe, RepairKit, StackId } from './repair-kits';
+export { detectStacks, REPAIR_KITS, repairKitFor } from './repair-kits';
 export type { CategoryScore, Scorecard } from './scoring';
 export { levelFor, scoreResults } from './scoring';
 export type { SessionState, SessionVerdict } from './session';

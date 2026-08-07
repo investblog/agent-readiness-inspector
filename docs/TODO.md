@@ -161,7 +161,21 @@ the revised spec). This file is the index.
           not in the user's report, showing someone else's number beside ours.
         - No replacement link to isitagentready.com either: it is a competitor,
           not a neutral reference.
-- [ ] M2.5 — repair kits: SKILL.md + stack recipes + verify loop (spec §8.0; content work, parallelizable)
+- [x] M2.5 — repair kits — DONE 2026-08-07. Four top-fail checks
+      (markdownNegotiation, linkHeaders, contentSignals, robotsTxtAiRules) with
+      per-stack recipes, a verify command and the evidence it should print.
+      Stack detected from headers we already read, and ALL matches reported: a
+      Vercel app behind Cloudflare is both, and the fix goes in different files
+      for each. Bundled rather than fetched from 301.st as the roadmap allowed —
+      it is small text, and an optional network feature is the exact shape that
+      cost this project three defects and a removal in one week.
+      The verify loop earned its place immediately: run against a site that
+      passes all four, the robotsTxtAiRules command printed nothing, because the
+      validator also accepts a plain `User-agent: *` group while my command
+      grepped for named crawlers. A reader passing via wildcard would have
+      concluded the fix failed. Requirement and command both corrected against
+      the validator. Eleven tests, including a content guard that every kit has
+      a generic recipe and a runnable command.
 - [x] M3 — watch: alarms + diff + regression notifications — DONE 2026-07-31
       (plan: .agents/plans/done/m3-watch.md)
 - [x] M3.5 — icon as a surface: score of the current tab while browsing (opt-in
@@ -184,7 +198,10 @@ the revised spec). This file is the index.
 - [ ] M4 — fix-apply (spec §8.1). The "full CF Connect wizard" half is moot:
       CF Connect was removed 2026-08-07, so M4 is fix-apply alone unless a
       reason to talk to Cloudflare reappears.
-- [ ] M5 — 301.st layer: cross-promo, spintax.net as living reference
+- [x] M5 — 301.st layer — the two remaining pieces were already built and are
+      confirmed in place 2026-08-07: the foldable 301.st block in the dashboard
+      plus footer links across popup/welcome/dashboard, and spintax.net as the
+      living reference in the welcome CTA and tips.
       - [x] 301.sh feed — DONE 2026-08-06. Posts are filed in the SAME inbox as
         regressions rather than getting a surface of their own, so there is one
         unread count and the toolbar badge already covers them with no change to
@@ -199,9 +216,13 @@ the revised spec). This file is the index.
         the seen-set was stored newest-first, so its FIFO cap would have dropped
         the newest slugs and re-filed them forever, and the feed validator only
         ran on the network path, so anything else feeding the cycle bypassed it.
-- [ ] M5 — feed follow-ups: a post older than the install is never shown (by
-      design); consider surfacing the last few on enable behind an explicit
-      "catch me up" instead of the current silent seed
+- [x] M5 — feed follow-up — DONE 2026-08-07, simpler than the "catch me up"
+      button this line proposed. Enabling now files the single newest post and
+      marks the rest seen. Zero new UI, and it fixes the real problem: filing
+      nothing left a new subscriber with an empty inbox until the blog published
+      again, which can be a week and is indistinguishable from a broken feature.
+      One entry is not spam and shows the feature in the shape it will always
+      take.
 
 Decisions: name is Agent Readiness Inspector (2026-07-30); the extension has no
 paid tier (2026-07-31). Fix prompts and weights remain bundled; reconsider remote

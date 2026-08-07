@@ -298,18 +298,6 @@
 	"settingsSaved": {
 		"message": "Settings saved."
 	},
-	"diffReasonDns": {
-		"message": "expected: DNS records can't be probed from a browser"
-	},
-	"diffReasonWebMcp": {
-		"message": "expected: in-page detection needs the page open"
-	},
-	"diffReasonMcp": {
-		"message": "expected: we accept the MCP card shapes deployed in the wild"
-	},
-	"diffReasonA2a": {
-		"message": "expected: we also read the legacy agent.json path"
-	},
 	"settingsWatch": {
 		"message": "Watch mode"
 	},
@@ -397,7 +385,7 @@
 		"message": "Scan pages as I browse"
 	},
 	"browseAutoScanHint": {
-		"message": "Off by default: this sends the same requests a manual scan does, once for every site you open. History is still recorded only for saved sites."
+		"message": "Off by default: this sends the same requests a manual scan does, once for every site you open — including a DNS lookup of that hostname to a public resolver. History is still recorded only for saved sites."
 	},
 	"badgeScore": {
 		"message": "Show the current page's score on the icon"
@@ -447,5 +435,45 @@
 	},
 	"sessionActive": {
 		"message": "Your session changed what this audit saw"
+	},
+	"repairHowTo": {
+		"message": "How to fix it on $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"repairWhere": {
+		"message": "Where"
+	},
+	"repairExpect": {
+		"message": "Expect"
+	},
+	"repairAlso": {
+		"message": "Also detected: $1 — the fix can go there instead",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"stack_cloudflare": {
+		"message": "Cloudflare"
+	},
+	"stack_vercel": {
+		"message": "Vercel"
+	},
+	"stack_netlify": {
+		"message": "Netlify"
+	},
+	"stack_nextjs": {
+		"message": "Next.js"
+	},
+	"stack_nginx": {
+		"message": "nginx"
+	},
+	"stack_generic": {
+		"message": "your stack"
 	}
 }
