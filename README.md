@@ -6,15 +6,16 @@ Browser extension by [301.st](https://301.st) that audits websites for
 AI-agent readiness. It runs 22 standards-based checks in the browser and shows
 the score, evidence, and copy-ready fix prompts beside the current tab.
 
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/agent-readiness-inspector/diofmjhnegmcccocikabageabmaokobd) [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-FF7139?logo=firefox&logoColor=white)](https://addons.mozilla.org/firefox/addon/agent-readiness-inspector/) [![Edge Add-ons](https://img.shields.io/badge/Edge-Add--ons-0078D7?logo=microsoftedge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/agent-readiness-inspector/jkhmlkoehfmmpgihkknnopanjcipmiho)
+
 Chrome and Edge use a native side panel. Firefox provides the same interface as
 a popup and sidebar. Because the audit runs in the browser, it can inspect
 staging sites and many authenticated pages that external scanners cannot reach;
 browser cookie protections may still limit session access on some sites.
 
-Status: **v0.1.0 is published** in the Chrome Web Store and on Firefox Add-ons;
-Microsoft Edge Add-ons is still in review. All three submissions use the
-Linux-built packages from
-[GitHub Release v0.1.0](https://github.com/investblog/agent-readiness-inspector/releases/tag/v0.1.0).
+Published in all three stores. Every submission uses the Linux-built packages
+from the matching [GitHub Release](https://github.com/investblog/agent-readiness-inspector/releases)
+— a locally built archive is never uploaded to a store.
 
 ## Features
 
@@ -39,12 +40,11 @@ standards. It is not affiliated with or endorsed by Cloudflare.
 
 ## Install
 
-- [Chrome Web Store](https://chromewebstore.google.com/detail/agent-readiness-inspector/diofmjhnegmcccocikabageabmaokobd)
-- [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/agent-readiness-inspector/)
-- Microsoft Edge Add-ons — in review
-
-Release packages are built on GitHub Actions for Chrome, Firefox, and Edge; do
-not use a local development archive as a store submission package.
+| Browser | Link |
+|---------|------|
+| Chrome | [Chrome Web Store](https://chromewebstore.google.com/detail/agent-readiness-inspector/diofmjhnegmcccocikabageabmaokobd) |
+| Firefox | [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/agent-readiness-inspector/) |
+| Edge | [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/agent-readiness-inspector/jkhmlkoehfmmpgihkknnopanjcipmiho) |
 
 For development, load the unpacked target from `dist/` after running the
 corresponding build command.
@@ -86,10 +86,11 @@ dependencies.
 
 ## Privacy
 
-The extension has no analytics and sends no scan or browsing data to 301.st.
-Manual scans contact only the selected site, plus a DNS-over-HTTPS lookup of its
-_index._agents name for the DNS-AID check. Saved data remains in local browser
-storage. There is no third-party transfer of your data.
+The extension has no analytics and sends no scan or browsing data to 301.st, and
+saved data remains in local browser storage. Two requests go elsewhere, both
+described in the privacy policy: a DNS-over-HTTPS lookup of the audited site's
+`_index._agents` name, which the DNS-AID check needs, and — only if you switch
+on the optional blog updates — a read of a public JSON feed on 301.sh.
 
 User-selected links open their destination normally. After uninstall, the
 browser opens a visible 301.st feedback page without scan results, settings, or
@@ -103,10 +104,19 @@ the complete quality gate and all packages succeed on Linux. The workflow then
 dispatches `Release`, which rebuilds the packages and attaches them to a GitHub
 Release.
 
-The first release, `v0.1.0`, is submitted to all stores manually using those
-GitHub-built packages. For later versions, Chrome and Edge are submitted
-automatically by the shared investblog workflow; Firefox submission remains a
-manual workflow action because AMO reserves uploaded version numbers.
+A locally built archive is never uploaded to a store: the working copy is
+Windows, and a store package is the one artifact nobody re-reads before users
+get it.
+
+`Submit to stores` takes a `hold` option that uploads the package and stops,
+leaving it as a draft for a human to publish. Use it whenever the listing needs
+editing first — Chrome offers a listing language only once the uploaded package
+contains that `_locales` directory. Firefox has no such state and spends the
+version number on upload, so it goes last.
+
+Both releases so far reached the stores by hand. `v0.1.0` predated the
+automation; `v0.1.1` because the Edge API credential turned out to be invalid on
+its first real use — see the backlog.
 
 See [store submission guidance](docs/store-listings/submission-guide.md) for the
 package map, listing copy, assets, privacy declarations, and required secrets.
