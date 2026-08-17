@@ -76,6 +76,7 @@ KlaviyoAIBot
 KunatoCrawler
 LAIONDownloader
 LCC
+Lightpanda
 LinerBot
 Linguee Bot
 LinkupBot
