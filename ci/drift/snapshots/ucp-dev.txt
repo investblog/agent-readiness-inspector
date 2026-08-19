@@ -193,6 +193,10 @@ Get Started
 :
 [
 {
+"type"
+:
+"shipping_address"
+,
 "id"
 :
 "dest_1"
