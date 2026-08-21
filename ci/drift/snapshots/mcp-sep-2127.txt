@@ -2,4 +2,4 @@ pr: modelcontextprotocol/modelcontextprotocol#2127
 state: open
 merged: false
 title: SEP-2127: MCP Server Cards - HTTP Server Discovery 
-head: cf36c441e0b35f83bf4bfb180b44a55961169f27
+head: 720187343affebd0dad93f08fa9c7a02c367e0b1

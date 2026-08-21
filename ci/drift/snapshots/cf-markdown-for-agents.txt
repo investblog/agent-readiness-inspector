@@ -12,6 +12,7 @@ Search
 Ctrl
 K
 Log in
+Dashboard
 Cloudflare Fundamentals
 /
 Overview
