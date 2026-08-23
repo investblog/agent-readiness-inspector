@@ -106,6 +106,7 @@ QualifiedBot
 Querit-SearchBot
 QueritBot
 QuillBot
+Reflectionbot
 SBIntuitionsBot
 Scrapy
 SemrushBot-OCOB
