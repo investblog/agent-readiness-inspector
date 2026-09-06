@@ -47,7 +47,9 @@ export const FIX_PROMPTS: Partial<Record<CheckId, string>> = {
     'application/linkset+json) with a `linkset` array pointing at your API endpoints and their documentation.',
   authMd:
     'Add an auth.md document (Cloudflare convention) describing how agents authenticate to your site/API: ' +
-    'supported flows, token endpoints, scopes. Serve it as markdown at the well-known path.',
+    'supported flows, token endpoints, scopes. Serve it as markdown at the ROOT /auth.md — that is the path ' +
+    'the live scanner reads, and a copy at /.well-known/auth.md alone is not found. Give it an H1 containing ' +
+    '"auth.md", and describe how an agent registers to obtain credentials.',
   a2aAgentCard:
     'Publish an A2A Agent Card at /.well-known/agent-card.json: JSON with at least name, description, url and ' +
     'capabilities describing your agent-facing endpoint.',
