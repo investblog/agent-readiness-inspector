@@ -73,7 +73,9 @@ ICC-Crawler
 ISSCyberRiskCrawler
 ImagesiftBot
 Kangaroo Bot
+Kimi-SearchBot
 Kimi-User
+KimiBot
 KlaviyoAIBot
 KunatoCrawler
 LAIONDownloader
@@ -85,6 +87,7 @@ LinkupBot
 Manus-User
 Meta-ExternalAgent
 Meta-ExternalFetcher
+MistralAI-Training
 MistralAI-User
 MistralAI-User/1.0
 Mozilla-Tabstack
@@ -92,6 +95,7 @@ MyCentralAIScraperBot
 NagetBot
 NotebookLM
 NovaAct
+OAI-AdsBot
 OAI-SearchBot
 OpenAI
 Operator
