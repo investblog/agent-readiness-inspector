@@ -279,6 +279,11 @@ the revised spec). This file is the index.
       generator, so it stays a live reference for the fixtures. Its
       /.well-known/agent-skills/index.json passed on the same scan, which is
       the positive half of the finding: that path we already have right.
+      One piece is already shipped, deliberately ahead of the probe: the
+      authMd fix prompt now names the root path and the two validators,
+      because leaving it pointing at .well-known was telling users to do
+      the work and keep the failing score. So prompt and probe disagree
+      on purpose until the calibration pass closes the gap.
 
 Decisions: name is Agent Readiness Inspector (2026-07-30); the extension has no
 paid tier (2026-07-31). Fix prompts and weights remain bundled; reconsider remote
