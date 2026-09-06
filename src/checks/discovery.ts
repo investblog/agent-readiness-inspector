@@ -54,10 +54,17 @@ export const apiCatalog: CheckFn = (ctx) => {
   }
 };
 
-// discovery/authMd (Cloudflare convention). Path UNCONFIRMED: every M0-5
-// calibration reference fails authMd on both sides, so the live tool's probe
-// path could not be observed — revisit when a site with auth.md appears
-// (spec §3). Pass: a markdown document describing auth at the probed path.
+// discovery/authMd (Cloudflare convention). The live tool's probe path was
+// OBSERVED 2026-09-06 on catchall.in, the first reference site that actually
+// serves auth.md — the site the old comment was waiting for. The live tool
+// reads the ROOT /auth.md: a 200 at /.well-known/auth.md alone still answered
+// "auth.md not found", and adding a root copy flipped the verdict the same
+// minute. So the path this probe uses is the wrong one, and two validators sit
+// behind it that this check does not have — the H1 must contain "auth.md", and
+// the body must "describe agent registration" (a document conforming to their
+// own skill's non-OAuth branch was still rejected). Each of those moves scores,
+// so they are a calibration decision with fixtures, tracked in docs/TODO.md,
+// not a by-the-way edit here. Pass: a markdown document at the probed path.
 export const authMd: CheckFn = (ctx) => {
   const res = ctx.responses.get(PROBE.authMd);
   if (res?.status !== 200) {

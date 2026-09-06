@@ -249,6 +249,37 @@ the revised spec). This file is the index.
       One entry is not spam and shows the feature in the shape it will always
       take.
 
+- [ ] Calibration findings 2026-09-06, from standing up auth.md and Agent
+      Skills on catchall.in — the first reference site that actually serves
+      auth.md, the thing the spec's authMd row was waiting for. Four facts,
+      each observed against the live /api/scan the same day; none implemented
+      here:
+      1. authMd probe path: the live tool reads the ROOT /auth.md. A 200 at
+         /.well-known/auth.md alone still answers "auth.md not found"; adding
+         the root copy changed the message the same minute. PROBE.authMd still
+         points at .well-known — switch it (or tier it the way mcpServerCard
+         tiers paths) at the next calibration pass, fixtures included.
+      2. authMd heading validator: "auth.md exists but is missing the expected
+         Auth.md heading" until the H1 contains "auth.md" — their skill says so
+         verbatim ("an H1 heading that contains auth.md"); "# Authentication"
+         is rejected.
+      3. authMd body validator: "does not describe agent registration" even for
+         a document following their own SKILL.md non-OAuth branch (audience,
+         provisioning URL, key-management endpoints, credentials explanation).
+         The grader de-facto requires OAuth-ish registration markers the skill
+         itself calls optional. Decide at calibration: replicate the strict
+         grader, or keep the skill-conformant acceptance and add a directional
+         EXPECTED_DIVERGENCES entry for authMd.
+      4. New live check id `ard` ("ARD capability manifest not found") in the
+         scan response — absent from MATRIX and spec §3. Research what ARD is
+         (path, shape), then either add the check or record it as
+         known-unimplemented so the calibration diff stops counting it as
+         onlyTheirs noise.
+      catchall.in serves both copies now, root and .well-known, from one
+      generator, so it stays a live reference for the fixtures. Its
+      /.well-known/agent-skills/index.json passed on the same scan, which is
+      the positive half of the finding: that path we already have right.
+
 Decisions: name is Agent Readiness Inspector (2026-07-30); the extension has no
 paid tier (2026-07-31). Fix prompts and weights remain bundled; reconsider remote
 hosting only with M2.5/M4. Branding, positioning, and store-listing copy:
