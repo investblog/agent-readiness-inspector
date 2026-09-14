@@ -1,1 +1,1 @@
-W:/projects/agent-readiness/AGENTS.md
+AGENTS.md
