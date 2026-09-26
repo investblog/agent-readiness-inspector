@@ -45,21 +45,21 @@ Reference
 Overview
 Quarterly DDoS threat reports
 Glossary
-API reference ↗
+API reference ↗︎
 API
 MCP server
 MCP
 Release notes
 Agent resources
-Agent setup ↗
-Cloudflare Skills ↗
-Code Mode MCP Server ↗
-Domain-specific MCP Servers ↗
+Agent setup ↗︎
+Cloudflare Skills ↗︎
+Code Mode MCP Server ↗︎
+Domain-specific MCP Servers ↗︎
 MCP
-Radar llms.txt ↗
-Radar llms-full.txt ↗
-Cloudflare Docs llms.txt ↗
-Cloudflare Docs llms-full.txt ↗
+Radar llms.txt ↗︎
+Radar llms-full.txt ↗︎
+Cloudflare Docs llms.txt ↗︎
+Cloudflare Docs llms-full.txt ↗︎
 Home
 /
 Radar
@@ -84,7 +84,7 @@ Search scans
 Security Center
 To better understand Internet usage around the world, use Cloudflare's URL Scanner. With Cloudflare's URL Scanner, you have the ability to investigate the details of a domain, IP, URL, or ASN. Cloudflare's URL Scanner is available in the Security Center of the Cloudflare dashboard,
 Cloudflare Radar
-↗
+↗︎
 , and the Cloudflare
 API
 .
@@ -126,7 +126,7 @@ By default, the report will have a
 Public
 visibility level, which means it will appear in the
 recent scans
-↗
+↗︎
 list and in search results. It will also include a single screenshot with desktop resolution.
 A successful response will have a status code of
 200
@@ -154,7 +154,7 @@ and be similar to the following:
 }
 You can submit up to 100 URLs at the same time via the
 API
-↗
+↗︎
 .
 The
 uuid
@@ -196,14 +196,14 @@ Above, the visibility level is set as
 Unlisted
 , which means that the scan report won't be included in the
 recent scans
-↗
+↗︎
 list nor in search results. In effect, only users with knowledge of the scan ID will be able to access it.
 There will also be three screenshots taken of the webpage, one per target device type. The
 User-Agent
-↗
+↗︎
 will be set as "XXX-my-user-agent". Note that you can set any custom HTTP header, including
 Authorization
-↗
+↗︎
 .
 Header
 Successful scans are subject to a retention policy of 12 months. Failed scans older than 30 days will be deleted.
@@ -236,7 +236,7 @@ data.console
 data.performance
 - Timings as given by the
 PerformanceNavigationTiming
-↗
+↗︎
 interface.
 meta
 - Meta processors output including detected technologies, domain and URL categories, rank, geolocation information, and others.
@@ -278,12 +278,12 @@ meta.processors.phishing
 meta.processors.radarRank
 -
 Cloudflare Radar Rank
-↗
+↗︎
 of the main hostname contacted.
 meta.processors.wappa
 - The kind of technologies detected as being in use by the website, with the help of
 Wappalyzer
-↗
+↗︎
 .
 page.url
 - URL of the primary request, after all HTTP redirects.
@@ -401,7 +401,7 @@ Scan now
 .
 You can also use the
 API
-↗
+↗︎
 to scan a URL from a specific location.
 In Security Center, you can retrieve pre-filtered information by:
 Similar screenshot

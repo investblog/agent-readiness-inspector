@@ -2,6 +2,7 @@ AI2Bot
 AI2Bot-DeepResearchEval
 AIWebIndex
 AddSearchBot
+AgentDataBot
 AgentTimes
 Ai2Bot-Dolma
 AmazonBuyForMe
@@ -17,6 +18,7 @@ Applebot-Extended
 Aranet-SearchBot
 Awario
 AzureAI-SearchBot
+BixelBot
 Bravebot
 Brightbot
 Brightbot 1.0
@@ -34,6 +36,7 @@ Claude-Web
 ClaudeBot
 CloudVertexBot
 Cloudflare-AutoRAG
+CloudflareBrowserRenderingCrawler
 Code
 Cotoyogi
 CragCrawler
@@ -75,6 +78,7 @@ ICC-Crawler
 ISSCyberRiskCrawler
 ImagesiftBot
 Kangaroo Bot
+Kimi-Agent
 Kimi-SearchBot
 Kimi-User
 KimiBot
@@ -170,6 +174,7 @@ omgili
 omgilibot
 opencode
 panscient.com
+qodercli
 quillbot.com
 webzio-extended
 wpbot

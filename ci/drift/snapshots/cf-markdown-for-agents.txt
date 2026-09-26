@@ -38,7 +38,7 @@ Microsoft Entra
 Okta
 Troubleshooting
 Secure compromised account
-Set up SSO ↗
+Set up SSO ↗︎
 Zone holds
 Find account and zone IDs
 Change Super Administrator
@@ -83,15 +83,15 @@ Performance
 Improve SEO
 Maintenance mode
 Minimize downtime
-Optimize site speed ↗
-Prepare for surges or spikes in web traffic ↗
+Optimize site speed ↗︎
+Prepare for surges or spikes in web traffic ↗︎
 Test speed
 Security
-Prevent DDoS attacks ↗
+Prevent DDoS attacks ↗︎
 Protect your origin server
 Recovering from a hacked site
 Scan for PCI compliance
-Secure your website ↗
+Secure your website ↗︎
 Under a DDoS attack?
 Cloudflare's API
 Get started
@@ -109,10 +109,10 @@ Restrict tokens
 Roll tokens
 API token template URLs
 Reference
-REST API ↗
+REST API ↗︎
 API
-GraphQL API ↗
-Wrangler API ↗
+GraphQL API ↗︎
+Wrangler API ↗︎
 API token permissions
 API deprecations
 API token templates
@@ -169,15 +169,15 @@ RSS Feeds
 Available RSS Feeds
 Consuming RSS Feeds
 Agent resources
-Agent setup ↗
-Cloudflare Skills ↗
-Code Mode MCP Server ↗
-Domain-specific MCP Servers ↗
+Agent setup ↗︎
+Cloudflare Skills ↗︎
+Code Mode MCP Server ↗︎
+Domain-specific MCP Servers ↗︎
 MCP
-Cloudflare Fundamentals llms.txt ↗
-Cloudflare Fundamentals llms-full.txt ↗
-Cloudflare Docs llms.txt ↗
-Cloudflare Docs llms-full.txt ↗
+Cloudflare Fundamentals llms.txt ↗︎
+Cloudflare Fundamentals llms-full.txt ↗︎
+Cloudflare Docs llms.txt ↗︎
+Cloudflare Docs llms-full.txt ↗︎
 Home
 /
 Cloudflare Fundamentals
@@ -216,13 +216,13 @@ What is Markdown for Agents
 Markdown has quickly become the lingua franca for agents and AI systems as a whole. The format’s explicit structure makes it ideal for AI processing, ultimately resulting in better results while minimizing token waste.
 Cloudflare's network supports real-time content conversion at the source, for enabled zones using
 content negotiation
-↗
+↗︎
 headers. When AI systems request pages from any website that uses Cloudflare and has Markdown for Agents enabled, they can express the preference for
 text/markdown
 in the request and our network will automatically and efficiently convert the HTML to Markdown, when possible, on the fly.
 Read the
 announcement
-↗
+↗︎
 in our blog for more information.
 How to use
 To fetch the Markdown version of any page from a zone with Markdown for Agents enabled, the client needs to add the
@@ -416,7 +416,7 @@ x-original-tokens
 indicates the estimated number of tokens in the original HTML document before conversion. You can use these values in your flow, for example to calculate the size of a context window, estimate the token savings from Markdown conversion, or decide on your chunking strategy.
 Content Signals Policy
 Content Signals
-↗
+↗︎
 is a framework that allows anyone to express their preferences for how their content can be used after it has been accessed.
 If your origin already sets a
 content-signal
@@ -486,7 +486,7 @@ https://example.com/cover.png
 ...
 JSON-LD
 JSON-LD
-↗
+↗︎
 is a structured-data format used by search engines and AI systems to interpret a page's semantic content. Markdown for Agents preserves any
 <script type="application/ld+json">
 blocks from the source HTML by appending them at the end of the converted Markdown inside a single fenced
@@ -534,12 +534,12 @@ How to enable
 To enable Markdown for Agents for your zone in the dashboard:
 Log into the
 Cloudflare dashboard
-↗
+↗︎
 and select your account (you need a Pro or Business plan).
 Select the zone you want to configure.
 Visit the
 AI Crawl Control
-↗
+↗︎
 section.
 Enable
 Markdown for Agents
@@ -550,7 +550,7 @@ configuration rule
 :
 Log in to the
 Cloudflare dashboard
-↗
+↗︎
 and select your account.
 Select the zone you want to configure.
 Go to
@@ -646,7 +646,7 @@ Enable for all custom hostnames
 To enable Markdown for Agents for all custom hostnames on your SaaS zone:
 Log into the
 Cloudflare dashboard
-↗
+↗︎
 and select your account.
 Select your SaaS zone.
 Look for
@@ -720,10 +720,10 @@ Markdown for Agents is available to Pro, Business and Enterprise plans, and SSL 
 Try it with Cloudflare
 We have enabled this feature in our
 Developer Documentation
-↗
+↗︎
 and our
 Blog
-↗
+↗︎
 , inviting all AI crawlers and agents to consume our content using markdown instead of HTML.
 curl
 https://blog.cloudflare.com/markdown-for-agents/
