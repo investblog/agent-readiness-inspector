@@ -78,6 +78,7 @@ ICC-Crawler
 ISSCyberRiskCrawler
 ImagesiftBot
 Kangaroo Bot
+KeenableBot
 Kimi-Agent
 Kimi-SearchBot
 Kimi-User
