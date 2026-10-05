@@ -1709,6 +1709,7 @@ Affirm
 Amadeus
 Amex
 Ant International
+Aven
 Best Buy
 Block
 Booking.com
@@ -1759,6 +1760,7 @@ Affirm
 Amadeus
 Amex
 Ant International
+Aven
 Best Buy
 Block
 Booking.com
