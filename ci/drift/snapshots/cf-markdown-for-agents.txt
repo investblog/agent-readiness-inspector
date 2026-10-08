@@ -43,7 +43,6 @@ Zone holds
 Find account and zone IDs
 Change Super Administrator
 Organizations
-Beta
 Overview
 Organizations for Enterprise
 Organizations for MSSP and Distributors
