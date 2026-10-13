@@ -17,6 +17,7 @@ Roadmap
 Schema Authoring
 Versioning
 Announcements
+Contributing
 Specification
 UCP is expanding beyond retail: Lodging draft specification now available.
 Food coming soon.
