@@ -73,6 +73,8 @@ GoogleAgent-URLContext
 GoogleOther
 GoogleOther-Image
 GoogleOther-Video
+GrokAppAndroid
+GrokBot
 HenkBot
 ICC-Crawler
 ISSCyberRiskCrawler
@@ -169,6 +171,7 @@ laion-huggingface-processor
 meta-externalagent
 meta-externalfetcher
 meta-webindexer
+nbot
 netEstate Imprint Crawler
 newsai
 omgili
