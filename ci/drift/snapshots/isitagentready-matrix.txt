@@ -19,4 +19,5 @@ discovery/authMd
 discovery/mcpServerCard
 discovery/oauthDiscovery
 discovery/oauthProtectedResource
+discovery/personalAgentProtocol
 discovery/webMcp
