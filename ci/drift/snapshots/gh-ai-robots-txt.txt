@@ -38,6 +38,7 @@ CloudVertexBot
 Cloudflare-AutoRAG
 CloudflareBrowserRenderingCrawler
 Code
+Codex
 Cotoyogi
 CragCrawler
 Crawl4AI
