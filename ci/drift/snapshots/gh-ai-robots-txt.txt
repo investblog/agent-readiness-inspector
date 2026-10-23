@@ -49,6 +49,7 @@ DeepSeekBot
 Devin
 Diffbot
 Diffbot-User
+Dot
 DoubaoBot
 DuckAssistBot
 ERNIEBot
@@ -78,6 +79,7 @@ GoogleOther-Video
 Grok Bot
 GrokAppAndroid
 GrokBot
+HarkBot
 HenkBot
 Hunyuan
 ICC-Crawler
