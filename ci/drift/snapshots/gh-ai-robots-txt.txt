@@ -59,6 +59,7 @@ ERNIEBot
 Echobot Bot
 EchoboxBot
 ElevenlabsBot
+ElevenlabsCrawler
 ExaBot
 ExaSearchBot
 ExaUser
@@ -139,6 +140,7 @@ QwenBot
 Reflectionbot
 SBIntuitionsBot
 Scrapy
+ScryBot
 SemrushBot-OCOB
 SemrushBot-SWA
 Shap-User
