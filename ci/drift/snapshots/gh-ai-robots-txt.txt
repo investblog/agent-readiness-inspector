@@ -31,6 +31,7 @@ Channel3Bot
 ChatGLM-Spider
 ChatGPT Agent
 ChatGPT-User
+Claude-Agent
 Claude-Code
 Claude-SearchBot
 Claude-User
@@ -168,6 +169,7 @@ YiBot
 YiyanBot
 YouBot
 ZanistaBot
+__usage_ai-training
 aiHitBot
 amazon-QBusiness
 amazon-kendra
