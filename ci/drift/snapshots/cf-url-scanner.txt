@@ -13,53 +13,6 @@ Ctrl
 K
 Log in
 Dashboard
-Radar
-/
-Overview
-Concepts
-Overview
-Aggregation intervals
-Bot classes
-Confidence levels
-Normalization methods
-Get started
-Overview
-Make your first API request
-Make comparisons
-Radar API error codes
-Share a Radar chart
-Configure alerts
-Investigate
-Overview
-HTTP requests
-NetFlows
-Application layer attacks
-BGP anomalies
-Beta
-DNS
-Domains ranking
-Network layer attacks
-Outages
-URL Scanner
-Reference
-Overview
-Quarterly DDoS threat reports
-Glossary
-API reference ↗︎
-API
-MCP server
-MCP
-Release notes
-Agent resources
-Agent setup ↗︎
-Cloudflare Skills ↗︎
-Code Mode MCP Server ↗︎
-Domain-specific MCP Servers ↗︎
-MCP
-Radar llms.txt ↗︎
-Radar llms-full.txt ↗︎
-Cloudflare Docs llms.txt ↗︎
-Cloudflare Docs llms-full.txt ↗︎
 Home
 /
 Radar
@@ -430,6 +383,53 @@ Search scans
 Security Center
 Edit page
 Report issue
+Radar
+/
+Overview
+Concepts
+Overview
+Aggregation intervals
+Bot classes
+Confidence levels
+Normalization methods
+Get started
+Overview
+Make your first API request
+Make comparisons
+Radar API error codes
+Share a Radar chart
+Configure alerts
+Investigate
+Overview
+HTTP requests
+NetFlows
+Application layer attacks
+BGP anomalies
+Beta
+DNS
+Domains ranking
+Network layer attacks
+Outages
+URL Scanner
+Reference
+Overview
+Quarterly DDoS threat reports
+Glossary
+API reference ↗︎
+API
+MCP server
+MCP
+Release notes
+Agent resources
+Agent setup ↗︎
+Cloudflare Skills ↗︎
+Code Mode MCP Server ↗︎
+Domain-specific MCP Servers ↗︎
+MCP
+Radar llms.txt ↗︎
+Radar llms-full.txt ↗︎
+Cloudflare Docs llms.txt ↗︎
+Cloudflare Docs llms-full.txt ↗︎
 Getting started
 Plans
 Contact sales

@@ -13,169 +13,6 @@ Ctrl
 K
 Log in
 Dashboard
-Cloudflare Fundamentals
-/
-Overview
-Concepts
-How Cloudflare DNS works
-Traffic flow through Cloudflare
-Accounts, zones, and profiles
-Cloudflare IP addresses
-Get started
-Accounts
-Create account
-Account security
-Add abuse contact
-Allow Cloudflare access
-Leaked Password Notifications
-Manage active sessions
-Review audit logs - v1
-Audit Logs - v2
-SCIM provisioning
-Overview
-Authentik
-Microsoft Entra
-Okta
-Troubleshooting
-Secure compromised account
-Set up SSO ↗︎
-Zone holds
-Find account and zone IDs
-Change Super Administrator
-Organizations
-Overview
-Organizations for Enterprise
-Organizations for MSSP and Distributors
-Policy sharing
-Limitations and troubleshooting
-Members and permissions
-Members and permissions
-Manage
-Policies
-Roles
-Role scopes
-User Groups
-New
-Set up dashboard SSO
-User profiles
-Overview
-Verify email address
-Log in to Cloudflare
-Profile settings
-Account recovery
-Delete your Cloudflare account
-Email address and password
-Multi-Factor Email Authentication
-Two-factor authentication
-Domains
-Overview
-Add multiple sites via automation
-Change your domain version
-Manage subdomains
-Move a domain between Cloudflare accounts
-Onboard a domain
-Pause Cloudflare
-Redirect one domain to another
-Remove a domain
-Star domains
-Performance
-Improve SEO
-Maintenance mode
-Minimize downtime
-Optimize site speed ↗︎
-Prepare for surges or spikes in web traffic ↗︎
-Test speed
-Security
-Prevent DDoS attacks ↗︎
-Protect your origin server
-Recovering from a hacked site
-Scan for PCI compliance
-Secure your website ↗︎
-Under a DDoS attack?
-Cloudflare's API
-Get started
-Create API token
-Get Global API key (legacy)
-Get Origin CA keys
-Deprecated
-Token formats
-Account API tokens
-How to
-Make API calls
-Create tokens via API
-Control API Access
-Restrict tokens
-Roll tokens
-API token template URLs
-Reference
-REST API ↗︎
-API
-GraphQL API ↗︎
-Wrangler API ↗︎
-API token permissions
-API deprecations
-API token templates
-Rate limits
-SDKs
-Troubleshooting
-OAuth Applications on Cloudflare
-Overview
-Create your OAuth client
-Integrate your OAuth client with Cloudflare
-Authorizing an application
-Reference
-Migration guides
-SCIM migration
-Policies
-Cloudflare Cookies
-Compliance documentation
-Content Security Policies (CSPs)
-Delivering Videos with Cloudflare
-Licenses
-Project Cybersafe Schools
-Abuse
-Overview
-Review abuse policies
-Complaint types
-Providing specific URLs
-Customer abuse report obligations
-View and submit reports
-Blocked Content
-SDK ecosystem support policy
-Troubleshooting
-/cdn-cgi/ endpoint
-Account and domain management best practices
-Cloudflare and Google Analytics
-Cloudflare crawlers
-Cloudflare HTTP headers
-Cloudflare Ray ID
-Cloudy AI agent
-Beta
-Connection limits
-Cryptographic Attestation of Personhood
-Error responses
-Glossary
-Markdown for Agents
-Network Layers
-Network ports
-Partners
-Redirects
-Scans and penetration testing policy
-TCP connections
-Under Attack mode
-RSS Feeds
-Available RSS Feeds
-Consuming RSS Feeds
-Agent resources
-Agent setup ↗︎
-Cloudflare Skills ↗︎
-Code Mode MCP Server ↗︎
-Domain-specific MCP Servers ↗︎
-MCP
-Cloudflare Fundamentals llms.txt ↗︎
-Cloudflare Fundamentals llms-full.txt ↗︎
-Cloudflare Docs llms.txt ↗︎
-Cloudflare Docs llms-full.txt ↗︎
 Home
 /
 Cloudflare Fundamentals
@@ -981,6 +818,169 @@ Limitations
 Other Markdown conversion APIs
 Edit page
 Report issue
+Cloudflare Fundamentals
+/
+Overview
+Concepts
+How Cloudflare DNS works
+Traffic flow through Cloudflare
+Accounts, zones, and profiles
+Cloudflare IP addresses
+Get started
+Accounts
+Create account
+Account security
+Add abuse contact
+Allow Cloudflare access
+Leaked Password Notifications
+Manage active sessions
+Review audit logs - v1
+Audit Logs - v2
+SCIM provisioning
+Overview
+Authentik
+Microsoft Entra
+Okta
+Troubleshooting
+Secure compromised account
+Set up SSO ↗︎
+Zone holds
+Find account and zone IDs
+Change Super Administrator
+Organizations
+Overview
+Organizations for Enterprise
+Organizations for MSSP and Distributors
+Policy sharing
+Limitations and troubleshooting
+Members and permissions
+Members and permissions
+Manage
+Policies
+Roles
+Role scopes
+User Groups
+New
+Set up dashboard SSO
+User profiles
+Overview
+Verify email address
+Log in to Cloudflare
+Profile settings
+Account recovery
+Delete your Cloudflare account
+Email address and password
+Multi-Factor Email Authentication
+Two-factor authentication
+Domains
+Overview
+Add multiple sites via automation
+Change your domain version
+Manage subdomains
+Move a domain between Cloudflare accounts
+Onboard a domain
+Pause Cloudflare
+Redirect one domain to another
+Remove a domain
+Star domains
+Performance
+Improve SEO
+Maintenance mode
+Minimize downtime
+Optimize site speed ↗︎
+Prepare for surges or spikes in web traffic ↗︎
+Test speed
+Security
+Prevent DDoS attacks ↗︎
+Protect your origin server
+Recovering from a hacked site
+Scan for PCI compliance
+Secure your website ↗︎
+Under a DDoS attack?
+Cloudflare's API
+Get started
+Create API token
+Get Global API key (legacy)
+Get Origin CA keys
+Deprecated
+Token formats
+Account API tokens
+How to
+Make API calls
+Create tokens via API
+Control API Access
+Restrict tokens
+Roll tokens
+API token template URLs
+Reference
+REST API ↗︎
+API
+GraphQL API ↗︎
+Wrangler API ↗︎
+API token permissions
+API deprecations
+API token templates
+Rate limits
+SDKs
+Troubleshooting
+OAuth Applications on Cloudflare
+Overview
+Create your OAuth client
+Integrate your OAuth client with Cloudflare
+Authorizing an application
+Reference
+Migration guides
+SCIM migration
+Policies
+Cloudflare Cookies
+Compliance documentation
+Content Security Policies (CSPs)
+Delivering Videos with Cloudflare
+Licenses
+Project Cybersafe Schools
+Abuse
+Overview
+Review abuse policies
+Complaint types
+Providing specific URLs
+Customer abuse report obligations
+View and submit reports
+Blocked Content
+SDK ecosystem support policy
+Troubleshooting
+/cdn-cgi/ endpoint
+Account and domain management best practices
+Cloudflare and Google Analytics
+Cloudflare crawlers
+Cloudflare HTTP headers
+Cloudflare Ray ID
+Cloudy AI agent
+Beta
+Connection limits
+Cryptographic Attestation of Personhood
+Error responses
+Glossary
+Markdown for Agents
+Network Layers
+Network ports
+Partners
+Redirects
+Scans and penetration testing policy
+TCP connections
+Under Attack mode
+RSS Feeds
+Available RSS Feeds
+Consuming RSS Feeds
+Agent resources
+Agent setup ↗︎
+Cloudflare Skills ↗︎
+Code Mode MCP Server ↗︎
+Domain-specific MCP Servers ↗︎
+MCP
+Cloudflare Fundamentals llms.txt ↗︎
+Cloudflare Fundamentals llms-full.txt ↗︎
+Cloudflare Docs llms.txt ↗︎
+Cloudflare Docs llms-full.txt ↗︎
 Getting started
 Plans
 Contact sales
